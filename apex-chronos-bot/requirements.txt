@@ -1,0 +1,7 @@
+# Pinned to the exact versions the verification suite ran on (these reproduce
+# the original backtest ledger bit-for-bit). Do not loosen without re-running
+# `python -m verification.verify_against_backtest`.
+numpy==2.2.6
+pandas==2.3.3
+scipy==1.15.3
+requests==2.32.3

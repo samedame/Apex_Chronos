@@ -1,0 +1,1062 @@
+[
+ {
+  "id": "A",
+  "name": "Oracle integrity (the original code, unmodified)",
+  "passed": true,
+  "detail": "reference files match pinned SHA-256: yes; original script re-run on this data vs the saved apex_chronos_final_trades.csv: 110 vs 110 trades, every decision identical = True; 11 rows differ in modelled option cost (max $0.713/share) - the code is deterministic, so its inputs must have changed since the ledger was saved (cause not established; refreshed daily files are the likely one). The bot is compared with the fresh run, and the fresh run's statistics equal the published ones (see the table below)",
+  "data": {
+   "saved_vs_rerun": {
+    "n_oracle": 110,
+    "n_bot": 110,
+    "decisions_equal": true,
+    "max_abs_diff": {
+     "cost_basis": 0.713012237167939,
+     "roi": 0.03192694045027089,
+     "peak_roi": 0.06542670604995315,
+     "rvol_entry": 4.440892098500626e-16,
+     "score": 1.7763568394002505e-15
+    },
+    "numeric_ok": false,
+    "ok": false
+   }
+  }
+ },
+ {
+  "id": "B",
+  "name": "Feature parity (VWAP, EMA9/21, noise area, RVOL, IV, prior close, 20d vol)",
+  "passed": true,
+  "detail": "252 ticker-sessions compared; worst absolute difference per feature: vwap 0.0e+00, vwap_std 0.0e+00, noise_upper 0.0e+00, rvol_cum 0.0e+00, ema9 0.0e+00, ema21 0.0e+00, iv 0.0e+00, prev_c 0.0e+00, rvol20 0.0e+00",
+  "data": {
+   "worst": {
+    "vwap": 0.0,
+    "vwap_std": 0.0,
+    "noise_upper": 0.0,
+    "rvol_cum": 0.0,
+    "ema9": 0.0,
+    "ema21": 0.0,
+    "iv": 0.0,
+    "prev_c": 0.0,
+    "rvol20": 0.0
+   },
+   "n": 252
+  }
+ },
+ {
+  "id": "C",
+  "name": "Candidate parity (every signal the original generated, before slot scheduling)",
+  "passed": true,
+  "detail": "198 oracle candidates vs 198 bot candidates; missing in bot 0, extra in bot 0; score diff 0.0e+00",
+  "data": {
+   "n_oracle": 198,
+   "n_bot": 198,
+   "only_oracle": [],
+   "only_bot": [],
+   "max_abs_diff_score": 0.0,
+   "max_abs_diff_rvol": 0.0,
+   "ok": true
+  }
+ },
+ {
+  "id": "D",
+  "name": "Trade-for-trade parity, 12-ticker portfolio (the 110-trade ledger)",
+  "passed": true,
+  "detail": "110 vs 110 trades; ticker/date/module/direction/entry minute/exit minute/exit reason/slot identical = True; max |diff|: cost_basis 0.0e+00, roi 0.0e+00, peak_roi 0.0e+00, rvol_entry 0.0e+00, score 0.0e+00",
+  "data": {
+   "n_oracle": 110,
+   "n_bot": 110,
+   "only_oracle": [],
+   "only_bot": [],
+   "decisions_equal": true,
+   "max_abs_diff": {
+    "cost_basis": 0.0,
+    "roi": 0.0,
+    "peak_roi": 0.0,
+    "rvol_entry": 0.0,
+    "score": 0.0
+   },
+   "numeric_ok": true,
+   "ok": true
+  }
+ },
+ {
+  "id": "E",
+  "name": "Extended universe: 24 tickers (more candidates, scheduler under pressure)",
+  "passed": true,
+  "detail": "candidates 364 vs 364 (identical sets: True); trades 131 vs 131 (decisions identical: True); max |diff| cost_basis 0.0e+00, roi 0.0e+00, peak_roi 0.0e+00, rvol_entry 0.0e+00, score 0.0e+00",
+  "data": {
+   "cands": {
+    "n_oracle": 364,
+    "n_bot": 364,
+    "only_oracle": [],
+    "only_bot": [],
+    "max_abs_diff_score": 0.0,
+    "max_abs_diff_rvol": 0.0,
+    "ok": true
+   },
+   "trades": {
+    "n_oracle": 131,
+    "n_bot": 131,
+    "only_oracle": [],
+    "only_bot": [],
+    "decisions_equal": true,
+    "max_abs_diff": {
+     "cost_basis": 0.0,
+     "roi": 0.0,
+     "peak_roi": 0.0,
+     "rvol_entry": 0.0,
+     "score": 0.0
+    },
+    "numeric_ok": true,
+    "ok": true
+   }
+  }
+ },
+ {
+  "id": "F",
+  "name": "Live-path replay: each minute sees ONLY bars up to that minute (no look-ahead)",
+  "passed": true,
+  "detail": "110 trades identical to oracle = True; candidate sets identical = True; full event stream (every ENTRY/TP1/EXIT with its minute) identical to the all-day-data run = True; 24-ticker live-path: 131 trades, identical to oracle = True; 74s",
+  "data": {
+   "trades": {
+    "n_oracle": 110,
+    "n_bot": 110,
+    "only_oracle": [],
+    "only_bot": [],
+    "decisions_equal": true,
+    "max_abs_diff": {
+     "cost_basis": 0.0,
+     "roi": 0.0,
+     "peak_roi": 0.0,
+     "rvol_entry": 0.0,
+     "score": 0.0
+    },
+    "numeric_ok": true,
+    "ok": true
+   },
+   "events_equal": true
+  }
+ },
+ {
+  "id": "G",
+  "name": "Poll-cadence invariance (a poll that arrives late and catches up several minutes at once)",
+  "passed": true,
+  "detail": "burst sizes 3 min: identical, 7 min: identical, 15 min: identical, 45 min: identical",
+  "data": {
+   "3": true,
+   "7": true,
+   "15": true,
+   "45": true
+  }
+ },
+ {
+  "id": "H",
+  "name": "Restart equivalence (cold start + catch-up == ran all day)",
+  "passed": true,
+  "detail": "252 cold-start comparisons at 12 cut points x 21 sessions; mismatches: 0",
+  "data": {
+   "n": 252,
+   "bad": [],
+   "ok": true
+  }
+ },
+ {
+  "id": "I",
+  "name": "Scheduler invariants (3 slots, phase limits 4/2/1, one trade per ticker-phase, no slot overlap)",
+  "passed": true,
+  "detail": "bot 12-ticker violations 0, 24-ticker violations 0 (oracle itself: 0)",
+  "data": {
+   "bot12": {
+    "violations": [],
+    "ok": true
+   },
+   "bot24": {
+    "violations": [],
+    "ok": true
+   },
+   "oracle12": {
+    "violations": [],
+    "ok": true
+   }
+  }
+ },
+ {
+  "id": "J",
+  "name": "Differential fuzzing: original vs bot on perturbed markets (prices, gaps, volume, VIX)",
+  "passed": true,
+  "detail": "20 different markets x 24 tickers x 21 sessions: 8158 candidates and 2814 scheduled trades compared, seeds with ANY difference: none; live-path (no look-ahead) re-check on 2 of them: identical; exits {'time_stop': 1395, 'stop_loss': 1150, 'profit_trail': 269}; per module {'Phase1A_GapTrap_Single0DTE': 1262, 'Phase1B_ConfirmedGap_DebitSpread': 139, 'Phase1C_BullTrap_PutDebitSpread': 212, 'Phase2_MiddayPin_CreditSpread': 834, 'Phase3_AfternoonVanna_CallSpread': 367}; 261s",
+  "data": {
+   "seeds": [
+    {
+     "seed": 0,
+     "ok": true,
+     "n_trades": 142,
+     "n_cands": 399,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 60,
+      "Phase1B_ConfirmedGap_DebitSpread": 9,
+      "Phase1C_BullTrap_PutDebitSpread": 15,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 16
+     },
+     "by_reason": {
+      "time_stop": 79,
+      "stop_loss": 51,
+      "profit_trail": 12
+     },
+     "invariants_ok": true,
+     "livepath_ok": true,
+     "detected": {}
+    },
+    {
+     "seed": 1,
+     "ok": true,
+     "n_trades": 143,
+     "n_cands": 419,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 61,
+      "Phase1B_ConfirmedGap_DebitSpread": 9,
+      "Phase1C_BullTrap_PutDebitSpread": 13,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 18
+     },
+     "by_reason": {
+      "time_stop": 65,
+      "stop_loss": 64,
+      "profit_trail": 14
+     },
+     "invariants_ok": true,
+     "livepath_ok": true,
+     "detected": {}
+    },
+    {
+     "seed": 2,
+     "ok": true,
+     "n_trades": 139,
+     "n_cands": 420,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 70,
+      "Phase1B_ConfirmedGap_DebitSpread": 6,
+      "Phase1C_BullTrap_PutDebitSpread": 5,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 16
+     },
+     "by_reason": {
+      "time_stop": 73,
+      "stop_loss": 54,
+      "profit_trail": 12
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 3,
+     "ok": true,
+     "n_trades": 143,
+     "n_cands": 399,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 67,
+      "Phase1B_ConfirmedGap_DebitSpread": 4,
+      "Phase1C_BullTrap_PutDebitSpread": 11,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 19
+     },
+     "by_reason": {
+      "time_stop": 72,
+      "stop_loss": 57,
+      "profit_trail": 14
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 4,
+     "ok": true,
+     "n_trades": 137,
+     "n_cands": 408,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 58,
+      "Phase1B_ConfirmedGap_DebitSpread": 13,
+      "Phase1C_BullTrap_PutDebitSpread": 6,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 18
+     },
+     "by_reason": {
+      "time_stop": 76,
+      "stop_loss": 55,
+      "profit_trail": 6
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 5,
+     "ok": true,
+     "n_trades": 142,
+     "n_cands": 403,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 66,
+      "Phase1B_ConfirmedGap_DebitSpread": 7,
+      "Phase1C_BullTrap_PutDebitSpread": 8,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 19
+     },
+     "by_reason": {
+      "time_stop": 72,
+      "stop_loss": 59,
+      "profit_trail": 11
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 6,
+     "ok": true,
+     "n_trades": 143,
+     "n_cands": 404,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 65,
+      "Phase1B_ConfirmedGap_DebitSpread": 7,
+      "Phase1C_BullTrap_PutDebitSpread": 10,
+      "Phase2_MiddayPin_CreditSpread": 40,
+      "Phase3_AfternoonVanna_CallSpread": 21
+     },
+     "by_reason": {
+      "time_stop": 71,
+      "stop_loss": 57,
+      "profit_trail": 15
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 7,
+     "ok": true,
+     "n_trades": 142,
+     "n_cands": 432,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 64,
+      "Phase1B_ConfirmedGap_DebitSpread": 9,
+      "Phase1C_BullTrap_PutDebitSpread": 8,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 19
+     },
+     "by_reason": {
+      "time_stop": 67,
+      "stop_loss": 57,
+      "profit_trail": 18
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 8,
+     "ok": true,
+     "n_trades": 142,
+     "n_cands": 421,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 60,
+      "Phase1B_ConfirmedGap_DebitSpread": 6,
+      "Phase1C_BullTrap_PutDebitSpread": 15,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 19
+     },
+     "by_reason": {
+      "time_stop": 73,
+      "stop_loss": 50,
+      "profit_trail": 19
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 9,
+     "ok": true,
+     "n_trades": 141,
+     "n_cands": 413,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 64,
+      "Phase1B_ConfirmedGap_DebitSpread": 3,
+      "Phase1C_BullTrap_PutDebitSpread": 13,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 19
+     },
+     "by_reason": {
+      "time_stop": 69,
+      "stop_loss": 60,
+      "profit_trail": 12
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 10,
+     "ok": true,
+     "n_trades": 136,
+     "n_cands": 370,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 64,
+      "Phase1B_ConfirmedGap_DebitSpread": 6,
+      "Phase1C_BullTrap_PutDebitSpread": 8,
+      "Phase2_MiddayPin_CreditSpread": 40,
+      "Phase3_AfternoonVanna_CallSpread": 18
+     },
+     "by_reason": {
+      "time_stop": 68,
+      "stop_loss": 54,
+      "profit_trail": 14
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 11,
+     "ok": true,
+     "n_trades": 142,
+     "n_cands": 400,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 62,
+      "Phase1B_ConfirmedGap_DebitSpread": 11,
+      "Phase1C_BullTrap_PutDebitSpread": 10,
+      "Phase2_MiddayPin_CreditSpread": 41,
+      "Phase3_AfternoonVanna_CallSpread": 18
+     },
+     "by_reason": {
+      "time_stop": 66,
+      "stop_loss": 63,
+      "profit_trail": 13
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 12,
+     "ok": true,
+     "n_trades": 139,
+     "n_cands": 410,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 62,
+      "Phase1B_ConfirmedGap_DebitSpread": 2,
+      "Phase1C_BullTrap_PutDebitSpread": 13,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 20
+     },
+     "by_reason": {
+      "time_stop": 61,
+      "stop_loss": 60,
+      "profit_trail": 18
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 13,
+     "ok": true,
+     "n_trades": 142,
+     "n_cands": 392,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 62,
+      "Phase1B_ConfirmedGap_DebitSpread": 10,
+      "Phase1C_BullTrap_PutDebitSpread": 10,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 18
+     },
+     "by_reason": {
+      "time_stop": 71,
+      "stop_loss": 57,
+      "profit_trail": 14
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 14,
+     "ok": true,
+     "n_trades": 143,
+     "n_cands": 433,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 68,
+      "Phase1B_ConfirmedGap_DebitSpread": 1,
+      "Phase1C_BullTrap_PutDebitSpread": 13,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 19
+     },
+     "by_reason": {
+      "time_stop": 68,
+      "stop_loss": 60,
+      "profit_trail": 15
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 15,
+     "ok": true,
+     "n_trades": 139,
+     "n_cands": 413,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 60,
+      "Phase1B_ConfirmedGap_DebitSpread": 6,
+      "Phase1C_BullTrap_PutDebitSpread": 12,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 19
+     },
+     "by_reason": {
+      "time_stop": 73,
+      "stop_loss": 57,
+      "profit_trail": 9
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 16,
+     "ok": true,
+     "n_trades": 144,
+     "n_cands": 421,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 63,
+      "Phase1B_ConfirmedGap_DebitSpread": 11,
+      "Phase1C_BullTrap_PutDebitSpread": 9,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 19
+     },
+     "by_reason": {
+      "time_stop": 67,
+      "stop_loss": 63,
+      "profit_trail": 14
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 17,
+     "ok": true,
+     "n_trades": 139,
+     "n_cands": 389,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 58,
+      "Phase1B_ConfirmedGap_DebitSpread": 8,
+      "Phase1C_BullTrap_PutDebitSpread": 13,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 18
+     },
+     "by_reason": {
+      "time_stop": 72,
+      "stop_loss": 54,
+      "profit_trail": 13
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 18,
+     "ok": true,
+     "n_trades": 136,
+     "n_cands": 413,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 65,
+      "Phase1B_ConfirmedGap_DebitSpread": 2,
+      "Phase1C_BullTrap_PutDebitSpread": 11,
+      "Phase2_MiddayPin_CreditSpread": 42,
+      "Phase3_AfternoonVanna_CallSpread": 16
+     },
+     "by_reason": {
+      "time_stop": 60,
+      "stop_loss": 59,
+      "profit_trail": 17
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    },
+    {
+     "seed": 19,
+     "ok": true,
+     "n_trades": 140,
+     "n_cands": 399,
+     "trade_detail": {
+      "only_oracle": [],
+      "only_bot": [],
+      "max_abs_diff": {
+       "cost_basis": 0.0,
+       "roi": 0.0,
+       "peak_roi": 0.0,
+       "rvol_entry": 0.0,
+       "score": 0.0
+      }
+     },
+     "by_module": {
+      "Phase1A_GapTrap_Single0DTE": 63,
+      "Phase1B_ConfirmedGap_DebitSpread": 9,
+      "Phase1C_BullTrap_PutDebitSpread": 9,
+      "Phase2_MiddayPin_CreditSpread": 41,
+      "Phase3_AfternoonVanna_CallSpread": 18
+     },
+     "by_reason": {
+      "time_stop": 72,
+      "stop_loss": 59,
+      "profit_trail": 9
+     },
+     "invariants_ok": true,
+     "livepath_ok": null,
+     "detected": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "K",
+  "name": "Mutation power: deliberately broken bots must be detected",
+  "passed": true,
+  "detail": "20/20 injected faults detected; 1 provably-equivalent fault(s) excluded (smallest TP1 overshoot seen in 431 touches: 0.0014 ROI points above the target, never exactly on it)",
+  "data": {
+   "results": [
+    {
+     "mutation": "P1A RVOL cap 1.25 -> 1.40",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "3 candidate differences; 15 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "P1A retrace cap 0.75 -> 0.90",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "3 candidate differences; 10 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "P1C RVOL ceiling 1.65 -> 1.40",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "6 candidate differences; 10 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "P2 RVOL floor 1.00 -> 0.80",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "17 candidate differences; 20 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "Phase-1 daily limit 4 -> 3",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "14 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "4 capital slots instead of 3",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "20 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "slot reusable in the minute its trade exits (exits processed before entries)",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "6 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "trail 72% -> 60% of peak",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "22 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "post-TP1 floor 60% -> 50% of the target",
+     "caught_in": null,
+     "how": "",
+     "equivalent": "after a TP1 touch the peak is >= the target, so the 72%-of-peak trail is always above the 60%-of-target floor; the floor can only bind if a bar touches the target to the last bit"
+    },
+    {
+     "mutation": "risk-free rate 4.5% -> 3%",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "numeric differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "half-spread (liquid names) 0.5% -> 1.0%",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "10 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "P2 stop-loss 20% -> 25%",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "6 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "P3 take-profit 65% -> 60%",
+     "caught_in": "recorded data, 24 tickers",
+     "how": "2 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "P1A max hold 50 -> 45 min",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "58 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "P1B score base 20 -> 10 (changes ranking)",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "0 candidate differences; numeric differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "E1 entry window ends at minute 20 instead of 60",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "8 candidate differences; 18 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "U5 window starts at minute 80 instead of 75",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "21 candidate differences; 15 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "E1 peeks one bar ahead (look-ahead)",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "92 candidate differences; 97 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "EMA9 computed with span 10",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "19 candidate differences; 12 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "implied vol one bar stale",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "10 trade differences",
+     "equivalent": null
+    },
+    {
+     "mutation": "RVOL baseline over 7 sessions instead of 14",
+     "caught_in": "recorded data, 12 tickers",
+     "how": "51 candidate differences; 70 trade differences",
+     "equivalent": null
+    }
+   ],
+   "tp1_touches": 431,
+   "min_margin": 1.367374638816532e-05
+  }
+ },
+ {
+  "id": "L",
+  "name": "Live-vs-backtest gaps measured on the same data (informational, not pass/fail)",
+  "passed": null,
+  "detail": "Live loader's clock-grid indexing (holes forward-filled) instead of the original's row indexing: 0 of 110 trades lost, 0 new, 0 entry minutes moved, 0 exits changed, mean |ROI change| 0.00 pts; VIX delayed 5 min (Yahoo's ^VIX runs ~15 min behind the equities): 0 of 110 trades lost, 0 new, 0 entry minutes moved, 7 exits changed, mean |ROI change| 0.49 pts; VIX delayed 15 min (Yahoo's ^VIX runs ~15 min behind the equities): 0 of 110 trades lost, 0 new, 0 entry minutes moved, 8 exits changed, mean |ROI change| 1.02 pts; Volume/noise baselines rebuilt from 5-minute bars for every session (the original used 5-minute data only for its first 14 sessions; live always has real 1-minute history): 14 of 110 trades lost, 19 new, 3 entry minutes moved, 3 exits changed, mean |ROI change| 0.32 pts",
+  "data": {
+   "baseline": {
+    "n": 110,
+    "win_rate": 0.5727272727272728,
+    "profit_factor": 1.8576733235463518,
+    "mean_roi": 0.07010995266657027
+   },
+   "scenarios": [
+    {
+     "name": "Live loader's clock-grid indexing (holes forward-filled) instead of the original's row indexing",
+     "stats": {
+      "n": 110,
+      "win_rate": 0.5727272727272728,
+      "profit_factor": 1.8576733235463516,
+      "mean_roi": 0.07010995266657029
+     },
+     "diff": {
+      "n_base": 110,
+      "n_other": 110,
+      "missing": 0,
+      "new": 0,
+      "entry_min_changed": 0,
+      "exit_changed": 0,
+      "roi_changed": 0,
+      "mean_abs_roi_diff": 0.0
+     }
+    },
+    {
+     "name": "VIX delayed 5 min (Yahoo's ^VIX runs ~15 min behind the equities)",
+     "stats": {
+      "n": 110,
+      "win_rate": 0.5818181818181818,
+      "profit_factor": 1.8729848240235116,
+      "mean_roi": 0.07070983527515834
+     },
+     "diff": {
+      "n_base": 110,
+      "n_other": 110,
+      "missing": 0,
+      "new": 0,
+      "entry_min_changed": 0,
+      "exit_changed": 7,
+      "roi_changed": 108,
+      "mean_abs_roi_diff": 0.004857720130433832
+     }
+    },
+    {
+     "name": "VIX delayed 15 min (Yahoo's ^VIX runs ~15 min behind the equities)",
+     "stats": {
+      "n": 110,
+      "win_rate": 0.5818181818181818,
+      "profit_factor": 1.7877859065134607,
+      "mean_roi": 0.06598076631042911
+     },
+     "diff": {
+      "n_base": 110,
+      "n_other": 110,
+      "missing": 0,
+      "new": 0,
+      "entry_min_changed": 0,
+      "exit_changed": 8,
+      "roi_changed": 110,
+      "mean_abs_roi_diff": 0.010230876852614574
+     }
+    },
+    {
+     "name": "Volume/noise baselines rebuilt from 5-minute bars for every session (the original used 5-minute data only for its first 14 sessions; live always has real 1-minute history)",
+     "stats": {
+      "n": 115,
+      "win_rate": 0.5652173913043478,
+      "profit_factor": 1.7309822309063778,
+      "mean_roi": 0.0611938203395363
+     },
+     "diff": {
+      "n_base": 110,
+      "n_other": 115,
+      "missing": 14,
+      "new": 19,
+      "entry_min_changed": 3,
+      "exit_changed": 3,
+      "roi_changed": 3,
+      "mean_abs_roi_diff": 0.003219769143669905
+     }
+    }
+   ]
+  }
+ }
+]
