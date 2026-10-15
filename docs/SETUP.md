@@ -7,8 +7,13 @@ About 15 minutes. Nothing here places an order: the bot only posts to Discord.
 ```bash
 cd apex-chronos-bot
 git init -b main && git add -A && git commit -m "APEX-CHRONOS alert bot"
-gh repo create samedame/apex-chronos-bot --public --source . --push      # or --private, see the cost note below
+gh repo create samedame/Apex_Chronos --public --source . --push      # or --private, see the cost note below
 ```
+
+**The contents of this folder must be the repository root** (`.github/`, `apex_chronos/`, `verification/` ... at the top level, not inside an
+`apex-chronos-bot/` subfolder), and **`.github/workflows/` must be there**: GitHub only runs workflows from the root `.github/workflows/`.
+Dragging a folder into GitHub's web uploader silently skips hidden files and folders (`.github`, `.gitignore`), which leaves a repo that looks complete
+but has no workflows, so use `git push`. Quick check: the repo's **Actions** tab should list `chronos-session`, `chronos-eod` and `tests`.
 
 **Public or private? It is mostly a cost decision.** The live loop polls every minute from the open to the close, about
 5.5-6.7 hours a day, roughly **7,000-8,400 Actions minutes a month**. GitHub's standard Linux runners are free in public
@@ -43,16 +48,23 @@ Settings -> Actions -> General -> Workflow permissions: leave "Read and write pe
 ## 4. Scheduling (important: do not rely on GitHub's native cron)
 
 On this account native `schedule:` runs land hours late (see the 2026-09-25 incident write-up), so every other bot is started
-by the Cloudflare Worker `open-scheduler` through `workflow_dispatch`. Do the same here. Add two jobs to the Worker's job list,
-using the same fields the existing jobs use:
+by the Cloudflare Worker `open-scheduler` through `workflow_dispatch`. Do the same here. **Both jobs were added to the Worker on 2026-10-15**
+(the entries sit at the end of `jobs_default.jobs`, after `shadow-daily`):
 
 | id | repo | workflow | ref | target (ET) | grace | days |
 |---|---|---|---|---|---|---|
-| `chronos-session` | `samedame/apex-chronos-bot` | `chronos-session.yml` | `main` | **09:20** | 10 min (usable until 09:30; later starts still catch up) | trading days (holidays skipped by the Worker's table) |
-| `chronos-eod` | `samedame/apex-chronos-bot` | `chronos-eod.yml` | `main` | **16:25** | 30 min | trading days |
+| `chronos-session` | `samedame/Apex_Chronos` | `chronos-session.yml` | `main` | **09:20** | 30 min (a late start still catches up on the missed minutes) | trading days (holidays skipped by the Worker's table) |
+| `chronos-eod` | `samedame/Apex_Chronos` | `chronos-eod.yml` | `main` | **16:25** | 30 min | trading days |
 
 Both workflows already declare the `scheduled_for_et` and `trigger` inputs the Worker sends, so the dispatch will not be rejected.
-`GH_PAT` on the Worker needs `repo` + `workflow` scope on this repository too.
+`GH_PAT` on the Worker needs "Actions: Read and write" on this repository too. If it is a fine-grained token limited to named repositories, add
+`Apex_Chronos` to it; until then the Worker posts a "could not start chronos-session ... HTTP 404" alert to its own Discord channel.
+To remove the jobs, delete the two entries and redeploy; nothing else in the Worker was touched.
+
+**Winter gap (starts Sunday 2026-11-01).** The Worker's cron triggers are `* 0-1 * * 2-6` and `* 11-20 * * 2-6` (UTC), i.e. up to 16:59 ET in summer
+but only up to 15:59 ET in winter. `chronos-session` (09:20) is covered all year; `chronos-eod` (16:25) is not covered in winter, so from November the EOD
+report falls back to the workflow's own `schedule:` backup (21:25 UTC = 16:25 EST, which may run late). The EOD report is not time-critical. The
+same gap already affects `shadow-daily` (16:20). Adding one more cron trigger, `* 21 * * 2-6`, to the Worker closes it for both.
 
 The two cron lines in each workflow are only a backup for DST (13:28 and 14:28 UTC for the session). A backup that fires more than
 45 minutes before the open, or after the close, exits immediately. A late start is harmless: the engine replays the minutes it missed

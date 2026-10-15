@@ -1,0 +1,63 @@
+name: chronos-session
+
+# The live loop: polls Yahoo every minute from ~09:31 to the close and posts ENTRY / TP1 / EXIT alerts to Discord.
+#
+# Start-up: the Cloudflare `open-scheduler` Worker dispatches this workflow at ~09:20 ET (see docs/SETUP.md).
+# The two cron lines are only a DST-safe BACKUP - GitHub's native schedule runs hours late on this account.
+# A late start is harmless: the engine replays the minutes it missed and the sent-alert ledger de-duplicates.
+on:
+  workflow_dispatch:
+    inputs:
+      scheduled_for_et:
+        description: "Set by open-scheduler (ignored by the bot)"
+        required: false
+        default: ""
+      trigger:
+        description: "manual | cf-scheduler | handoff"
+        required: false
+        default: "manual"
+  schedule:
+    - cron: "28 13 * * 1-5"   # 09:28 EDT (summer); at 08:28 EST (winter) the bot sees it is too early and exits
+    - cron: "28 14 * * 1-5"   # 09:28 EST (winter); at 10:28 EDT (summer) it joins late and catches up
+
+# One live loop at a time. A run queued behind it (hand-off or backup) waits, it never cancels the active one.
+concurrency:
+  group: chronos-session
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # commit state/ (sent-alert ledger, session history)
+  actions: write    # hand-off: dispatch the next run when the 6h job limit is near
+
+jobs:
+  session:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      - name: Run the live loop
+        id: live
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          ACCOUNT_CAPITAL: ${{ vars.ACCOUNT_CAPITAL }}
+          SLOT_FRACTION: ${{ vars.SLOT_FRACTION }}
+          DRY_RUN: ${{ vars.DRY_RUN }}
+          APEX_GIT_PUSH: "1"
+          PYTHONUNBUFFERED: "1"
+        run: python -m apex_chronos live --max-runtime-min 330
+
+      # The session outlives one 6-hour job when it starts early; the next run catches up from minute 0.
+      - name: Hand off to a fresh run
+        if: steps.live.outputs.more == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run chronos-session.yml --ref "${{ github.ref_name }}" -f trigger=handoff

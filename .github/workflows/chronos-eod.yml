@@ -1,0 +1,62 @@
+name: chronos-eod
+
+# After the close: re-runs the day on the FINAL one-minute bars, reconciles it against what the live loop alerted,
+# appends the day's model trades to ledger/trades.csv, saves the session's volume/noise profile for tomorrow's
+# baselines, and posts a forward-test summary next to the backtest numbers.
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Session date YYYY-MM-DD (default: today ET)"
+        required: false
+        default: ""
+      scheduled_for_et:
+        description: "Set by open-scheduler (ignored by the bot)"
+        required: false
+        default: ""
+      trigger:
+        description: "manual | cf-scheduler"
+        required: false
+        default: "manual"
+  schedule:
+    - cron: "25 20 * * 1-5"   # 16:25 EDT / 15:25 EST - backup only, see docs/SETUP.md
+    - cron: "25 21 * * 1-5"   # 17:25 EDT / 16:25 EST
+
+concurrency:
+  group: chronos-eod
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  eod:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      - name: Reconcile the day
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          ACCOUNT_CAPITAL: ${{ vars.ACCOUNT_CAPITAL }}
+          SLOT_FRACTION: ${{ vars.SLOT_FRACTION }}
+          DRY_RUN: ${{ vars.DRY_RUN }}
+          APEX_GIT_PUSH: "1"
+          INPUT_DATE: ${{ inputs.date }}
+        run: |
+          if [ -n "$INPUT_DATE" ]; then
+            python -m apex_chronos eod --date "$INPUT_DATE"
+          else
+            python -m apex_chronos eod
+          fi
