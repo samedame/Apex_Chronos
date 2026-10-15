@@ -1,0 +1,45 @@
+{
+ "date": "2026-10-15",
+ "live_entries": 0,
+ "final_entries": 7,
+ "matched": 0,
+ "missed_by_live": [
+  [
+   "AAPL",
+   "Phase1A_GapTrap_Single0DTE",
+   "28"
+  ],
+  [
+   "AAPL",
+   "Phase2_MiddayPin_CreditSpread",
+   "80"
+  ],
+  [
+   "AAPL",
+   "Phase3_AfternoonVanna_CallSpread",
+   "301"
+  ],
+  [
+   "COIN",
+   "Phase1A_GapTrap_Single0DTE",
+   "9"
+  ],
+  [
+   "META",
+   "Phase1A_GapTrap_Single0DTE",
+   "6"
+  ],
+  [
+   "MSTR",
+   "Phase1A_GapTrap_Single0DTE",
+   "12"
+  ],
+  [
+   "QQQ",
+   "Phase2_MiddayPin_CreditSpread",
+   "80"
+  ]
+ ],
+ "phantom_in_live": [],
+ "excluded": {}
+}
