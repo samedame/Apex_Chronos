@@ -8,5 +8,15 @@
   ],
   "posted": true,
   "t": "2026-10-16T11:14:25-04:00"
+ },
+ "2026-10-16|ENTRY|AMZN|Phase2_MiddayPin_CreditSpread|155": {
+  "late_s": 25.0,
+  "pos": [
+   "AMZN",
+   "Phase2_MiddayPin_CreditSpread",
+   155
+  ],
+  "posted": true,
+  "t": "2026-10-16T12:06:25-04:00"
  }
 }
