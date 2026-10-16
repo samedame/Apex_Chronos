@@ -19,6 +19,16 @@
   "posted": true,
   "t": "2026-10-16T12:06:25-04:00"
  },
+ "2026-10-16|ENTRY|AMZN|Phase3_AfternoonVanna_CallSpread|228": {
+  "late_s": 6.3,
+  "pos": [
+   "AMZN",
+   "Phase3_AfternoonVanna_CallSpread",
+   228
+  ],
+  "posted": true,
+  "t": "2026-10-16T13:19:06-04:00"
+ },
  "2026-10-16|EXIT|AMD|Phase2_MiddayPin_CreditSpread|183": {
   "late_s": 0.0,
   "pos": null,
