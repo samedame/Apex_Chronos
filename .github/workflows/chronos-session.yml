@@ -51,6 +51,9 @@ jobs:
           ACCOUNT_CAPITAL: ${{ vars.ACCOUNT_CAPITAL }}
           SLOT_FRACTION: ${{ vars.SLOT_FRACTION }}
           DRY_RUN: ${{ vars.DRY_RUN }}
+          TRADIER_API_KEY: ${{ secrets.TRADIER_API_KEY }}
+          TRADIER_BASE_URL: ${{ secrets.TRADIER_BASE_URL }}
+          CHRONOS_TRADIER_BARS: ${{ vars.CHRONOS_TRADIER_BARS }}
           APEX_GIT_PUSH: "1"
           PYTHONUNBUFFERED: "1"
         run: python -m apex_chronos live --max-runtime-min 330

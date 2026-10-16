@@ -89,3 +89,17 @@ posted as "Missed entry (stale), not actionable" instead.
 - **If ^VIX is stale** (Yahoo's index feed normally runs about 15 minutes behind), the bot keeps working up to 30 minutes of staleness; beyond that it stops evaluating rather than guess the implied volatility.
 - **Manual re-run of a day:** `python -m apex_chronos eod --date 2026-10-15`.
 - **Re-running the proof:** `python -m verification.verify_against_backtest --data-dir verification/fixtures.tar.gz` (or `--data-dir` pointing at the original `data/` folder for the full 24-ticker version).
+
+## Optional: Tradier 1-minute bars (off by default)
+
+Yahoo is the feed the strategy was fitted on, so the bot stays on it unless you opt in. To try Tradier for the live equity bars:
+
+1. Add the repo **secret** `TRADIER_API_KEY` (and, only for a *sandbox* key, the secret `TRADIER_BASE_URL` = `https://sandbox.tradier.com/v1`;
+   sandbox data is about 15 minutes delayed, so do not use it for the live loop).
+2. After a session closes, run `TRADIER_API_KEY=... python scripts/compare_feeds.py` and read the price differences and the volume
+   ratio. RVOL uses volume, so a ratio far from 1.0 changes signals; if the feeds disagree, leave the switch off.
+3. Set the repo **variable** `CHRONOS_TRADIER_BARS` to `1`. Equities then come from Tradier first, with Yahoo as the fallback on any
+   Tradier error or empty answer; `^VIX` and the 14-session baselines stay on Yahoo. Clear the variable to switch back.
+
+`apex_chronos/tradier.py` is a read-only market-data client (it refuses any path outside `/markets/`). The bot's option prices are still
+Black-Scholes model prices; Tradier option quotes are not wired in.
