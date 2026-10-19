@@ -65,6 +65,12 @@
   "posted": true,
   "t": "2026-10-19T09:53:06-04:00"
  },
+ "2026-10-19|EXIT|MSFT|Phase2_MiddayPin_CreditSpread|178": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-10-19T12:29:13-04:00"
+ },
  "2026-10-19|EXIT|MSTR|Phase1A_GapTrap_Single0DTE|58": {
   "late_s": 0.0,
   "pos": null,
