@@ -9,6 +9,16 @@
   "posted": true,
   "t": "2026-10-20T09:38:06-04:00"
  },
+ "2026-10-20|ENTRY|AMD|Phase2_MiddayPin_CreditSpread|77": {
+  "late_s": 12.8,
+  "pos": [
+   "AMD",
+   "Phase2_MiddayPin_CreditSpread",
+   77
+  ],
+  "posted": true,
+  "t": "2026-10-20T10:48:13-04:00"
+ },
  "2026-10-20|ENTRY|MSTR|Phase1A_GapTrap_Single0DTE|6": {
   "late_s": 6.4,
   "pos": [
