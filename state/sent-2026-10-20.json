@@ -71,6 +71,12 @@
   "posted": true,
   "t": "2026-10-20T12:08:06-04:00"
  },
+ "2026-10-20|EXIT|IWM|Phase2_MiddayPin_CreditSpread|159": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-10-20T12:10:13-04:00"
+ },
  "2026-10-20|EXIT|MSTR|Phase1A_GapTrap_Single0DTE|23": {
   "late_s": 0.0,
   "pos": null,
