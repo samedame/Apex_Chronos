@@ -49,6 +49,16 @@
   "posted": true,
   "t": "2026-10-20T09:59:06-04:00"
  },
+ "2026-10-20|ENTRY|SPY|Phase2_MiddayPin_CreditSpread|89": {
+  "late_s": 13853.7,
+  "pos": [
+   "SPY",
+   "Phase2_MiddayPin_CreditSpread",
+   89
+  ],
+  "posted": false,
+  "t": "2026-10-20T14:50:55-04:00"
+ },
  "2026-10-20|ENTRY|TSLA|Phase1B_ConfirmedGap_DebitSpread|44": {
   "late_s": 6.4,
   "pos": [
@@ -58,6 +68,16 @@
   ],
   "posted": true,
   "t": "2026-10-20T10:15:06-04:00"
+ },
+ "2026-10-20|ENTRY|TSLA|Phase1B_ConfirmedGap_DebitSpread|64": {
+  "late_s": 15353.7,
+  "pos": [
+   "TSLA",
+   "Phase1B_ConfirmedGap_DebitSpread",
+   64
+  ],
+  "posted": false,
+  "t": "2026-10-20T14:50:54-04:00"
  },
  "2026-10-20|EXIT|AMD|Phase1A_GapTrap_Single0DTE|35": {
   "late_s": 0.0,
@@ -76,6 +96,12 @@
   "pos": null,
   "posted": true,
   "t": "2026-10-20T12:10:13-04:00"
+ },
+ "2026-10-20|EXIT|MSTR|Phase1A_GapTrap_Single0DTE|19": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-10-20T14:50:54-04:00"
  },
  "2026-10-20|EXIT|MSTR|Phase1A_GapTrap_Single0DTE|23": {
   "late_s": 0.0,
