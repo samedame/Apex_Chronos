@@ -29,6 +29,16 @@
   "posted": true,
   "t": "2026-10-20T09:59:06-04:00"
  },
+ "2026-10-20|ENTRY|TSLA|Phase1B_ConfirmedGap_DebitSpread|44": {
+  "late_s": 6.4,
+  "pos": [
+   "TSLA",
+   "Phase1B_ConfirmedGap_DebitSpread",
+   44
+  ],
+  "posted": true,
+  "t": "2026-10-20T10:15:06-04:00"
+ },
  "2026-10-20|EXIT|AMD|Phase1A_GapTrap_Single0DTE|35": {
   "late_s": 0.0,
   "pos": null,
