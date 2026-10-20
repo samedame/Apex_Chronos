@@ -19,6 +19,16 @@
   "posted": true,
   "t": "2026-10-20T10:48:13-04:00"
  },
+ "2026-10-20|ENTRY|IWM|Phase2_MiddayPin_CreditSpread|79": {
+  "late_s": 12.8,
+  "pos": [
+   "IWM",
+   "Phase2_MiddayPin_CreditSpread",
+   79
+  ],
+  "posted": true,
+  "t": "2026-10-20T10:50:13-04:00"
+ },
  "2026-10-20|ENTRY|MSTR|Phase1A_GapTrap_Single0DTE|6": {
   "late_s": 6.4,
   "pos": [
