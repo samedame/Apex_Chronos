@@ -6,14 +6,14 @@
  "missed_by_live": [],
  "phantom_in_live": [
   [
-   "SPY",
+   "AMD",
    "Phase2_MiddayPin_CreditSpread",
-   "89"
+   "77"
   ],
   [
    "TSLA",
    "Phase1B_ConfirmedGap_DebitSpread",
-   "64"
+   "44"
   ]
  ],
  "excluded": {}
