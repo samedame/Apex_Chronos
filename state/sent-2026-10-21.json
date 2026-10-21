@@ -45,6 +45,12 @@
   "posted": true,
   "t": "2026-10-21T09:48:07-04:00"
  },
+ "2026-10-21|EXIT|TSLA|Phase1B_ConfirmedGap_DebitSpread|35": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-10-21T10:06:06-04:00"
+ },
  "2026-10-21|TP1|COIN|Phase1A_GapTrap_Single0DTE|17": {
   "late_s": 0.0,
   "pos": null,
