@@ -18,5 +18,15 @@
   ],
   "posted": true,
   "t": "2026-10-21T09:36:07-04:00"
+ },
+ "2026-10-21|ENTRY|NVDA|Phase1A_GapTrap_Single0DTE|6": {
+  "late_s": 6.4,
+  "pos": [
+   "NVDA",
+   "Phase1A_GapTrap_Single0DTE",
+   6
+  ],
+  "posted": true,
+  "t": "2026-10-21T09:37:06-04:00"
  }
 }
