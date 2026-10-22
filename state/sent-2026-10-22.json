@@ -83,6 +83,12 @@
   "posted": true,
   "t": "2026-10-22T09:48:06-04:00"
  },
+ "2026-10-22|EXIT|QQQ|Phase2_MiddayPin_CreditSpread|164": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-10-22T12:15:12-04:00"
+ },
  "2026-10-22|EXIT|SPY|Phase2_MiddayPin_CreditSpread|159": {
   "late_s": 0.0,
   "pos": null,
