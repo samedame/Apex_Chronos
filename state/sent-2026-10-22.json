@@ -29,6 +29,16 @@
   "posted": true,
   "t": "2026-10-22T09:36:12-04:00"
  },
+ "2026-10-22|ENTRY|META|Phase3_AfternoonVanna_CallSpread|210": {
+  "late_s": 6.3,
+  "pos": [
+   "META",
+   "Phase3_AfternoonVanna_CallSpread",
+   210
+  ],
+  "posted": true,
+  "t": "2026-10-22T13:01:07-04:00"
+ },
  "2026-10-22|ENTRY|NVDA|Phase1A_GapTrap_Single0DTE|8": {
   "late_s": 6.3,
   "pos": [
