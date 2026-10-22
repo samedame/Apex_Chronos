@@ -1,4 +1,14 @@
 {
+ "2026-10-22|ENTRY|COIN|Phase1A_GapTrap_Single0DTE|11": {
+  "late_s": 6.2,
+  "pos": [
+   "COIN",
+   "Phase1A_GapTrap_Single0DTE",
+   11
+  ],
+  "posted": true,
+  "t": "2026-10-22T09:42:06-04:00"
+ },
  "2026-10-22|ENTRY|IWM|Phase1A_GapTrap_Single0DTE|5": {
   "late_s": 12.7,
   "pos": [
