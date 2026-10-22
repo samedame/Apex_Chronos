@@ -81,11 +81,23 @@
   "posted": true,
   "t": "2026-10-22T09:56:06-04:00"
  },
+ "2026-10-22|EXIT|COIN|Phase1A_GapTrap_Single0DTE|26": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-10-22T14:51:42-04:00"
+ },
  "2026-10-22|EXIT|IWM|Phase1A_GapTrap_Single0DTE|26": {
   "late_s": 0.0,
   "pos": null,
   "posted": true,
   "t": "2026-10-22T09:57:12-04:00"
+ },
+ "2026-10-22|EXIT|IWM|Phase1A_GapTrap_Single0DTE|27": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-10-22T14:51:42-04:00"
  },
  "2026-10-22|EXIT|META|Phase3_AfternoonVanna_CallSpread|260": {
   "late_s": 0.0,
