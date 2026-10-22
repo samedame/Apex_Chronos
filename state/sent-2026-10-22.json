@@ -39,6 +39,16 @@
   "posted": true,
   "t": "2026-10-22T09:39:06-04:00"
  },
+ "2026-10-22|ENTRY|QQQ|Phase2_MiddayPin_CreditSpread|84": {
+  "late_s": 12.4,
+  "pos": [
+   "QQQ",
+   "Phase2_MiddayPin_CreditSpread",
+   84
+  ],
+  "posted": true,
+  "t": "2026-10-22T10:55:12-04:00"
+ },
  "2026-10-22|ENTRY|SPY|Phase2_MiddayPin_CreditSpread|79": {
   "late_s": 6.3,
   "pos": [
