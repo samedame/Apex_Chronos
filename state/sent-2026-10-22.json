@@ -39,6 +39,16 @@
   "posted": true,
   "t": "2026-10-22T09:39:06-04:00"
  },
+ "2026-10-22|ENTRY|SPY|Phase2_MiddayPin_CreditSpread|79": {
+  "late_s": 6.3,
+  "pos": [
+   "SPY",
+   "Phase2_MiddayPin_CreditSpread",
+   79
+  ],
+  "posted": true,
+  "t": "2026-10-22T10:50:06-04:00"
+ },
  "2026-10-22|EXIT|AMD|Phase1A_GapTrap_Single0DTE|53": {
   "late_s": 0.0,
   "pos": null,
