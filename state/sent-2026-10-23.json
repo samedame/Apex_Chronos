@@ -1,4 +1,14 @@
 {
+ "2026-10-23|ENTRY|IWM|Phase1A_GapTrap_Single0DTE|31": {
+  "late_s": 6.3,
+  "pos": [
+   "IWM",
+   "Phase1A_GapTrap_Single0DTE",
+   31
+  ],
+  "posted": true,
+  "t": "2026-10-23T10:02:06-04:00"
+ },
  "2026-10-23|ENTRY|META|Phase1A_GapTrap_Single0DTE|10": {
   "late_s": 6.3,
   "pos": [
