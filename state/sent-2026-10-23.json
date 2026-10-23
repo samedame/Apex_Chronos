@@ -18,5 +18,15 @@
   ],
   "posted": true,
   "t": "2026-10-23T09:51:06-04:00"
+ },
+ "2026-10-23|ENTRY|SPY|Phase1A_GapTrap_Single0DTE|22": {
+  "late_s": 6.3,
+  "pos": [
+   "SPY",
+   "Phase1A_GapTrap_Single0DTE",
+   22
+  ],
+  "posted": true,
+  "t": "2026-10-23T09:53:06-04:00"
  }
 }
