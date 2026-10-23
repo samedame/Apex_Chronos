@@ -8,5 +8,15 @@
   ],
   "posted": true,
   "t": "2026-10-23T09:41:06-04:00"
+ },
+ "2026-10-23|ENTRY|QQQ|Phase1C_BullTrap_PutDebitSpread|20": {
+  "late_s": 6.4,
+  "pos": [
+   "QQQ",
+   "Phase1C_BullTrap_PutDebitSpread",
+   20
+  ],
+  "posted": true,
+  "t": "2026-10-23T09:51:06-04:00"
  }
 }
