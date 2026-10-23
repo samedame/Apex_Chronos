@@ -2,20 +2,8 @@
  "date": "2026-10-22",
  "live_entries": 7,
  "final_entries": 7,
- "matched": 6,
- "missed_by_live": [
-  [
-   "QQQ",
-   "Phase1A_GapTrap_Single0DTE",
-   "28"
-  ]
- ],
- "phantom_in_live": [
-  [
-   "AMD",
-   "Phase1A_GapTrap_Single0DTE",
-   "24"
-  ]
- ],
+ "matched": 7,
+ "missed_by_live": [],
+ "phantom_in_live": [],
  "excluded": {}
 }
