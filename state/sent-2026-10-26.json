@@ -65,6 +65,12 @@
   "posted": true,
   "t": "2026-10-26T10:47:07-04:00"
  },
+ "2026-10-26|EXIT|MSFT|Phase1C_BullTrap_PutDebitSpread|135": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-10-26T11:46:20-04:00"
+ },
  "2026-10-26|EXIT|NVDA|Phase1C_BullTrap_PutDebitSpread|76": {
   "late_s": 0.0,
   "pos": null,
