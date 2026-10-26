@@ -8,5 +8,15 @@
   ],
   "posted": true,
   "t": "2026-10-26T09:53:06-04:00"
+ },
+ "2026-10-26|ENTRY|TSLA|Phase1B_ConfirmedGap_DebitSpread|24": {
+  "late_s": 6.3,
+  "pos": [
+   "TSLA",
+   "Phase1B_ConfirmedGap_DebitSpread",
+   24
+  ],
+  "posted": true,
+  "t": "2026-10-26T09:55:06-04:00"
  }
 }
