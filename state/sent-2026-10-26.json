@@ -9,6 +9,16 @@
   "posted": true,
   "t": "2026-10-26T09:57:06-04:00"
  },
+ "2026-10-26|ENTRY|COIN|Phase2_MiddayPin_CreditSpread|89": {
+  "late_s": 15.2,
+  "pos": [
+   "COIN",
+   "Phase2_MiddayPin_CreditSpread",
+   89
+  ],
+  "posted": true,
+  "t": "2026-10-26T11:00:15-04:00"
+ },
  "2026-10-26|ENTRY|META|Phase2_MiddayPin_CreditSpread|81": {
   "late_s": 6.4,
   "pos": [
