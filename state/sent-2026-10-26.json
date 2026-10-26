@@ -9,6 +9,16 @@
   "posted": true,
   "t": "2026-10-26T09:57:06-04:00"
  },
+ "2026-10-26|ENTRY|COIN|Phase1C_BullTrap_PutDebitSpread|53": {
+  "late_s": 20274.9,
+  "pos": [
+   "COIN",
+   "Phase1C_BullTrap_PutDebitSpread",
+   53
+  ],
+  "posted": false,
+  "t": "2026-10-26T16:01:55-04:00"
+ },
  "2026-10-26|ENTRY|COIN|Phase2_MiddayPin_CreditSpread|89": {
   "late_s": 15.2,
   "pos": [
