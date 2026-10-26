@@ -1,4 +1,14 @@
 {
+ "2026-10-26|ENTRY|AMD|Phase1A_GapTrap_Single0DTE|26": {
+  "late_s": 6.3,
+  "pos": [
+   "AMD",
+   "Phase1A_GapTrap_Single0DTE",
+   26
+  ],
+  "posted": true,
+  "t": "2026-10-26T09:57:06-04:00"
+ },
  "2026-10-26|ENTRY|NVDA|Phase1C_BullTrap_PutDebitSpread|22": {
   "late_s": 6.3,
   "pos": [
