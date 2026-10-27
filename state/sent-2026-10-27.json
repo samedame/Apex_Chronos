@@ -1,4 +1,14 @@
 {
+ "2026-10-27|ENTRY|AMZN|Phase1A_GapTrap_Single0DTE|19": {
+  "late_s": 12.5,
+  "pos": [
+   "AMZN",
+   "Phase1A_GapTrap_Single0DTE",
+   19
+  ],
+  "posted": true,
+  "t": "2026-10-27T09:50:12-04:00"
+ },
  "2026-10-27|ENTRY|NVDA|Phase1A_GapTrap_Single0DTE|16": {
   "late_s": 12.5,
   "pos": [
@@ -8,5 +18,15 @@
   ],
   "posted": true,
   "t": "2026-10-27T09:47:12-04:00"
+ },
+ "2026-10-27|ENTRY|SPY|Phase1A_GapTrap_Single0DTE|19": {
+  "late_s": 12.5,
+  "pos": [
+   "SPY",
+   "Phase1A_GapTrap_Single0DTE",
+   19
+  ],
+  "posted": true,
+  "t": "2026-10-27T09:50:14-04:00"
  }
 }
