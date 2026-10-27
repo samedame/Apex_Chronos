@@ -1,14 +1,19 @@
 {
  "date": "2026-10-26",
  "live_entries": 7,
- "final_entries": 6,
- "matched": 6,
+ "final_entries": 5,
+ "matched": 5,
  "missed_by_live": [],
  "phantom_in_live": [
   [
-   "COIN",
+   "MSFT",
    "Phase1C_BullTrap_PutDebitSpread",
-   "53"
+   "98"
+  ],
+  [
+   "NVDA",
+   "Phase1C_BullTrap_PutDebitSpread",
+   "22"
   ]
  ],
  "excluded": {}
