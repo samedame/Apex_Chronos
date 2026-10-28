@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 import requests
 
-from . import alerts, config as C, data, history, state
+from . import alert_confidence, alerts, config as C, data, history, state
 from .calendar_nyse import NY, bar_close_clock, is_full_session, minute_clock, now_et, session_open
 from .engine import Event, SessionEngine
 from .features import Features, compute_features, session_profiles
@@ -148,15 +148,32 @@ class LiveSession:
         return feats, degraded
 
     # -- alerting -----------------------------------------------------------------------------
-    def _post(self, text: str, key: Optional[str] = None, pos=None, posted=True, late=0.0) -> bool:
+    def _post(self, text: str, key: Optional[str] = None, pos=None, posted=True, late=0.0, conf: Optional[int] = None) -> bool:
         if key is not None and key in self.sent:
             return True
         ok = alerts.post_discord(self.cfg.webhook, text, dry_run=self.cfg.dry_run)
         if key is not None and ok:
             self.sent[key] = {'t': now_et().isoformat(timespec='seconds'), 'posted': posted, 'late_s': round(late, 1),
                               'pos': list(pos) if pos else None}
+            if conf is not None:
+                self.sent[key]['conf'] = conf       # kept so the score can later be checked against realised outcomes
             state.save_sent(self.cfg.state_dir, self.date, self.sent)
         return ok
+
+    def _confidence(self, ev, late: float):
+        """Score an entry alert. A scoring failure must never suppress an actionable alert, so it returns None instead of raising."""
+        try:
+            cb = ev.data['cost_basis']
+            return alert_confidence.score_alert({
+                'module': ev.module,
+                'ticker': ev.ticker,
+                'late_s': late,
+                'data_age_s': self.vix_delay * 60.0,          # vix_delay is in minutes
+                'contracts': alerts.contracts_for(cb, self.cfg.capital, self.cfg.slot_fraction),
+            }, grace_s=self.cfg.entry_grace_s)
+        except Exception as e:                                 # noqa: BLE001
+            print(f'confidence scoring failed for {ev.ticker} {ev.module}: {e!r}')
+            return None
 
     def dispatch(self, events: List[Event], now: datetime) -> int:
         n = 0
@@ -171,8 +188,10 @@ class LiveSession:
                             f"{late / 60:.0f} min old - NOT actionable; the bot still tracks it in the paper ledger.")
                     self._post(text, key=key, pos=pos, posted=False, late=late)
                 else:
-                    text = alerts.fmt_entry(self.date.isoformat(), ev, self.cfg.capital, self.cfg.slot_fraction, late, self.cfg.entry_grace_s)
-                    if self._post(text, key=key, pos=pos, posted=True, late=late):
+                    conf = self._confidence(ev, late)
+                    text = alerts.fmt_entry(self.date.isoformat(), ev, self.cfg.capital, self.cfg.slot_fraction, late, self.cfg.entry_grace_s,
+                                            confidence=conf.lines() if conf else None)
+                    if self._post(text, key=key, pos=pos, posted=True, late=late, conf=conf.score if conf else None):
                         self.posted_entries.add(pos)
                         n += 1
             elif ev.kind == 'TP1':

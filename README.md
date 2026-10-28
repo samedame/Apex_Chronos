@@ -55,6 +55,7 @@ and run it as a shadow forward test first.
 
 [`docs/SETUP.md`](docs/SETUP.md): repo, secrets, `open-scheduler` jobs, smoke tests, shadow-week checklist, and the Actions-minutes cost note (the loop runs ~6 h a day: free in a public repo, ~$30-36/month in a private one).
 Strategy reference: [`docs/STRATEGY.md`](docs/STRATEGY.md).
+Entry-alert confidence score (what the 1-100 number means, and what it does not): [`docs/CONFIDENCE.md`](docs/CONFIDENCE.md).
 
 ## Layout
 
