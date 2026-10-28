@@ -44,7 +44,8 @@ def _sizing_line(cost_basis: float, capital: Optional[float], slot_fraction: flo
             f"at model ${per_contract:,.0f} each.")
 
 
-def fmt_entry(date: str, ev, capital=None, slot_fraction=0.25, late_s: float = 0.0, grace_s: float = 150.0) -> str:
+def fmt_entry(date: str, ev, capital=None, slot_fraction=0.25, late_s: float = 0.0, grace_s: float = 150.0,
+              confidence: Optional[str] = None) -> str:
     d = ev.data
     side = 'CALL' if d['direction'] == 1 else 'PUT'
     m = ev.minute
@@ -55,6 +56,8 @@ def fmt_entry(date: str, ev, capital=None, slot_fraction=0.25, late_s: float = 0
     head = '🟢' if late_s <= grace_s else '🟠'
     late = '' if late_s <= grace_s else f"  ⚠ LATE by {late_s / 60:.1f} min - model entry price may be stale"
     lines.append(f"{head} **APEX-CHRONOS ENTRY** - {ev.ticker} {d['phase']} · slot {d['slot'] + 1}/{C.N_SLOTS}{late}")
+    if confidence:
+        lines.append(confidence)
     lines.append(f"**{d['legs']}**   exp TODAY (0DTE) - the backtest assumed a same-day expiry")
     lines.append(f"Signal: {ev.module} · bar {minute_clock(m)} closed {bar_close_clock(m)} ET · underlying {d['S_entry']:.2f}")
     if credit:
