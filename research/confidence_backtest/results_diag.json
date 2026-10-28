@@ -1,0 +1,132 @@
+{
+ "D1_walkforward_setup": {
+  "warmup_sessions": 10,
+  "scored_trades": 114,
+  "scored_sessions": 21,
+  "null_check_auc_when_outcomes_shuffled": {
+   "mean": 0.461,
+   "min": 0.371,
+   "max": 0.593
+  },
+  "later_backtest_sessions": {
+   "n": 58,
+   "auc_win_walkforward": 0.496,
+   "auc_ci95": [
+    0.343,
+    0.653
+   ],
+   "spearman_roi_walkforward": -0.072,
+   "spearman_ci95": [
+    -0.43,
+    0.29
+   ]
+  },
+  "forward": {
+   "n": 56,
+   "auc_win_walkforward": 0.318,
+   "auc_ci95": [
+    0.141,
+    0.566
+   ],
+   "spearman_roi_walkforward": -0.293,
+   "spearman_ci95": [
+    -0.557,
+    0.109
+   ]
+  },
+  "all_scored": {
+   "n": 114,
+   "auc_win_walkforward": 0.44,
+   "auc_ci95": [
+    0.31,
+    0.578
+   ],
+   "spearman_roi_walkforward": -0.143,
+   "spearman_ci95": [
+    -0.389,
+    0.121
+   ]
+  }
+ },
+ "D2_refit_ceiling_walkforward": {
+  "warmup_sessions": 10,
+  "scored_trades": 114,
+  "later_backtest_sessions": {
+   "n": 58,
+   "auc_win_walkforward": 0.417,
+   "auc_ci95": [
+    0.312,
+    0.547
+   ],
+   "spearman_roi_walkforward": -0.317,
+   "spearman_ci95": [
+    -0.506,
+    0.037
+   ]
+  },
+  "forward": {
+   "n": 56,
+   "auc_win_walkforward": 0.495,
+   "auc_ci95": [
+    0.324,
+    0.7
+   ],
+   "spearman_roi_walkforward": -0.267,
+   "spearman_ci95": [
+    -0.498,
+    0.035
+   ]
+  },
+  "all_scored": {
+   "n": 114,
+   "auc_win_walkforward": 0.48,
+   "auc_ci95": [
+    0.377,
+    0.602
+   ],
+   "spearman_roi_walkforward": -0.26,
+   "spearman_ci95": [
+    -0.428,
+    -0.037
+   ]
+  },
+  "null_check_auc_when_outcomes_shuffled": {
+   "mean": 0.486,
+   "min": 0.408,
+   "max": 0.631
+  }
+ },
+ "D3_sample_size": {
+  "trades_per_session": 5.35,
+  "have": 166,
+  "sessions_have": 31,
+  "auc_0.58": {
+   "trades_needed": 396,
+   "more_trades_than_now": 230,
+   "sessions_needed_total": 74.0,
+   "more_sessions_pooled": 43.0,
+   "clean_forward_only_sessions": 74.0
+  },
+  "auc_0.6": {
+   "trades_needed": 249,
+   "more_trades_than_now": 83,
+   "sessions_needed_total": 46.5,
+   "more_sessions_pooled": 15.5,
+   "clean_forward_only_sessions": 46.5
+  },
+  "auc_0.65": {
+   "trades_needed": 104,
+   "more_trades_than_now": 0,
+   "sessions_needed_total": 19.4,
+   "more_sessions_pooled": 0.0,
+   "clean_forward_only_sessions": 19.4
+  },
+  "auc_0.7": {
+   "trades_needed": 54,
+   "more_trades_than_now": 0,
+   "sessions_needed_total": 10.1,
+   "more_sessions_pooled": 0.0,
+   "clean_forward_only_sessions": 10.1
+  }
+ }
+}
