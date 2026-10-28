@@ -19,6 +19,16 @@
   "posted": true,
   "t": "2026-10-28T09:37:07-04:00"
  },
+ "2026-10-28|ENTRY|META|Phase2_MiddayPin_CreditSpread|89": {
+  "late_s": 18.7,
+  "pos": [
+   "META",
+   "Phase2_MiddayPin_CreditSpread",
+   89
+  ],
+  "posted": true,
+  "t": "2026-10-28T11:00:21-04:00"
+ },
  "2026-10-28|ENTRY|NVDA|Phase1A_GapTrap_Single0DTE|6": {
   "late_s": 6.3,
   "pos": [
