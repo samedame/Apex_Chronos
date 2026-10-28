@@ -1,4 +1,14 @@
 {
+ "2026-10-28|ENTRY|AAPL|Phase2_MiddayPin_CreditSpread|80": {
+  "late_s": 6.3,
+  "pos": [
+   "AAPL",
+   "Phase2_MiddayPin_CreditSpread",
+   80
+  ],
+  "posted": true,
+  "t": "2026-10-28T10:51:06-04:00"
+ },
  "2026-10-28|ENTRY|AMD|Phase1A_GapTrap_Single0DTE|6": {
   "late_s": 6.3,
   "pos": [
