@@ -49,6 +49,16 @@
   "posted": true,
   "t": "2026-10-28T09:41:12-04:00"
  },
+ "2026-10-28|ENTRY|SPY|Phase2_MiddayPin_CreditSpread|116": {
+  "late_s": 12764.7,
+  "pos": [
+   "SPY",
+   "Phase2_MiddayPin_CreditSpread",
+   116
+  ],
+  "posted": false,
+  "t": "2026-10-28T14:59:46-04:00"
+ },
  "2026-10-28|EXIT|AAPL|Phase2_MiddayPin_CreditSpread|160": {
   "late_s": 0.0,
   "pos": null,
@@ -72,6 +82,12 @@
   "pos": null,
   "posted": true,
   "t": "2026-10-28T09:49:06-04:00"
+ },
+ "2026-10-28|EXIT|NVDA|Phase1A_GapTrap_Single0DTE|19": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-10-28T14:59:45-04:00"
  },
  "2026-10-28|EXIT|QQQ|Phase1A_GapTrap_Single0DTE|18": {
   "late_s": 0.0,
