@@ -1,0 +1,13 @@
+{
+ "2026-10-29|ENTRY|AMD|Phase1A_GapTrap_Single0DTE|5": {
+  "conf": 70,
+  "late_s": 12.6,
+  "pos": [
+   "AMD",
+   "Phase1A_GapTrap_Single0DTE",
+   5
+  ],
+  "posted": true,
+  "t": "2026-10-29T09:36:12-04:00"
+ }
+}
