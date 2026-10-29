@@ -71,6 +71,12 @@
   "posted": true,
   "t": "2026-10-29T10:26:06-04:00"
  },
+ "2026-10-29|EXIT|AMD|Phase2_MiddayPin_CreditSpread|185": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-10-29T12:36:13-04:00"
+ },
  "2026-10-29|EXIT|COIN|Phase1A_GapTrap_Single0DTE|16": {
   "late_s": 0.0,
   "pos": null,
