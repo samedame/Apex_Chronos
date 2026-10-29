@@ -21,6 +21,17 @@
   "posted": true,
   "t": "2026-10-29T09:37:12-04:00"
  },
+ "2026-10-29|ENTRY|IWM|Phase1C_BullTrap_PutDebitSpread|26": {
+  "conf": 91,
+  "late_s": 6.3,
+  "pos": [
+   "IWM",
+   "Phase1C_BullTrap_PutDebitSpread",
+   26
+  ],
+  "posted": true,
+  "t": "2026-10-29T09:57:06-04:00"
+ },
  "2026-10-29|EXIT|COIN|Phase1A_GapTrap_Single0DTE|16": {
   "late_s": 0.0,
   "pos": null,
