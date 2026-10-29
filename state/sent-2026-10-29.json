@@ -32,6 +32,17 @@
   "posted": true,
   "t": "2026-10-29T09:57:06-04:00"
  },
+ "2026-10-29|ENTRY|MSTR|Phase1C_BullTrap_PutDebitSpread|34": {
+  "conf": 70,
+  "late_s": 6.3,
+  "pos": [
+   "MSTR",
+   "Phase1C_BullTrap_PutDebitSpread",
+   34
+  ],
+  "posted": true,
+  "t": "2026-10-29T10:05:06-04:00"
+ },
  "2026-10-29|EXIT|COIN|Phase1A_GapTrap_Single0DTE|16": {
   "late_s": 0.0,
   "pos": null,
