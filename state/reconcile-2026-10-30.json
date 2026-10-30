@@ -2,34 +2,13 @@
  "date": "2026-10-30",
  "live_entries": 8,
  "final_entries": 7,
- "matched": 5,
- "missed_by_live": [
-  [
-   "META",
-   "Phase2_MiddayPin_CreditSpread",
-   "81"
-  ],
-  [
-   "QQQ",
-   "Phase1C_BullTrap_PutDebitSpread",
-   "32"
-  ]
- ],
+ "matched": 7,
+ "missed_by_live": [],
  "phantom_in_live": [
   [
    "AAPL",
-   "Phase2_MiddayPin_CreditSpread",
-   "83"
-  ],
-  [
-   "META",
-   "Phase1A_GapTrap_Single0DTE",
-   "28"
-  ],
-  [
-   "QQQ",
    "Phase1C_BullTrap_PutDebitSpread",
-   "38"
+   "83"
   ]
  ],
  "excluded": {}
