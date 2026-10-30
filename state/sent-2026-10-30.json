@@ -10,6 +10,17 @@
   "posted": true,
   "t": "2026-10-30T09:36:06-04:00"
  },
+ "2026-10-30|ENTRY|META|Phase1A_GapTrap_Single0DTE|28": {
+  "conf": 70,
+  "late_s": 6.3,
+  "pos": [
+   "META",
+   "Phase1A_GapTrap_Single0DTE",
+   28
+  ],
+  "posted": true,
+  "t": "2026-10-30T09:59:06-04:00"
+ },
  "2026-10-30|ENTRY|TSLA|Phase1A_GapTrap_Single0DTE|16": {
   "conf": 70,
   "late_s": 12.5,
