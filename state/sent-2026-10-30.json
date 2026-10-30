@@ -1,4 +1,26 @@
 {
+ "2026-10-30|ENTRY|AAPL|Phase1C_BullTrap_PutDebitSpread|83": {
+  "conf": 70,
+  "late_s": 12.6,
+  "pos": [
+   "AAPL",
+   "Phase1C_BullTrap_PutDebitSpread",
+   83
+  ],
+  "posted": true,
+  "t": "2026-10-30T10:54:12-04:00"
+ },
+ "2026-10-30|ENTRY|AAPL|Phase2_MiddayPin_CreditSpread|83": {
+  "conf": 71,
+  "late_s": 12.6,
+  "pos": [
+   "AAPL",
+   "Phase2_MiddayPin_CreditSpread",
+   83
+  ],
+  "posted": true,
+  "t": "2026-10-30T10:54:13-04:00"
+ },
  "2026-10-30|ENTRY|IWM|Phase1A_GapTrap_Single0DTE|5": {
   "conf": 92,
   "late_s": 6.3,
