@@ -54,6 +54,26 @@
   "posted": true,
   "t": "2026-10-30T09:59:06-04:00"
  },
+ "2026-10-30|ENTRY|NVDA|Phase3_AfternoonVanna_CallSpread|228": {
+  "late_s": 5591.2,
+  "pos": [
+   "NVDA",
+   "Phase3_AfternoonVanna_CallSpread",
+   228
+  ],
+  "posted": false,
+  "t": "2026-10-30T14:52:12-04:00"
+ },
+ "2026-10-30|ENTRY|QQQ|Phase1C_BullTrap_PutDebitSpread|38": {
+  "late_s": 16991.2,
+  "pos": [
+   "QQQ",
+   "Phase1C_BullTrap_PutDebitSpread",
+   38
+  ],
+  "posted": false,
+  "t": "2026-10-30T14:52:11-04:00"
+ },
  "2026-10-30|ENTRY|TSLA|Phase1A_GapTrap_Single0DTE|16": {
   "conf": 70,
   "late_s": 12.5,
@@ -88,6 +108,12 @@
   "pos": null,
   "posted": true,
   "t": "2026-10-30T10:26:06-04:00"
+ },
+ "2026-10-30|EXIT|META|Phase1A_GapTrap_Single0DTE|68": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-10-30T14:52:12-04:00"
  },
  "2026-10-30|EXIT|META|Phase1A_GapTrap_Single0DTE|73": {
   "late_s": 0.0,
