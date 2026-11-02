@@ -1,4 +1,15 @@
 {
+ "2026-11-02|ENTRY|AMZN|Phase1B_ConfirmedGap_DebitSpread|59": {
+  "conf": 70,
+  "late_s": 6.3,
+  "pos": [
+   "AMZN",
+   "Phase1B_ConfirmedGap_DebitSpread",
+   59
+  ],
+  "posted": true,
+  "t": "2026-11-02T10:30:06-05:00"
+ },
  "2026-11-02|ENTRY|IWM|Phase1A_GapTrap_Single0DTE|7": {
   "conf": 92,
   "late_s": 12.5,
