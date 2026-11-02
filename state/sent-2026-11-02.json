@@ -10,6 +10,17 @@
   "posted": true,
   "t": "2026-11-02T10:30:06-05:00"
  },
+ "2026-11-02|ENTRY|COIN|Phase2_MiddayPin_CreditSpread|121": {
+  "conf": 71,
+  "late_s": 12.5,
+  "pos": [
+   "COIN",
+   "Phase2_MiddayPin_CreditSpread",
+   121
+  ],
+  "posted": true,
+  "t": "2026-11-02T11:32:12-05:00"
+ },
  "2026-11-02|ENTRY|IWM|Phase1A_GapTrap_Single0DTE|7": {
   "conf": 92,
   "late_s": 12.5,
@@ -31,6 +42,17 @@
   ],
   "posted": true,
   "t": "2026-11-02T09:38:13-05:00"
+ },
+ "2026-11-02|ENTRY|NVDA|Phase2_MiddayPin_CreditSpread|121": {
+  "conf": 71,
+  "late_s": 12.5,
+  "pos": [
+   "NVDA",
+   "Phase2_MiddayPin_CreditSpread",
+   121
+  ],
+  "posted": true,
+  "t": "2026-11-02T11:32:12-05:00"
  },
  "2026-11-02|ENTRY|SPY|Phase1A_GapTrap_Single0DTE|7": {
   "conf": 92,
