@@ -1,0 +1,41 @@
+{
+ "date": "2026-11-02",
+ "live_entries": 7,
+ "final_entries": 7,
+ "matched": 4,
+ "missed_by_live": [
+  [
+   "AAPL",
+   "Phase3_AfternoonVanna_CallSpread",
+   "211"
+  ],
+  [
+   "QQQ",
+   "Phase1A_GapTrap_Single0DTE",
+   "7"
+  ],
+  [
+   "TSLA",
+   "Phase2_MiddayPin_CreditSpread",
+   "81"
+  ]
+ ],
+ "phantom_in_live": [
+  [
+   "AMD",
+   "Phase3_AfternoonVanna_CallSpread",
+   "212"
+  ],
+  [
+   "NVDA",
+   "Phase2_MiddayPin_CreditSpread",
+   "121"
+  ],
+  [
+   "SPY",
+   "Phase1A_GapTrap_Single0DTE",
+   "7"
+  ]
+ ],
+ "excluded": {}
+}
