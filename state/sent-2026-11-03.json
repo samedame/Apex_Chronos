@@ -38,6 +38,12 @@
   "posted": true,
   "t": "2026-11-03T10:54:12-05:00"
  },
+ "2026-11-03|EXIT|COIN|Phase1B_ConfirmedGap_DebitSpread|89": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-03T11:00:13-05:00"
+ },
  "2026-11-03|EXIT|IWM|Phase1C_BullTrap_PutDebitSpread|64": {
   "late_s": 0.0,
   "pos": null,
