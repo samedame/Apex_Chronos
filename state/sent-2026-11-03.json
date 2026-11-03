@@ -1,0 +1,24 @@
+{
+ "2026-11-03|ENTRY|AMD|Phase1C_BullTrap_PutDebitSpread|18": {
+  "conf": 70,
+  "late_s": 12.5,
+  "pos": [
+   "AMD",
+   "Phase1C_BullTrap_PutDebitSpread",
+   18
+  ],
+  "posted": true,
+  "t": "2026-11-03T09:49:12-05:00"
+ },
+ "2026-11-03|ENTRY|IWM|Phase1C_BullTrap_PutDebitSpread|18": {
+  "conf": 91,
+  "late_s": 12.5,
+  "pos": [
+   "IWM",
+   "Phase1C_BullTrap_PutDebitSpread",
+   18
+  ],
+  "posted": true,
+  "t": "2026-11-03T09:49:12-05:00"
+ }
+}
