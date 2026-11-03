@@ -84,6 +84,16 @@
   "posted": true,
   "t": "2026-11-03T11:23:06-05:00"
  },
+ "2026-11-03|ENTRY|SPY|Phase2_MiddayPin_CreditSpread|84": {
+  "late_s": 16705.1,
+  "pos": [
+   "SPY",
+   "Phase2_MiddayPin_CreditSpread",
+   84
+  ],
+  "posted": false,
+  "t": "2026-11-03T15:33:25-05:00"
+ },
  "2026-11-03|EXIT|AMD|Phase1C_BullTrap_PutDebitSpread|83": {
   "late_s": 0.0,
   "pos": null,
