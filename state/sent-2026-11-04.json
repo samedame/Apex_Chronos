@@ -65,6 +65,12 @@
   "posted": true,
   "t": "2026-11-04T09:48:06-05:00"
  },
+ "2026-11-04|EXIT|AAPL|Phase2_MiddayPin_CreditSpread|166": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-04T12:17:12-05:00"
+ },
  "2026-11-04|EXIT|AMZN|Phase1B_ConfirmedGap_DebitSpread|49": {
   "late_s": 0.0,
   "pos": null,
