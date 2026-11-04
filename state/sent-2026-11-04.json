@@ -1,4 +1,26 @@
 {
+ "2026-11-04|ENTRY|COIN|Phase1C_BullTrap_PutDebitSpread|24": {
+  "conf": 70,
+  "late_s": 6.3,
+  "pos": [
+   "COIN",
+   "Phase1C_BullTrap_PutDebitSpread",
+   24
+  ],
+  "posted": true,
+  "t": "2026-11-04T09:55:06-05:00"
+ },
+ "2026-11-04|ENTRY|MSTR|Phase1B_ConfirmedGap_DebitSpread|24": {
+  "conf": 70,
+  "late_s": 6.3,
+  "pos": [
+   "MSTR",
+   "Phase1B_ConfirmedGap_DebitSpread",
+   24
+  ],
+  "posted": true,
+  "t": "2026-11-04T09:55:06-05:00"
+ },
  "2026-11-04|ENTRY|TSLA|Phase1A_GapTrap_Single0DTE|17": {
   "conf": 70,
   "late_s": 6.3,
