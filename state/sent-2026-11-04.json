@@ -101,6 +101,18 @@
   "posted": true,
   "t": "2026-11-04T10:02:07-05:00"
  },
+ "2026-11-04|EXIT|TSLA|Phase1A_GapTrap_Single0DTE|33": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-04T15:30:13-05:00"
+ },
+ "2026-11-04|TP1|IWM|Phase2_MiddayPin_CreditSpread|172": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-04T15:30:13-05:00"
+ },
  "2026-11-04|TP1|IWM|Phase2_MiddayPin_CreditSpread|186": {
   "late_s": 0.0,
   "pos": null,
