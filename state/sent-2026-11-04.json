@@ -1,4 +1,15 @@
 {
+ "2026-11-04|ENTRY|AAPL|Phase2_MiddayPin_CreditSpread|86": {
+  "conf": 71,
+  "late_s": 12.6,
+  "pos": [
+   "AAPL",
+   "Phase2_MiddayPin_CreditSpread",
+   86
+  ],
+  "posted": true,
+  "t": "2026-11-04T10:57:12-05:00"
+ },
  "2026-11-04|ENTRY|AMZN|Phase1B_ConfirmedGap_DebitSpread|34": {
   "conf": 70,
   "late_s": 6.3,
