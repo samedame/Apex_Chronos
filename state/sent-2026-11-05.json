@@ -66,6 +66,12 @@
   "posted": true,
   "t": "2026-11-05T09:45:13-05:00"
  },
+ "2026-11-05|EXIT|AMZN|Phase1A_GapTrap_Single0DTE|19": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-05T15:46:43-05:00"
+ },
  "2026-11-05|EXIT|COIN|Phase3_AfternoonVanna_CallSpread|264": {
   "late_s": 0.0,
   "pos": null,
@@ -78,17 +84,35 @@
   "posted": true,
   "t": "2026-11-05T12:15:07-05:00"
  },
+ "2026-11-05|EXIT|NVDA|Phase2_MiddayPin_CreditSpread|135": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-05T15:46:43-05:00"
+ },
  "2026-11-05|EXIT|NVDA|Phase2_MiddayPin_CreditSpread|136": {
   "late_s": 0.0,
   "pos": null,
   "posted": true,
   "t": "2026-11-05T11:47:06-05:00"
  },
+ "2026-11-05|TP1|META|Phase2_MiddayPin_CreditSpread|103": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-05T15:46:43-05:00"
+ },
  "2026-11-05|TP1|META|Phase2_MiddayPin_CreditSpread|113": {
   "late_s": 0.0,
   "pos": null,
   "posted": true,
   "t": "2026-11-05T11:24:13-05:00"
+ },
+ "2026-11-05|TP1|NVDA|Phase2_MiddayPin_CreditSpread|108": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-05T15:46:43-05:00"
  },
  "2026-11-05|TP1|NVDA|Phase2_MiddayPin_CreditSpread|125": {
   "late_s": 0.0,
