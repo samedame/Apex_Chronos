@@ -21,6 +21,12 @@
   "posted": true,
   "t": "2026-11-05T09:41:13-05:00"
  },
+ "2026-11-05|EXIT|AAPL|Phase1A_GapTrap_Single0DTE|31": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-05T10:02:13-05:00"
+ },
  "2026-11-05|EXIT|AMZN|Phase1A_GapTrap_Single0DTE|14": {
   "late_s": 0.0,
   "pos": null,
