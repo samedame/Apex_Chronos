@@ -32,6 +32,17 @@
   "posted": true,
   "t": "2026-11-05T10:55:06-05:00"
  },
+ "2026-11-05|ENTRY|NVDA|Phase2_MiddayPin_CreditSpread|86": {
+  "conf": 71,
+  "late_s": 12.7,
+  "pos": [
+   "NVDA",
+   "Phase2_MiddayPin_CreditSpread",
+   86
+  ],
+  "posted": true,
+  "t": "2026-11-05T10:57:12-05:00"
+ },
  "2026-11-05|EXIT|AAPL|Phase1A_GapTrap_Single0DTE|31": {
   "late_s": 0.0,
   "pos": null,
