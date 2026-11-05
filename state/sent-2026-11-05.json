@@ -21,6 +21,17 @@
   "posted": true,
   "t": "2026-11-05T09:41:13-05:00"
  },
+ "2026-11-05|ENTRY|META|Phase2_MiddayPin_CreditSpread|84": {
+  "conf": 71,
+  "late_s": 6.4,
+  "pos": [
+   "META",
+   "Phase2_MiddayPin_CreditSpread",
+   84
+  ],
+  "posted": true,
+  "t": "2026-11-05T10:55:06-05:00"
+ },
  "2026-11-05|EXIT|AAPL|Phase1A_GapTrap_Single0DTE|31": {
   "late_s": 0.0,
   "pos": null,
