@@ -1,0 +1,13 @@
+{
+ "2026-11-05|ENTRY|AMZN|Phase1A_GapTrap_Single0DTE|10": {
+  "conf": 70,
+  "late_s": 13.1,
+  "pos": [
+   "AMZN",
+   "Phase1A_GapTrap_Single0DTE",
+   10
+  ],
+  "posted": true,
+  "t": "2026-11-05T09:41:13-05:00"
+ }
+}
