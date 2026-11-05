@@ -21,6 +21,17 @@
   "posted": true,
   "t": "2026-11-05T09:41:13-05:00"
  },
+ "2026-11-05|ENTRY|COIN|Phase3_AfternoonVanna_CallSpread|214": {
+  "conf": 70,
+  "late_s": 12.8,
+  "pos": [
+   "COIN",
+   "Phase3_AfternoonVanna_CallSpread",
+   214
+  ],
+  "posted": true,
+  "t": "2026-11-05T13:05:13-05:00"
+ },
  "2026-11-05|ENTRY|META|Phase2_MiddayPin_CreditSpread|84": {
   "conf": 71,
   "late_s": 6.4,
