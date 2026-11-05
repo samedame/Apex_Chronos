@@ -66,6 +66,12 @@
   "posted": true,
   "t": "2026-11-05T09:45:13-05:00"
  },
+ "2026-11-05|EXIT|COIN|Phase3_AfternoonVanna_CallSpread|264": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-05T13:55:13-05:00"
+ },
  "2026-11-05|EXIT|META|Phase2_MiddayPin_CreditSpread|164": {
   "late_s": 0.0,
   "pos": null,
