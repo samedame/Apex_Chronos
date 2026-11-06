@@ -71,6 +71,12 @@
   "posted": true,
   "t": "2026-11-06T10:25:06-05:00"
  },
+ "2026-11-06|EXIT|AAPL|Phase1A_GapTrap_Single0DTE|55": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-06T15:02:07-05:00"
+ },
  "2026-11-06|EXIT|AMD|Phase1B_ConfirmedGap_DebitSpread|41": {
   "late_s": 0.0,
   "pos": null,
@@ -100,5 +106,11 @@
   "pos": null,
   "posted": true,
   "t": "2026-11-06T10:09:12-05:00"
+ },
+ "2026-11-06|EXIT|QQQ|Phase1B_ConfirmedGap_DebitSpread|41": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-06T15:02:07-05:00"
  }
 }
