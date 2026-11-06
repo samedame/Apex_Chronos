@@ -1,4 +1,15 @@
 {
+ "2026-11-06|ENTRY|AAPL|Phase1A_GapTrap_Single0DTE|22": {
+  "conf": 70,
+  "late_s": 6.3,
+  "pos": [
+   "AAPL",
+   "Phase1A_GapTrap_Single0DTE",
+   22
+  ],
+  "posted": true,
+  "t": "2026-11-06T09:53:06-05:00"
+ },
  "2026-11-06|ENTRY|AMD|Phase1B_ConfirmedGap_DebitSpread|19": {
   "conf": 70,
   "late_s": 12.6,
