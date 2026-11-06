@@ -49,7 +49,7 @@ jobs:
       - name: Reconcile the day
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          ACCOUNT_CAPITAL: ${{ vars.ACCOUNT_CAPITAL }}
+          ACCOUNT_CAPITAL: ${{ vars.ACCOUNT_CAPITAL || '1500' }}   # default 1500; a repo variable overrides it
           SLOT_FRACTION: ${{ vars.SLOT_FRACTION }}
           DRY_RUN: ${{ vars.DRY_RUN }}
           APEX_GIT_PUSH: "1"
