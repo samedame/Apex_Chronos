@@ -1,0 +1,24 @@
+{
+ "2026-11-06|ENTRY|AMD|Phase1B_ConfirmedGap_DebitSpread|19": {
+  "conf": 70,
+  "late_s": 12.6,
+  "pos": [
+   "AMD",
+   "Phase1B_ConfirmedGap_DebitSpread",
+   19
+  ],
+  "posted": true,
+  "t": "2026-11-06T09:50:13-05:00"
+ },
+ "2026-11-06|ENTRY|QQQ|Phase1B_ConfirmedGap_DebitSpread|19": {
+  "conf": 91,
+  "late_s": 12.6,
+  "pos": [
+   "QQQ",
+   "Phase1B_ConfirmedGap_DebitSpread",
+   19
+  ],
+  "posted": true,
+  "t": "2026-11-06T09:50:12-05:00"
+ }
+}
