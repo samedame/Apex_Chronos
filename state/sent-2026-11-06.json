@@ -43,6 +43,17 @@
   "posted": true,
   "t": "2026-11-06T10:48:06-05:00"
  },
+ "2026-11-06|ENTRY|NVDA|Phase2_MiddayPin_CreditSpread|111": {
+  "conf": 71,
+  "late_s": 6.3,
+  "pos": [
+   "NVDA",
+   "Phase2_MiddayPin_CreditSpread",
+   111
+  ],
+  "posted": true,
+  "t": "2026-11-06T11:22:06-05:00"
+ },
  "2026-11-06|ENTRY|QQQ|Phase1B_ConfirmedGap_DebitSpread|19": {
   "conf": 91,
   "late_s": 12.6,
