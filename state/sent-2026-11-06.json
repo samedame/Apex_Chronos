@@ -77,6 +77,12 @@
   "posted": true,
   "t": "2026-11-06T10:12:06-05:00"
  },
+ "2026-11-06|EXIT|MSFT|Phase1C_BullTrap_PutDebitSpread|120": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-06T11:31:06-05:00"
+ },
  "2026-11-06|EXIT|QQQ|Phase1B_ConfirmedGap_DebitSpread|38": {
   "late_s": 0.0,
   "pos": null,
