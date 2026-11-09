@@ -1,4 +1,15 @@
 {
+ "2026-11-09|ENTRY|AMD|Phase1B_ConfirmedGap_DebitSpread|19": {
+  "conf": 49,
+  "late_s": 6.3,
+  "pos": [
+   "AMD",
+   "Phase1B_ConfirmedGap_DebitSpread",
+   19
+  ],
+  "posted": true,
+  "t": "2026-11-09T09:50:06-05:00"
+ },
  "2026-11-09|ENTRY|MSFT|Phase1A_GapTrap_Single0DTE|6": {
   "conf": 49,
   "late_s": 6.3,
