@@ -43,6 +43,26 @@
   "posted": true,
   "t": "2026-11-09T11:01:13-05:00"
  },
+ "2026-11-09|ENTRY|SPY|Phase1B_ConfirmedGap_DebitSpread|54": {
+  "late_s": 15936.4,
+  "pos": [
+   "SPY",
+   "Phase1B_ConfirmedGap_DebitSpread",
+   54
+  ],
+  "posted": false,
+  "t": "2026-11-09T14:50:38-05:00"
+ },
+ "2026-11-09|ENTRY|SPY|Phase2_MiddayPin_CreditSpread|100": {
+  "late_s": 13176.4,
+  "pos": [
+   "SPY",
+   "Phase2_MiddayPin_CreditSpread",
+   100
+  ],
+  "posted": false,
+  "t": "2026-11-09T14:50:39-05:00"
+ },
  "2026-11-09|ENTRY|TSLA|Phase2_MiddayPin_CreditSpread|85": {
   "conf": 49,
   "late_s": 12.6,
@@ -60,6 +80,12 @@
   "posted": true,
   "t": "2026-11-09T10:50:06-05:00"
  },
+ "2026-11-09|EXIT|MSFT|Phase1A_GapTrap_Single0DTE|22": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-09T14:50:37-05:00"
+ },
  "2026-11-09|EXIT|MSFT|Phase1A_GapTrap_Single0DTE|23": {
   "late_s": 0.0,
   "pos": null,
@@ -72,6 +98,18 @@
   "posted": true,
   "t": "2026-11-09T10:09:06-05:00"
  },
+ "2026-11-09|EXIT|MSTR|Phase1A_GapTrap_Single0DTE|40": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-09T14:50:38-05:00"
+ },
+ "2026-11-09|EXIT|NVDA|Phase2_MiddayPin_CreditSpread|138": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-09T14:50:39-05:00"
+ },
  "2026-11-09|EXIT|NVDA|Phase2_MiddayPin_CreditSpread|140": {
   "late_s": 0.0,
   "pos": null,
@@ -83,6 +121,12 @@
   "pos": null,
   "posted": true,
   "t": "2026-11-09T12:16:12-05:00"
+ },
+ "2026-11-09|TP1|NVDA|Phase2_MiddayPin_CreditSpread|121": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-09T14:50:39-05:00"
  },
  "2026-11-09|TP1|NVDA|Phase2_MiddayPin_CreditSpread|122": {
   "late_s": 0.0,
