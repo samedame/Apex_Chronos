@@ -55,7 +55,7 @@ Reproduce everything below with `python scripts/refit_confidence.py --as-of 2026
 | P1A Gap-Trap Sweep | 47 / 51% / +11.0% | 28 / 36% / +1.1% |
 | P1B Confirmed Gap + ORB15 | 7 / 57% / +14.9% | 2 / 50% / +0.5% |
 | P1C ORB15 Bull-Trap Reject | 13 / 54% / +4.5% | 4 / 0% / -17.7% |
-| P2 Midday Range-Wall Pin | 37 / 68% / +1.5% | 18 / 67% / +1.8% |
+| P2 Midday Range-Wall Pin | 37 / 68% / +1.5% | 18 / 67% / +2.1% |
 | P3 Afternoon Vanna Squeeze | 6 / 50% / +6.1% | 3 / 33% / -2.0% |
 
 * The backtest said P1A was the engine (+11.0% vs P2's +1.5%). The forward ledger did not repeat that: P1A fell to +1.1% with a 36% win rate while P2
