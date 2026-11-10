@@ -15,7 +15,7 @@ What the evidence did and did not support (reproduce with scripts/refit_confiden
 
   * Setup TYPE barely separates the five modules once the small samples are shrunk: P1A (75 pooled trades) and
     P2 (55) land within a few points of each other. The backtest favoured P1A (+11.0% vs +1.5% mean ROI), but the
-    forward ledger did not repeat it (P1A +1.1% and 36% wins vs P2 +1.8% and 67% wins). So the setup component
+    forward ledger did not repeat it (P1A +1.1% and 36% wins vs P2 +2.1% and 67% wins). So the setup component
     carries only 15% of the score, and P1B / P1C / P3 (9, 17, 9 pooled trades) are scored as a declared neutral
     with a "thin evidence" flag instead of being ranked on a handful of trades.
   * Within a setup type, RVOL at entry, entry minute and the bot's own rank score do not predict ROI (all
@@ -42,7 +42,7 @@ RECORD = {
     'P1A': {'bt': (47, 24, 0.1101), 'fwd': (28, 10, 0.0109)},
     'P1B': {'bt': (7, 4, 0.1489), 'fwd': (2, 1, 0.005)},
     'P1C': {'bt': (13, 7, 0.0447), 'fwd': (4, 0, -0.1767)},
-    'P2': {'bt': (37, 25, 0.0149), 'fwd': (18, 12, 0.018)},
+    'P2': {'bt': (37, 25, 0.0149), 'fwd': (18, 12, 0.0211)},
     'P3': {'bt': (6, 3, 0.0607), 'fwd': (3, 1, -0.0196)},
 }
 
