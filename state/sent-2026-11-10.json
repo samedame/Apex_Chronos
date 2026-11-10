@@ -71,6 +71,12 @@
   "posted": true,
   "t": "2026-11-10T10:00:13-05:00"
  },
+ "2026-11-10|EXIT|IWM|Phase1C_BullTrap_PutDebitSpread|118": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-10T11:29:12-05:00"
+ },
  "2026-11-10|EXIT|MSTR|Phase1A_GapTrap_Single0DTE|28": {
   "late_s": 0.0,
   "pos": null,
