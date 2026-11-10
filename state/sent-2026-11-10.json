@@ -21,6 +21,16 @@
   "posted": true,
   "t": "2026-11-10T10:24:13-05:00"
  },
+ "2026-11-10|ENTRY|IWM|Phase1C_BullTrap_PutDebitSpread|54": {
+  "late_s": 15939.6,
+  "pos": [
+   "IWM",
+   "Phase1C_BullTrap_PutDebitSpread",
+   54
+  ],
+  "posted": false,
+  "t": "2026-11-10T14:50:40-05:00"
+ },
  "2026-11-10|ENTRY|IWM|Phase2_MiddayPin_CreditSpread|87": {
   "conf": 90,
   "late_s": 6.3,
@@ -82,6 +92,12 @@
   "pos": null,
   "posted": true,
   "t": "2026-11-10T12:18:13-05:00"
+ },
+ "2026-11-10|EXIT|MSTR|Phase1A_GapTrap_Single0DTE|26": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-10T14:50:39-05:00"
  },
  "2026-11-10|EXIT|MSTR|Phase1A_GapTrap_Single0DTE|28": {
   "late_s": 0.0,
