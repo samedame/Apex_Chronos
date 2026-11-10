@@ -77,6 +77,12 @@
   "posted": true,
   "t": "2026-11-10T11:29:12-05:00"
  },
+ "2026-11-10|EXIT|IWM|Phase2_MiddayPin_CreditSpread|167": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-10T12:18:13-05:00"
+ },
  "2026-11-10|EXIT|MSTR|Phase1A_GapTrap_Single0DTE|28": {
   "late_s": 0.0,
   "pos": null,
@@ -88,5 +94,11 @@
   "pos": null,
   "posted": true,
   "t": "2026-11-10T09:55:06-05:00"
+ },
+ "2026-11-10|EXIT|SPY|Phase2_MiddayPin_CreditSpread|167": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-10T12:18:12-05:00"
  }
 }
