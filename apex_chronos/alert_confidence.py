@@ -46,6 +46,12 @@ RECORD = {
     'P3': {'bt': (6, 3, 0.0607), 'fwd': (3, 1, -0.0196)},
 }
 
+# Freeze the deployed alert calibration, including its printed setup record.
+# RECORD above is the corrected evidence snapshot. Its P2 correction must not
+# change alert scores, the pooled baseline for other setups, or alert text.
+ALERT_RECORD = {short: dict(samples) for short, samples in RECORD.items()}
+ALERT_RECORD['P2']['fwd'] = (18, 12, 0.018)
+
 SETUP_WEIGHT = 0.15          # share of the headline score; small because setup type barely discriminates (see above)
 SHRINK_K = 40                # pseudo-trades pulling each module toward the pooled average
 THIN_N = 30                  # fewer pooled trades than this: do not rank the module, score a declared neutral
@@ -120,7 +126,7 @@ def _num(x) -> Optional[float]:
 
 
 def _pooled(short: str) -> Tuple[int, int, float]:
-    rec = RECORD[short]
+    rec = ALERT_RECORD[short]
     n = sum(rec[s][0] for s in rec)
     w = sum(rec[s][1] for s in rec)
     total = sum(rec[s][0] * rec[s][2] for s in rec)
@@ -130,7 +136,7 @@ def _pooled(short: str) -> Tuple[int, int, float]:
 def _baseline() -> Tuple[float, float]:
     n = w = 0
     total = 0.0
-    for short in RECORD:
+    for short in ALERT_RECORD:
         pn, pw, pm = _pooled(short)
         n, w, total = n + pn, w + pw, total + pn * pm
     return (w / n, total / n) if n else (0.5, 0.0)
@@ -138,11 +144,11 @@ def _baseline() -> Tuple[float, float]:
 
 def setup_quality(short: Optional[str]) -> Tuple[float, str, bool]:
     """(quality 0..1, one-line record text, thin?) for a module key such as 'P1A'."""
-    if short not in RECORD:
+    if short not in ALERT_RECORD:
         return THIN_SETUP, 'Setup record: unknown setup type - scored as a neutral.', True
     spec = C.MODULES[short]
     n, w, mean = _pooled(short)
-    bt, fwd = RECORD[short]['bt'], RECORD[short]['fwd']
+    bt, fwd = ALERT_RECORD[short]['bt'], ALERT_RECORD[short]['fwd']
 
     def rate(t):
         return f"{t[1] / t[0] * 100:.0f}%/{t[0]}" if t[0] else 'none'
