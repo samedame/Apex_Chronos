@@ -1,4 +1,4 @@
-"""End-of-day comparison of the existing scheduler and a setup-return ranking."""
+"""End-of-day comparisons of the existing scheduler and independent shadow policies."""
 from __future__ import annotations
 
 import json
@@ -16,7 +16,7 @@ TICKER_PRIOR_TRADES = 20
 
 
 def compare(date, day, tickers, baseline, ledger):
-    """Fit on prior sessions only, then compare two policies on the same final bars."""
+    """Fit on prior sessions only, then compare three policies on the same final bars."""
     history = defaultdict(list)
     ticker_history = defaultdict(list)
     for row in ledger:
@@ -42,6 +42,7 @@ def compare(date, day, tickers, baseline, ledger):
             )
 
     shadow, _ = run_session(date, day, tickers, engine_kwargs={'expected_returns': expected})
+    filtered, _ = run_session(date, day, tickers, engine_kwargs={'excluded_modules': {'P1C', 'P3'}})
 
     def key(row):
         return row['ticker'], row['module'], row['m_entry']
@@ -66,12 +67,16 @@ def compare(date, day, tickers, baseline, ledger):
             'selected': len(closed) + len(opened),
             'unclosed': len(opened),
             'sum_model_roi': sum(t['roi'] for t in closed.values()),
+            'mean_model_roi': mean(t['roi'] for t in closed.values()) if closed else None,
         }
 
     current, alternative = outcomes(baseline), outcomes(shadow)
+    filtered_outcomes = outcomes(filtered)
     current_summary, shadow_summary = summary(current), summary(alternative)
+    filtered_summary = summary(filtered_outcomes)
     current_entries = current[0].keys() | current[1].keys()
     shadow_entries = alternative[0].keys() | alternative[1].keys()
+    filtered_entries = filtered_outcomes[0].keys() | filtered_outcomes[1].keys()
     candidates = [
         {
             **row,
@@ -79,6 +84,7 @@ def compare(date, day, tickers, baseline, ledger):
             'training_trades_for_ticker_setup': len(ticker_history[row['ticker'], row['module']]),
             'current': decision(current, key(row)),
             'shadow': decision(alternative, key(row)),
+            'skip_p1c_p3': decision(filtered_outcomes, key(row)),
         }
         for row in baseline.candidate_log
     ]
@@ -98,6 +104,16 @@ def compare(date, day, tickers, baseline, ledger):
             None if current_summary['unclosed'] or shadow_summary['unclosed']
             else shadow_summary['sum_model_roi'] - current_summary['sum_model_roi']
         ),
+        'skip_p1c_p3': {
+            **filtered_summary,
+            'excluded_modules': ['P1C', 'P3'],
+            'current_only': len(current_entries - filtered_entries),
+            'shadow_only': len(filtered_entries - current_entries),
+            'delta_sum_model_roi': (
+                None if current_summary['unclosed'] or filtered_summary['unclosed']
+                else filtered_summary['sum_model_roi'] - current_summary['sum_model_roi']
+            ),
+        },
         'candidates': candidates,
     }
 

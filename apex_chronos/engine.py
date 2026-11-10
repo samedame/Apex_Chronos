@@ -55,7 +55,8 @@ class _Cand:
 class SessionEngine:
     def __init__(self, date: str, tickers: List[str], n_bars=C.SESSION_BARS,
                  n_slots: int = C.N_SLOTS, phase_limits: Optional[Dict[str, int]] = None,
-                 expected_returns: Optional[Dict[tuple[str, str], float]] = None):
+                 expected_returns: Optional[Dict[tuple[str, str], float]] = None,
+                 excluded_modules: Optional[Set[str]] = None):
         self.date = date
         self.tickers = list(tickers)
         # n_bars: int for every ticker, or {ticker: bars} (the original uses each ticker-day's own row count)
@@ -64,6 +65,7 @@ class SessionEngine:
         self.n_slots = n_slots
         self.phase_limits = dict(phase_limits or C.PHASE_LIMITS)
         self.expected_returns = expected_returns
+        self.excluded_modules = set(excluded_modules or ())
         self.dets: Dict[str, list] = {}
         self.pending: Dict[int, List[tuple]] = {}   # entry minute -> [(ticker, module_key, direction)]
         self.slot_free = [-1] * n_slots             # minute from which each slot may be re-used
@@ -129,6 +131,8 @@ class SessionEngine:
             cands.sort(key=lambda c: -self.expected_returns[c.ticker, C.MODULES[c.key].name])
         for c in cands:
             spec = C.MODULES[c.key]
+            if c.key in self.excluded_modules:
+                continue
             ph = spec.phase
             if self.p_counts[ph] >= self.phase_limits[ph]:
                 continue

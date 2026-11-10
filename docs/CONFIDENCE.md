@@ -101,3 +101,13 @@ the selection actually changed. The delta is shadow minus current in summed trad
 decimal, and is null if either replay ended with an open position. The training ledger contains
 trades picked by the original scheduler. Both the score and the reported outcomes use model
 prices before fees. They do not verify real expiries, quotes, fills, or net profitability.
+
+The same daily report also contains a `skip_p1c_p3` policy. It uses the original
+candidate priority but rejects P1C and P3 before either can occupy a slot or consume
+a phase allowance. It replays its own positions, so other candidates can use the
+freed capacity. Candidate records retain excluded setups with a null selection
+under this policy. Its summary gives trade count, mean and summed model ROI,
+selection changes, and summed ROI difference from the current scheduler.
+This policy is independent of the expected-return ranking and runs only at end
+of day. Since the excluded setups were chosen after reviewing their losses, future
+daily comparisons are needed to evaluate the filter beyond that reviewed sample.
