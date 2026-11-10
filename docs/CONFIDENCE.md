@@ -80,6 +80,11 @@ Reproduce everything below with `python scripts/refit_confidence.py --as-of 2026
 
 ## Expected-return shadow test
 
+The corrected evidence snapshot reports P2's forward mean as +2.11%. Live alert
+calibration uses `ALERT_RECORD`, which preserves the deployed +1.80% input and its
+printed setup record. This keeps existing confidence scores and alert text identical
+while the corrected `RECORD` continues to be checked against the ledger.
+
 The end-of-day job writes `ledger/shadow/YYYY-MM-DD.json` with every candidate that reached
 the scheduler on the final bars, including candidates neither policy selected. Each record has
 the original rank score, the shadow estimate, and the slot and modeled outcome for each policy
