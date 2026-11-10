@@ -358,5 +358,12 @@ def run_eod(cfg: Settings, d: Optional[date] = None) -> int:
     if excluded:
         lines.append(f"Excluded today: {excluded}")
     alerts.post_discord(cfg.webhook, '\n'.join(lines), cfg.dry_run)
+    try:
+        from . import shadow
+        report = shadow.compare(d.isoformat(), days, cfg.tickers, eng, rows)
+        report['excluded_tickers'] = excluded
+        shadow.save_report(cfg.ledger_dir, report)
+    except Exception as e:
+        print(f'shadow comparison failed for {d}: {e!r}')
     state.git_commit_push([cfg.state_dir, cfg.ledger_dir], f'apex-chronos {d} end-of-day reconcile')
     return 0
