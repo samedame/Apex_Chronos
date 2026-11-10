@@ -61,3 +61,31 @@ def test_eod_shadow_failure_leaves_alert_and_ledger_intact(days, tmp_path, monke
     assert runner.run_eod(cfg, day) == 0
     assert posts[0] == posts[1]
     assert (tmp_path / 'ledger' / 'trades.csv').read_bytes() == ledger
+
+
+def test_skip_policy_replays_freed_capacity_and_retains_excluded_candidates(days):
+    day = '2026-09-18'
+    tickers = list(C.TICKERS)
+    session = days[1][day]
+    baseline, _ = replay.run_session(day, session, tickers)
+    original_trades = list(baseline.trades)
+    report = shadow.compare(day, session, tickers, baseline, [])
+    filtered = report['skip_p1c_p3']
+    assert baseline.trades == original_trades
+    assert report['current']['selected'] == 6
+    assert filtered['selected'] == 4
+    assert filtered['unclosed'] == 0
+    assert filtered['current_only'] == 3
+    assert filtered['shadow_only'] == 1
+    excluded = {C.MODULES[key].name for key in ('P1C', 'P3')}
+    candidates = report['candidates']
+    assert len(candidates) == len(baseline.candidate_log)
+    assert {row['module'] for row in candidates if row['module'] in excluded} == excluded
+    assert all(row['skip_p1c_p3'] is None for row in candidates if row['module'] in excluded)
+    assert any(row['current'] is None and row['skip_p1c_p3'] is not None for row in candidates)
+    selected = [row['skip_p1c_p3'] for row in candidates if row['skip_p1c_p3'] is not None]
+    assert len(selected) == filtered['selected']
+    total = sum(row['roi'] for row in selected)
+    assert filtered['sum_model_roi'] == pytest.approx(total)
+    assert filtered['mean_model_roi'] == pytest.approx(total / len(selected))
+    assert filtered['delta_sum_model_roi'] == pytest.approx(total - report['current']['sum_model_roi'])
