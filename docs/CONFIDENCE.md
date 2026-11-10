@@ -55,7 +55,7 @@ Reproduce everything below with `python scripts/refit_confidence.py --as-of 2026
 | P1A Gap-Trap Sweep | 47 / 51% / +11.0% | 28 / 36% / +1.1% |
 | P1B Confirmed Gap + ORB15 | 7 / 57% / +14.9% | 2 / 50% / +0.5% |
 | P1C ORB15 Bull-Trap Reject | 13 / 54% / +4.5% | 4 / 0% / -17.7% |
-| P2 Midday Range-Wall Pin | 37 / 68% / +1.5% | 18 / 67% / +1.8% |
+| P2 Midday Range-Wall Pin | 37 / 68% / +1.5% | 18 / 67% / +2.1% |
 | P3 Afternoon Vanna Squeeze | 6 / 50% / +6.1% | 3 / 33% / -2.0% |
 
 * The backtest said P1A was the engine (+11.0% vs P2's +1.5%). The forward ledger did not repeat that: P1A fell to +1.1% with a 36% win rate while P2
@@ -77,3 +77,27 @@ Reproduce everything below with `python scripts/refit_confidence.py --as-of 2026
 * The single largest improvement available is a real option-chain check for the same-day expiry. Pass its result as `expiry_verified` and the
   expiry factor stops being a guess in either direction.
 * A scoring failure never blocks an alert: the live loop catches it, logs it, and sends the alert without the score line.
+
+## Expected-return shadow test
+
+The corrected evidence snapshot reports P2's forward mean as +2.11%. Live alert
+calibration uses `ALERT_RECORD`, which preserves the deployed +1.80% input and its
+printed setup record. This keeps existing confidence scores and alert text identical
+while the corrected `RECORD` continues to be checked against the ledger.
+
+The end-of-day job writes `ledger/shadow/YYYY-MM-DD.json` with every candidate that reached
+the scheduler on the final bars, including candidates neither policy selected. Each record has
+the original rank score, the shadow estimate, and the slot and modeled outcome for each policy
+that took it. A null policy entry means it did not select that candidate.
+
+The shadow policy ranks same-minute candidates by mean ROI for their ticker and setup in the
+forward ledger from strictly earlier sessions. Each ticker/setup mean is shrunk toward its setup
+mean with 20 pseudo-trades, and each setup mean toward the pooled mean with 40. Ties keep
+the original order. Both policies have their own positions and slot availability and use the
+same phase limits, entry rules and exits. Live alerts and the Discord summary are unchanged.
+
+Compare `delta_sum_model_roi` across days and use `current_only` and `shadow_only` to see when
+the selection actually changed. The delta is shadow minus current in summed trade ROI, as a
+decimal, and is null if either replay ended with an open position. The training ledger contains
+trades picked by the original scheduler. Both the score and the reported outcomes use model
+prices before fees. They do not verify real expiries, quotes, fills, or net profitability.

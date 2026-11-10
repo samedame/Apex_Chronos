@@ -15,7 +15,7 @@ What the evidence did and did not support (reproduce with scripts/refit_confiden
 
   * Setup TYPE barely separates the five modules once the small samples are shrunk: P1A (75 pooled trades) and
     P2 (55) land within a few points of each other. The backtest favoured P1A (+11.0% vs +1.5% mean ROI), but the
-    forward ledger did not repeat it (P1A +1.1% and 36% wins vs P2 +1.8% and 67% wins). So the setup component
+    forward ledger did not repeat it (P1A +1.1% and 36% wins vs P2 +2.1% and 67% wins). So the setup component
     carries only 15% of the score, and P1B / P1C / P3 (9, 17, 9 pooled trades) are scored as a declared neutral
     with a "thin evidence" flag instead of being ranked on a handful of trades.
   * Within a setup type, RVOL at entry, entry minute and the bot's own rank score do not predict ROI (all
@@ -42,9 +42,15 @@ RECORD = {
     'P1A': {'bt': (47, 24, 0.1101), 'fwd': (28, 10, 0.0109)},
     'P1B': {'bt': (7, 4, 0.1489), 'fwd': (2, 1, 0.005)},
     'P1C': {'bt': (13, 7, 0.0447), 'fwd': (4, 0, -0.1767)},
-    'P2': {'bt': (37, 25, 0.0149), 'fwd': (18, 12, 0.018)},
+    'P2': {'bt': (37, 25, 0.0149), 'fwd': (18, 12, 0.0211)},
     'P3': {'bt': (6, 3, 0.0607), 'fwd': (3, 1, -0.0196)},
 }
+
+# Freeze the deployed alert calibration, including its printed setup record.
+# RECORD above is the corrected evidence snapshot. Its P2 correction must not
+# change alert scores, the pooled baseline for other setups, or alert text.
+ALERT_RECORD = {short: dict(samples) for short, samples in RECORD.items()}
+ALERT_RECORD['P2']['fwd'] = (18, 12, 0.018)
 
 SETUP_WEIGHT = 0.15          # share of the headline score; small because setup type barely discriminates (see above)
 SHRINK_K = 40                # pseudo-trades pulling each module toward the pooled average
@@ -120,7 +126,7 @@ def _num(x) -> Optional[float]:
 
 
 def _pooled(short: str) -> Tuple[int, int, float]:
-    rec = RECORD[short]
+    rec = ALERT_RECORD[short]
     n = sum(rec[s][0] for s in rec)
     w = sum(rec[s][1] for s in rec)
     total = sum(rec[s][0] * rec[s][2] for s in rec)
@@ -130,7 +136,7 @@ def _pooled(short: str) -> Tuple[int, int, float]:
 def _baseline() -> Tuple[float, float]:
     n = w = 0
     total = 0.0
-    for short in RECORD:
+    for short in ALERT_RECORD:
         pn, pw, pm = _pooled(short)
         n, w, total = n + pn, w + pw, total + pn * pm
     return (w / n, total / n) if n else (0.5, 0.0)
@@ -138,11 +144,11 @@ def _baseline() -> Tuple[float, float]:
 
 def setup_quality(short: Optional[str]) -> Tuple[float, str, bool]:
     """(quality 0..1, one-line record text, thin?) for a module key such as 'P1A'."""
-    if short not in RECORD:
+    if short not in ALERT_RECORD:
         return THIN_SETUP, 'Setup record: unknown setup type - scored as a neutral.', True
     spec = C.MODULES[short]
     n, w, mean = _pooled(short)
-    bt, fwd = RECORD[short]['bt'], RECORD[short]['fwd']
+    bt, fwd = ALERT_RECORD[short]['bt'], ALERT_RECORD[short]['fwd']
 
     def rate(t):
         return f"{t[1] / t[0] * 100:.0f}%/{t[0]}" if t[0] else 'none'

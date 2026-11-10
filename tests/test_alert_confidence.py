@@ -150,6 +150,29 @@ def test_forward_side_of_the_table_matches_the_ledger_up_to_as_of():
     assert _stats(rows) == {k: v['fwd'] for k, v in AC.RECORD.items()}
 
 
+def test_corrected_evidence_preserves_deployed_alert_output(monkeypatch):
+    deployed_record = {
+        'P1A': {'bt': (47, 24, 0.1101), 'fwd': (28, 10, 0.0109)},
+        'P1B': {'bt': (7, 4, 0.1489), 'fwd': (2, 1, 0.005)},
+        'P1C': {'bt': (13, 7, 0.0447), 'fwd': (4, 0, -0.1767)},
+        'P2': {'bt': (37, 25, 0.0149), 'fwd': (18, 12, 0.018)},
+        'P3': {'bt': (6, 3, 0.0607), 'fwd': (3, 1, -0.0196)},
+    }
+    assert AC.RECORD['P2']['fwd'] == (18, 12, 0.0211)
+    assert AC.ALERT_RECORD == deployed_record
+    contexts = [
+        good(module=module, ticker=ticker, late_s=late, data_age_s=age, contracts=contracts)
+        for module in (*C.MODULES, 'unknown')
+        for ticker in ('SPY', 'AMD')
+        for late in (None, 6.0, 200.0, 599.0, 600.0)
+        for age in (None, 900.0, 1800.0)
+        for contracts in (None, 0, 1, 3)
+    ]
+    output = [AC.score_alert(ctx).lines() for ctx in contexts]
+    monkeypatch.setattr(AC, 'ALERT_RECORD', deployed_record)
+    assert output == [AC.score_alert(ctx).lines() for ctx in contexts]
+
+
 # ------------------------------------------------------------------------------------------------ the live alert
 def real_entries(days, fast_run, limit=None):
     from apex_chronos import replay
