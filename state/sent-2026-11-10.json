@@ -21,6 +21,17 @@
   "posted": true,
   "t": "2026-11-10T10:24:13-05:00"
  },
+ "2026-11-10|ENTRY|IWM|Phase2_MiddayPin_CreditSpread|87": {
+  "conf": 90,
+  "late_s": 6.3,
+  "pos": [
+   "IWM",
+   "Phase2_MiddayPin_CreditSpread",
+   87
+  ],
+  "posted": true,
+  "t": "2026-11-10T10:58:06-05:00"
+ },
  "2026-11-10|ENTRY|MSTR|Phase1A_GapTrap_Single0DTE|5": {
   "conf": 72,
   "late_s": 6.3,
@@ -42,6 +53,17 @@
   ],
   "posted": true,
   "t": "2026-11-10T09:36:07-05:00"
+ },
+ "2026-11-10|ENTRY|SPY|Phase2_MiddayPin_CreditSpread|87": {
+  "conf": 49,
+  "late_s": 6.3,
+  "pos": [
+   "SPY",
+   "Phase2_MiddayPin_CreditSpread",
+   87
+  ],
+  "posted": true,
+  "t": "2026-11-10T10:58:06-05:00"
  },
  "2026-11-10|EXIT|COIN|Phase1A_GapTrap_Single0DTE|29": {
   "late_s": 0.0,
