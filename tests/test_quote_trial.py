@@ -42,6 +42,10 @@ def account(spec, scenario='slip_0.00', prior=None):
     return PaperAccount(spec, '2026-11-11', 'candidate', spec['scenarios'][scenario], prior)
 
 
+def test_freeze_covers_underlying_data_and_signal_execution_dependencies():
+    assert {'data.py', 'history.py', 'position.py', 'replay.py'}.issubset(qt.source_hashes())
+
+
 def test_real_quote_funding_whole_contracts_and_t_plus_one(spec):
     a = account(spec)
     a.candidate(candidate())

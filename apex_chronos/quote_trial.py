@@ -15,7 +15,8 @@ from .option_quotes import canonical, digest
 
 SOURCE_FILES = ('option_quotes.py', 'trial_engine.py', 'quote_trial.py', 'quote_collector.py',
                 'cash_catalog.py', 'cash_shadow.py', 'calendar_nyse.py', 'config.py',
-                'features.py', 'signals.py', 'engine.py', 'pricing.py')
+                'features.py', 'signals.py', 'engine.py', 'pricing.py',
+                'data.py', 'history.py', 'position.py', 'replay.py')
 ARMS = ('candidate', 'original_p1a_control')
 
 
