@@ -111,3 +111,15 @@ selection changes, and summed ROI difference from the current scheduler.
 This policy is independent of the expected-return ranking and runs only at end
 of day. Since the excluded setups were chosen after reviewing their losses, future
 daily comparisons are needed to evaluate the filter beyond that reviewed sample.
+
+The independent `p1a_rvol1_retrace1` policy changes only P1A's post-signal filters
+to RVOL <= 1.00 and retrace < 1.00. The entry-minute ceiling stays at 35 and all
+other setups, priorities, sizing assumptions, and exits retain their defaults.
+The overrides belong to that shadow engine instance; the live engine uses its
+existing limits. This policy replays its own slots and phase allowances.
+
+The shared candidate log includes the union of baseline and P1A-policy candidates,
+so a newly admitted candidate is recorded even if the current bot never considered
+it. The policy summary includes selections, mean and summed model ROI, and the
+difference from the current scheduler. These limits were selected from the
+historical optimization search, so future comparisons are required to validate them.
