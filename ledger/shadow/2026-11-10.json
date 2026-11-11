@@ -1,0 +1,324 @@
+{
+  "date": "2026-11-10",
+  "method": "prior_forward_ticker_setup_mean_shrunk_v1",
+  "outcome_basis": "final_bar_model_roi_before_fees",
+  "training_trades": 103,
+  "training_trades_by_module": {
+    "Phase1A_GapTrap_Single0DTE": 42,
+    "Phase1B_ConfirmedGap_DebitSpread": 10,
+    "Phase1C_BullTrap_PutDebitSpread": 11,
+    "Phase2_MiddayPin_CreditSpread": 34,
+    "Phase3_AfternoonVanna_CallSpread": 6
+  },
+  "setup_prior_weight": 40,
+  "ticker_prior_weight": 20,
+  "current": {
+    "selected": 6,
+    "unclosed": 0,
+    "sum_model_roi": -0.6169083139683176,
+    "mean_model_roi": -0.10281805232805293
+  },
+  "shadow": {
+    "selected": 6,
+    "unclosed": 0,
+    "sum_model_roi": -0.6169083139683176,
+    "mean_model_roi": -0.10281805232805293
+  },
+  "current_only": 0,
+  "shadow_only": 0,
+  "delta_sum_model_roi": 0.0,
+  "skip_p1c_p3": {
+    "selected": 5,
+    "unclosed": 0,
+    "sum_model_roi": -0.7940265461901886,
+    "mean_model_roi": -0.15880530923803773,
+    "excluded_modules": [
+      "P1C",
+      "P3"
+    ],
+    "current_only": 1,
+    "shadow_only": 0,
+    "delta_sum_model_roi": -0.17711823222187106
+  },
+  "p1a_rvol1_retrace1": {
+    "selected": 6,
+    "unclosed": 0,
+    "sum_model_roi": -0.643629561420504,
+    "mean_model_roi": -0.10727159357008399,
+    "entry_filters": {
+      "p1a_max_rvol": 1.0,
+      "p1a_max_retrace": 1.0
+    },
+    "current_only": 1,
+    "shadow_only": 1,
+    "delta_sum_model_roi": -0.026721247452186403
+  },
+  "candidates": [
+    {
+      "ticker": "QQQ",
+      "date": "2026-11-10",
+      "module": "Phase1A_GapTrap_Single0DTE",
+      "m_entry": 5,
+      "direction": -1,
+      "score": 8.921431426746539,
+      "rvol_entry": 1.0785685732534616,
+      "expected_model_roi": 0.02837522683467143,
+      "training_trades_for_ticker_setup": 4,
+      "current": {
+        "slot": 2,
+        "m_exit": 24,
+        "roi": -0.2972976051754293,
+        "exit_reason": "stop_loss"
+      },
+      "shadow": {
+        "slot": 0,
+        "m_exit": 24,
+        "roi": -0.2972976051754293,
+        "exit_reason": "stop_loss"
+      },
+      "skip_p1c_p3": {
+        "slot": 2,
+        "m_exit": 24,
+        "roi": -0.2972976051754293,
+        "exit_reason": "stop_loss"
+      },
+      "p1a_rvol1_retrace1": null
+    },
+    {
+      "ticker": "COIN",
+      "date": "2026-11-10",
+      "module": "Phase1A_GapTrap_Single0DTE",
+      "m_entry": 5,
+      "direction": -1,
+      "score": 9.199874118541025,
+      "rvol_entry": 0.8001258814589752,
+      "expected_model_roi": 0.0017706559123759076,
+      "training_trades_for_ticker_setup": 4,
+      "current": {
+        "slot": 0,
+        "m_exit": 29,
+        "roi": -0.3354374918489975,
+        "exit_reason": "stop_loss"
+      },
+      "shadow": {
+        "slot": 2,
+        "m_exit": 29,
+        "roi": -0.3354374918489975,
+        "exit_reason": "stop_loss"
+      },
+      "skip_p1c_p3": {
+        "slot": 0,
+        "m_exit": 29,
+        "roi": -0.3354374918489975,
+        "exit_reason": "stop_loss"
+      },
+      "p1a_rvol1_retrace1": {
+        "slot": 0,
+        "m_exit": 29,
+        "roi": -0.3354374918489975,
+        "exit_reason": "stop_loss"
+      }
+    },
+    {
+      "ticker": "MSTR",
+      "date": "2026-11-10",
+      "module": "Phase1A_GapTrap_Single0DTE",
+      "m_entry": 5,
+      "direction": -1,
+      "score": 9.098201385849105,
+      "rvol_entry": 0.9017986141508958,
+      "expected_model_roi": 0.01086559388792233,
+      "training_trades_for_ticker_setup": 5,
+      "current": {
+        "slot": 1,
+        "m_exit": 26,
+        "roi": -0.2622618615908433,
+        "exit_reason": "stop_loss"
+      },
+      "shadow": {
+        "slot": 1,
+        "m_exit": 26,
+        "roi": -0.2622618615908433,
+        "exit_reason": "stop_loss"
+      },
+      "skip_p1c_p3": {
+        "slot": 1,
+        "m_exit": 26,
+        "roi": -0.2622618615908433,
+        "exit_reason": "stop_loss"
+      },
+      "p1a_rvol1_retrace1": {
+        "slot": 1,
+        "m_exit": 26,
+        "roi": -0.2622618615908433,
+        "exit_reason": "stop_loss"
+      }
+    },
+    {
+      "ticker": "SPY",
+      "date": "2026-11-10",
+      "module": "Phase1A_GapTrap_Single0DTE",
+      "m_entry": 14,
+      "direction": -1,
+      "score": 8.905290898514782,
+      "rvol_entry": 1.0947091014852177,
+      "expected_model_roi": 0.002751245946407444,
+      "training_trades_for_ticker_setup": 2,
+      "current": null,
+      "shadow": null,
+      "skip_p1c_p3": null,
+      "p1a_rvol1_retrace1": null
+    },
+    {
+      "ticker": "AMD",
+      "date": "2026-11-10",
+      "module": "Phase1C_BullTrap_PutDebitSpread",
+      "m_entry": 18,
+      "direction": -1,
+      "score": 16.12020166915548,
+      "rvol_entry": 1.1202016691554806,
+      "expected_model_roi": -0.03402807790172039,
+      "training_trades_for_ticker_setup": 1,
+      "current": null,
+      "shadow": null,
+      "skip_p1c_p3": null,
+      "p1a_rvol1_retrace1": {
+        "slot": 2,
+        "m_exit": 28,
+        "roi": -0.3240188526276157,
+        "exit_reason": "stop_loss"
+      }
+    },
+    {
+      "ticker": "IWM",
+      "date": "2026-11-10",
+      "module": "Phase1C_BullTrap_PutDebitSpread",
+      "m_entry": 54,
+      "direction": -1,
+      "score": 16.10120256094504,
+      "rvol_entry": 1.101202560945041,
+      "expected_model_roi": -0.05439279942777348,
+      "training_trades_for_ticker_setup": 2,
+      "current": {
+        "slot": 0,
+        "m_exit": 119,
+        "roi": 0.17711823222187112,
+        "exit_reason": "time_stop"
+      },
+      "shadow": {
+        "slot": 0,
+        "m_exit": 119,
+        "roi": 0.17711823222187112,
+        "exit_reason": "time_stop"
+      },
+      "skip_p1c_p3": null,
+      "p1a_rvol1_retrace1": {
+        "slot": 0,
+        "m_exit": 119,
+        "roi": 0.17711823222187112,
+        "exit_reason": "time_stop"
+      }
+    },
+    {
+      "ticker": "SPY",
+      "date": "2026-11-10",
+      "module": "Phase2_MiddayPin_CreditSpread",
+      "m_entry": 87,
+      "direction": 1,
+      "score": 6.752177568058066,
+      "rvol_entry": 1.752177568058066,
+      "expected_model_roi": 0.02876118885286448,
+      "training_trades_for_ticker_setup": 3,
+      "current": {
+        "slot": 1,
+        "m_exit": 167,
+        "roi": 0.03375196070729044,
+        "exit_reason": "time_stop"
+      },
+      "shadow": {
+        "slot": 1,
+        "m_exit": 167,
+        "roi": 0.03375196070729044,
+        "exit_reason": "time_stop"
+      },
+      "skip_p1c_p3": {
+        "slot": 0,
+        "m_exit": 167,
+        "roi": 0.03375196070729044,
+        "exit_reason": "time_stop"
+      },
+      "p1a_rvol1_retrace1": {
+        "slot": 1,
+        "m_exit": 167,
+        "roi": 0.03375196070729044,
+        "exit_reason": "time_stop"
+      }
+    },
+    {
+      "ticker": "IWM",
+      "date": "2026-11-10",
+      "module": "Phase2_MiddayPin_CreditSpread",
+      "m_entry": 87,
+      "direction": 1,
+      "score": 6.025556925433039,
+      "rvol_entry": 1.0255569254330381,
+      "expected_model_roi": 0.028037847559059612,
+      "training_trades_for_ticker_setup": 2,
+      "current": {
+        "slot": 2,
+        "m_exit": 167,
+        "roi": 0.06721845171779102,
+        "exit_reason": "time_stop"
+      },
+      "shadow": {
+        "slot": 2,
+        "m_exit": 167,
+        "roi": 0.06721845171779102,
+        "exit_reason": "time_stop"
+      },
+      "skip_p1c_p3": {
+        "slot": 1,
+        "m_exit": 167,
+        "roi": 0.06721845171779102,
+        "exit_reason": "time_stop"
+      },
+      "p1a_rvol1_retrace1": {
+        "slot": 2,
+        "m_exit": 167,
+        "roi": 0.06721845171779102,
+        "exit_reason": "time_stop"
+      }
+    },
+    {
+      "ticker": "NVDA",
+      "date": "2026-11-10",
+      "module": "Phase2_MiddayPin_CreditSpread",
+      "m_entry": 91,
+      "direction": 1,
+      "score": 7.810224034114378,
+      "rvol_entry": 2.810224034114378,
+      "expected_model_roi": 0.025212996461532296,
+      "training_trades_for_ticker_setup": 3,
+      "current": null,
+      "shadow": null,
+      "skip_p1c_p3": null,
+      "p1a_rvol1_retrace1": null
+    },
+    {
+      "ticker": "TSLA",
+      "date": "2026-11-10",
+      "module": "Phase1A_GapTrap_Single0DTE",
+      "m_entry": 26,
+      "direction": -1,
+      "score": 9.570030764225677,
+      "rvol_entry": 0.42996923577432306,
+      "expected_model_roi": -0.022439999122779317,
+      "training_trades_for_ticker_setup": 2,
+      "current": null,
+      "shadow": null,
+      "skip_p1c_p3": null,
+      "p1a_rvol1_retrace1": null
+    }
+  ],
+  "excluded_tickers": {}
+}
