@@ -15,7 +15,8 @@ SETUP_PRIOR_TRADES = 40
 TICKER_PRIOR_TRADES = 20
 
 
-def compare(date, day, tickers, baseline, ledger):
+def compare(date, day, tickers, baseline, ledger, *, capital=1500.0, slot_fraction=0.25,
+            ledger_dir=None, baseline_events=None):
     """Fit on prior sessions only, then compare five policies on the same final bars."""
     history = defaultdict(list)
     ticker_history = defaultdict(list)
@@ -42,10 +43,10 @@ def compare(date, day, tickers, baseline, ledger):
             )
 
     shadow, _ = run_session(date, day, tickers, engine_kwargs={'expected_returns': expected})
-    filtered, _ = run_session(date, day, tickers, engine_kwargs={'excluded_modules': {'P1C', 'P3'}})
+    filtered, filtered_events = run_session(date, day, tickers, engine_kwargs={'excluded_modules': {'P1C', 'P3'}})
     p1a_settings = {'p1a_max_rvol': 1.0, 'p1a_max_retrace': 1.0}
-    p1a, _ = run_session(date, day, tickers, engine_kwargs=p1a_settings)
-    combined, _ = run_session(date, day, tickers, engine_kwargs={
+    p1a, p1a_events = run_session(date, day, tickers, engine_kwargs=p1a_settings)
+    combined, combined_events = run_session(date, day, tickers, engine_kwargs={
         **p1a_settings, 'excluded_modules': {'P1C', 'P3'},
     })
 
@@ -105,7 +106,7 @@ def compare(date, day, tickers, baseline, ledger):
         }
         for row in candidate_rows.values()
     ]
-    return {
+    report = {
         'date': date,
         'method': 'prior_forward_ticker_setup_mean_shrunk_v1',
         'outcome_basis': 'final_bar_model_roi_before_fees',
@@ -154,6 +155,20 @@ def compare(date, day, tickers, baseline, ledger):
         },
         'candidates': candidates,
     }
+    try:
+        from . import shadow_costs
+        if baseline_events is None:
+            _, baseline_events = run_session(date, day, tickers)
+        report['execution_costs'] = shadow_costs.evaluate(
+            date, day, tickers,
+            {'current': baseline_events, 'skip_p1c_p3': filtered_events,
+             'p1a_rvol1_retrace1': p1a_events, 'combined_p1a_skip_p1c_p3': combined_events},
+            capital=capital, slot_fraction=slot_fraction, ledger_dir=ledger_dir,
+        )
+    except Exception as error:
+        report['execution_costs'] = {'status': 'error', 'date': date, 'error': str(error)}
+        print(f'shadow execution-cost report failed for {date}: {error!r}')
+    return report
 
 
 def save_report(ledger_dir, report):

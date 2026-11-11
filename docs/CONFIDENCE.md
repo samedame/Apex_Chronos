@@ -131,3 +131,46 @@ can admit trades that neither separate policy selected. The daily report records
 its selections alongside the current scheduler and both separate policies, plus
 mean and summed model ROI and the difference from the current scheduler.
 Live defaults and alert formatting are unaffected.
+
+## Execution costs, account sizing and drawdowns
+
+Each daily report adds an `execution_costs` block for the current scheduler,
+P1C/P3 exclusion, P1A-only and combined policy. The expected-return ranking retains
+its existing gross comparison. Each of the four account comparisons has eight
+scenarios, crossing additional slippage of $0.00/$0.01/$0.03/$0.05 per option share,
+per leg, per side with two sizing modes.
+
+* `fractional_equivalent` is an idealized model that targets the slot budget and
+  permits exact half exits.
+* `whole_even_contracts` requires an even number of at least two contracts, so the
+  original half-at-TP1 rule can be followed. Unfunded signals are counted as skipped.
+  They retain their paper scheduler slots and do not generate replacement trades.
+
+Starting capital uses `ACCOUNT_CAPITAL`, with a $1,500 fallback. Allocation uses
+`SLOT_FRACTION`, default 25%. Each entry targets that fraction of the prior minute's
+net liquidation equity, including entry costs and constrained by available cash.
+The report gives daily and cumulative PnL, fee estimates, additional slippage,
+funded/skipped counts, individual funded trades and drawdowns. Equity is marked
+each minute using modeled liquidation proceeds after estimated remaining closing
+costs. Intraminute drawdowns and actual broker marks can differ.
+
+The fee model is pinned as of November 10, 2026 for US retail stock/ETF options.
+It includes $0 commission, ORF/OCC, SEC sale fees, CAT and date-specific TAF,
+including the October-December 2026 pause. Fees on spread sales use model leg
+premiums as an estimate of sold principal. Rates and execution rounding can change.
+Slippage is an additional sensitivity beyond the existing modeled spread.
+The assumptions and source URL are embedded in each report.
+[Robinhood fee guidance](https://robinhood.com/us/en/support/articles/trading-fees-on-robinhood/)
+
+Account tracking starts a new cohort on the first cost report and when capital,
+allocation, universe or strategy/model source changes. The reset reason and cohort
+date are explicit. Compatible reports carry equity, high-water marks and drawdowns
+from the preceding full session. Same-day reruns ignore their own saved ending
+balance, and future reports are never used. Parent hashes detect changes to earlier
+reports. A gap, failed predecessor or inconsistent history produces an explicit
+cost error until the affected sessions are replayed, preserving the gross report.
+Cost failures do not modify Discord output or suppress the usual end-of-day work.
+
+These are modeled account overlays. Historical chains, expiration availability,
+broker approvals, actual fills and account restrictions are not verified. The
+existing live scheduler, sizing messages and confidence calibration are unchanged.

@@ -321,7 +321,7 @@ def run_eod(cfg: Settings, d: Optional[date] = None) -> int:
     if not days:
         alerts.post_discord(cfg.webhook, f'🔴 APEX-CHRONOS EOD {d}: no final bars available - cannot reconcile.', cfg.dry_run)
         return 1
-    eng, _ = run_session(d.isoformat(), days, cfg.tickers, mode='fast')
+    eng, final_events = run_session(d.isoformat(), days, cfg.tickers, mode='fast')
     trades = eng.trades
     sent = state.load_sent(cfg.state_dir, d)
     live_entries = {tuple(k.split('|')[2:5]) for k in sent if '|ENTRY|' in k}
@@ -360,7 +360,11 @@ def run_eod(cfg: Settings, d: Optional[date] = None) -> int:
     alerts.post_discord(cfg.webhook, '\n'.join(lines), cfg.dry_run)
     try:
         from . import shadow
-        report = shadow.compare(d.isoformat(), days, cfg.tickers, eng, rows)
+        report = shadow.compare(
+            d.isoformat(), days, cfg.tickers, eng, rows,
+            capital=cfg.capital if cfg.capital is not None else 1500.0,
+            slot_fraction=cfg.slot_fraction, ledger_dir=cfg.ledger_dir, baseline_events=final_events,
+        )
         report['excluded_tickers'] = excluded
         shadow.save_report(cfg.ledger_dir, report)
     except Exception as e:
