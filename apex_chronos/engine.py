@@ -56,7 +56,9 @@ class SessionEngine:
     def __init__(self, date: str, tickers: List[str], n_bars=C.SESSION_BARS,
                  n_slots: int = C.N_SLOTS, phase_limits: Optional[Dict[str, int]] = None,
                  expected_returns: Optional[Dict[tuple[str, str], float]] = None,
-                 excluded_modules: Optional[Set[str]] = None):
+                 excluded_modules: Optional[Set[str]] = None,
+                 p1a_max_rvol: Optional[float] = None,
+                 p1a_max_retrace: Optional[float] = None):
         self.date = date
         self.tickers = list(tickers)
         # n_bars: int for every ticker, or {ticker: bars} (the original uses each ticker-day's own row count)
@@ -66,6 +68,8 @@ class SessionEngine:
         self.phase_limits = dict(phase_limits or C.PHASE_LIMITS)
         self.expected_returns = expected_returns
         self.excluded_modules = set(excluded_modules or ())
+        self.p1a_max_rvol = C.P1A_MAX_RVOL if p1a_max_rvol is None else p1a_max_rvol
+        self.p1a_max_retrace = C.P1A_MAX_RETRACE if p1a_max_retrace is None else p1a_max_retrace
         self.dets: Dict[str, list] = {}
         self.pending: Dict[int, List[tuple]] = {}   # entry minute -> [(ticker, module_key, direction)]
         self.slot_free = [-1] * n_slots             # minute from which each slot may be re-used
@@ -174,7 +178,7 @@ class SessionEngine:
         rvol = float(f.rvol_cum[m])
         if key == 'P1A':
             retrace = abs(f.C[m] - f.O[0]) / max(abs(f.O[0] - f.prev_c), 1e-4)
-            if not (m <= C.P1A_MAX_MINUTE and retrace < C.P1A_MAX_RETRACE and f.rvol_cum[m] <= C.P1A_MAX_RVOL):
+            if not (m <= C.P1A_MAX_MINUTE and retrace < self.p1a_max_retrace and f.rvol_cum[m] <= self.p1a_max_rvol):
                 return None
         elif key == 'P1B':
             m5 = min(self._nb[tkr] - 20, m + (4 - (m % 5)))
