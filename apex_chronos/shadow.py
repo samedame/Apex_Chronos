@@ -16,7 +16,7 @@ TICKER_PRIOR_TRADES = 20
 
 
 def compare(date, day, tickers, baseline, ledger):
-    """Fit on prior sessions only, then compare three policies on the same final bars."""
+    """Fit on prior sessions only, then compare four policies on the same final bars."""
     history = defaultdict(list)
     ticker_history = defaultdict(list)
     for row in ledger:
@@ -43,6 +43,8 @@ def compare(date, day, tickers, baseline, ledger):
 
     shadow, _ = run_session(date, day, tickers, engine_kwargs={'expected_returns': expected})
     filtered, _ = run_session(date, day, tickers, engine_kwargs={'excluded_modules': {'P1C', 'P3'}})
+    p1a_settings = {'p1a_max_rvol': 1.0, 'p1a_max_retrace': 1.0}
+    p1a, _ = run_session(date, day, tickers, engine_kwargs=p1a_settings)
 
     def key(row):
         return row['ticker'], row['module'], row['m_entry']
@@ -72,11 +74,18 @@ def compare(date, day, tickers, baseline, ledger):
 
     current, alternative = outcomes(baseline), outcomes(shadow)
     filtered_outcomes = outcomes(filtered)
+    p1a_outcomes = outcomes(p1a)
     current_summary, shadow_summary = summary(current), summary(alternative)
     filtered_summary = summary(filtered_outcomes)
+    p1a_summary = summary(p1a_outcomes)
     current_entries = current[0].keys() | current[1].keys()
     shadow_entries = alternative[0].keys() | alternative[1].keys()
     filtered_entries = filtered_outcomes[0].keys() | filtered_outcomes[1].keys()
+    p1a_entries = p1a_outcomes[0].keys() | p1a_outcomes[1].keys()
+    # Relaxing the retrace limit can introduce candidates absent from the baseline.
+    candidate_rows = {key(row): row for row in baseline.candidate_log}
+    for row in p1a.candidate_log:
+        candidate_rows.setdefault(key(row), row)
     candidates = [
         {
             **row,
@@ -85,8 +94,9 @@ def compare(date, day, tickers, baseline, ledger):
             'current': decision(current, key(row)),
             'shadow': decision(alternative, key(row)),
             'skip_p1c_p3': decision(filtered_outcomes, key(row)),
+            'p1a_rvol1_retrace1': decision(p1a_outcomes, key(row)),
         }
-        for row in baseline.candidate_log
+        for row in candidate_rows.values()
     ]
     return {
         'date': date,
@@ -112,6 +122,16 @@ def compare(date, day, tickers, baseline, ledger):
             'delta_sum_model_roi': (
                 None if current_summary['unclosed'] or filtered_summary['unclosed']
                 else filtered_summary['sum_model_roi'] - current_summary['sum_model_roi']
+            ),
+        },
+        'p1a_rvol1_retrace1': {
+            **p1a_summary,
+            'entry_filters': p1a_settings,
+            'current_only': len(current_entries - p1a_entries),
+            'shadow_only': len(p1a_entries - current_entries),
+            'delta_sum_model_roi': (
+                None if current_summary['unclosed'] or p1a_summary['unclosed']
+                else p1a_summary['sum_model_roi'] - current_summary['sum_model_roi']
             ),
         },
         'candidates': candidates,
