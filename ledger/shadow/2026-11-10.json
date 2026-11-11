@@ -53,6 +53,23 @@
     "shadow_only": 1,
     "delta_sum_model_roi": -0.026721247452186403
   },
+  "combined_p1a_skip_p1c_p3": {
+    "selected": 5,
+    "unclosed": 0,
+    "sum_model_roi": -0.4108365552386808,
+    "mean_model_roi": -0.08216731104773616,
+    "entry_filters": {
+      "p1a_max_rvol": 1.0,
+      "p1a_max_retrace": 1.0
+    },
+    "excluded_modules": [
+      "P1C",
+      "P3"
+    ],
+    "current_only": 2,
+    "shadow_only": 1,
+    "delta_sum_model_roi": 0.2060717587296368
+  },
   "candidates": [
     {
       "ticker": "QQQ",
@@ -82,7 +99,8 @@
         "roi": -0.2972976051754293,
         "exit_reason": "stop_loss"
       },
-      "p1a_rvol1_retrace1": null
+      "p1a_rvol1_retrace1": null,
+      "combined_p1a_skip_p1c_p3": null
     },
     {
       "ticker": "COIN",
@@ -113,6 +131,12 @@
         "exit_reason": "stop_loss"
       },
       "p1a_rvol1_retrace1": {
+        "slot": 0,
+        "m_exit": 29,
+        "roi": -0.3354374918489975,
+        "exit_reason": "stop_loss"
+      },
+      "combined_p1a_skip_p1c_p3": {
         "slot": 0,
         "m_exit": 29,
         "roi": -0.3354374918489975,
@@ -152,6 +176,12 @@
         "m_exit": 26,
         "roi": -0.2622618615908433,
         "exit_reason": "stop_loss"
+      },
+      "combined_p1a_skip_p1c_p3": {
+        "slot": 1,
+        "m_exit": 26,
+        "roi": -0.2622618615908433,
+        "exit_reason": "stop_loss"
       }
     },
     {
@@ -167,7 +197,8 @@
       "current": null,
       "shadow": null,
       "skip_p1c_p3": null,
-      "p1a_rvol1_retrace1": null
+      "p1a_rvol1_retrace1": null,
+      "combined_p1a_skip_p1c_p3": null
     },
     {
       "ticker": "AMD",
@@ -187,7 +218,8 @@
         "m_exit": 28,
         "roi": -0.3240188526276157,
         "exit_reason": "stop_loss"
-      }
+      },
+      "combined_p1a_skip_p1c_p3": null
     },
     {
       "ticker": "IWM",
@@ -217,7 +249,8 @@
         "m_exit": 119,
         "roi": 0.17711823222187112,
         "exit_reason": "time_stop"
-      }
+      },
+      "combined_p1a_skip_p1c_p3": null
     },
     {
       "ticker": "SPY",
@@ -249,6 +282,12 @@
       },
       "p1a_rvol1_retrace1": {
         "slot": 1,
+        "m_exit": 167,
+        "roi": 0.03375196070729044,
+        "exit_reason": "time_stop"
+      },
+      "combined_p1a_skip_p1c_p3": {
+        "slot": 0,
         "m_exit": 167,
         "roi": 0.03375196070729044,
         "exit_reason": "time_stop"
@@ -287,6 +326,12 @@
         "m_exit": 167,
         "roi": 0.06721845171779102,
         "exit_reason": "time_stop"
+      },
+      "combined_p1a_skip_p1c_p3": {
+        "slot": 1,
+        "m_exit": 167,
+        "roi": 0.06721845171779102,
+        "exit_reason": "time_stop"
       }
     },
     {
@@ -302,7 +347,8 @@
       "current": null,
       "shadow": null,
       "skip_p1c_p3": null,
-      "p1a_rvol1_retrace1": null
+      "p1a_rvol1_retrace1": null,
+      "combined_p1a_skip_p1c_p3": null
     },
     {
       "ticker": "TSLA",
@@ -317,7 +363,13 @@
       "current": null,
       "shadow": null,
       "skip_p1c_p3": null,
-      "p1a_rvol1_retrace1": null
+      "p1a_rvol1_retrace1": null,
+      "combined_p1a_skip_p1c_p3": {
+        "slot": 2,
+        "m_exit": 76,
+        "roi": 0.08589238577607858,
+        "exit_reason": "time_stop"
+      }
     }
   ],
   "excluded_tickers": {}
