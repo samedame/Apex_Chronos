@@ -9,11 +9,40 @@ on:
       - "ledger/**"
   pull_request:
   workflow_dispatch:
+    inputs:
+      probe_quotes:
+        description: "Run a read-only encrypted Tradier quote connection probe"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 jobs:
+  quote-probe:
+    if: github.event_name == 'workflow_dispatch' && inputs.probe_quotes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-quotes.txt
+      - run: pip install -r requirements-quotes.txt
+      - name: Read option quotes without orders or alerts
+        env:
+          TRADIER_API_KEY: ${{ secrets.TRADIER_API_KEY }}
+          CHRONOS_QUOTE_ARCHIVE_KEY: ${{ secrets.CHRONOS_QUOTE_ARCHIVE_KEY }}
+        run: python -m verification.quote_provider_probe
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: encrypted-quote-connection-probe
+          path: |
+            state/quote_probe_archive/
+            quote-probe-summary.json
   tests:
     runs-on: ubuntu-latest
     timeout-minutes: 30
