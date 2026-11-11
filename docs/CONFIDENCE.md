@@ -136,15 +136,30 @@ Live defaults and alert formatting are unaffected.
 
 Each daily report adds an `execution_costs` block for the current scheduler,
 P1C/P3 exclusion, P1A-only and combined policy. The expected-return ranking retains
-its existing gross comparison. Each of the four account comparisons has eight
+its existing gross comparison. Each of the four account comparisons has sixteen
 scenarios, crossing additional slippage of $0.00/$0.01/$0.03/$0.05 per option share,
-per leg, per side with two sizing modes.
+per leg, per side with four sizing modes (64 accounts total).
 
 * `fractional_equivalent` is an idealized model that targets the slot budget and
   permits exact half exits.
 * `whole_even_contracts` requires an even number of at least two contracts, so the
   original half-at-TP1 rule can be followed. Unfunded signals are counted as skipped.
   They retain their paper scheduler slots and do not generate replacement trades.
+* `whole_contracts_keep_runner` allows any affordable integer quantity, minimum
+  one. At the first profit target (TP1), it sells floor(quantity / 2) and keeps the
+  rest for the existing trailing or time exit. A single contract stays open through
+  TP1. The remaining contracts earn the unblended runner return, rather than the
+  original paper trade's equal-half average.
+* `whole_contracts_sell_odd_at_tp1` uses the same integer entry sizing but sells
+  ceil(quantity / 2) at TP1. A single contract closes entirely at TP1. The account
+  records its actual exit minute and retains the original paper exit and ROI for
+  comparison. No extra fee or sale is recorded when the later paper exit arrives.
+
+One-contract modes can buy more than one contract when the budget permits. For
+spreads, the quantity refers to complete spreads and costs include every leg.
+An early account exit keeps its original paper scheduler slot occupied until the
+paper exit; cash released earlier can affect the size of later selected entries.
+Neither funding skips nor early account exits create replacement signals.
 
 Starting capital uses `ACCOUNT_CAPITAL`, with a $1,500 fallback. Allocation uses
 `SLOT_FRACTION`, default 25%. Each entry targets that fraction of the prior minute's
@@ -153,6 +168,14 @@ The report gives daily and cumulative PnL, fee estimates, additional slippage,
 funded/skipped counts, individual funded trades and drawdowns. Equity is marked
 each minute using modeled liquidation proceeds after estimated remaining closing
 costs. Intraminute drawdowns and actual broker marks can differ.
+
+`execution_costs.contract_sizing_comparison[policy][slippage]` summarizes the three
+whole-contract modes side by side, including daily/cumulative PnL, fees, slippage,
+drawdowns and funding counts. `differences_vs_two_contracts` gives the one-contract
+variants minus `whole_even_contracts`. Positive PnL differences mean more profit;
+positive drawdown differences mean a larger drawdown. The detailed account and
+trade records remain in `execution_costs.policies`. `sizing_rules` describes each
+mode, and single-contract/odd-lot entry counts make changes in exposure visible.
 
 The fee model is pinned as of November 10, 2026 for US retail stock/ETF options.
 It includes $0 commission, ORF/OCC, SEC sale fees, CAT and date-specific TAF,
@@ -170,6 +193,13 @@ balance, and future reports are never used. Parent hashes detect changes to earl
 reports. A gap, failed predecessor or inconsistent history produces an explicit
 cost error until the affected sessions are replayed, preserving the gross report.
 Cost failures do not modify Discord output or suppress the usual end-of-day work.
+
+The sizing comparison uses schema version 2 / `robinhood_shadow_accounts_v2`.
+Upgrading a saved v1 report starts all 64 accounts together at the configured
+capital on the first v2 session, with `reset_reason: settings_changed`; v1 ending
+balances are not mixed with newly introduced accounts. Earlier files remain
+saved. Later compatible v2 sessions compound normally. Historical one-versus-two
+reconstructions are separate analyses, not the starting balances of this cohort.
 
 These are modeled account overlays. Historical chains, expiration availability,
 broker approvals, actual fills and account restrictions are not verified. The

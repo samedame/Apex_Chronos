@@ -40,7 +40,8 @@ def test_partial_exits_reconcile_and_drawdown_state_carries_between_days(sizing)
     qty = account.open[key]['quantity']
     account.process([event('TP1', 1, {'m_entry': 0})], meta, 1)
     assert account.open[key]['remaining'] == pytest.approx(qty / 2)
-    account.process([event('EXIT', 2, {'trade': {'m_entry': 0, 'roi': 0.3}})], meta, 2)
+    account.process([event('EXIT', 2, {'trade': {'m_entry': 0, 'm_exit': 2,
+                                              'exit_reason': 'profit_trail', 'roi': 0.3}})], meta, 2)
     first = account.summary()
     assert first['gross_pnl'] == pytest.approx(qty * 150 * 0.3)
     assert first['additional_slippage_dollars'] == pytest.approx(2 * qty)
@@ -56,6 +57,8 @@ def test_partial_exits_reconcile_and_drawdown_state_carries_between_days(sizing)
     assert carried['equity_peak'] == first['equity_peak']
     assert carried['max_minute_close_drawdown'] == first['max_minute_close_drawdown']
     assert carried['day_max_minute_close_drawdown'] == 0
+    assert carried['cumulative_account_trades'] == carried['cumulative_paper_trades'] == 1
+    assert carried['cumulative_skipped_for_funding'] == 0
     if sizing == 'whole_even_contracts':
         assert qty == 2
 
@@ -97,9 +100,34 @@ def test_report_history_is_idempotent_causal_and_has_all_scenarios(days, tmp_pat
     assert second['cohort_start'] == '2026-09-16' and second['reset_reason'] is None
     assert set(second['policies']) == set(costs.POLICIES)
     for scenarios in second['policies'].values():
-        assert len(scenarios) == 8
+        assert len(scenarios) == 16
         assert all(result['net_pnl'] == 0 and result['ending_equity'] == 1500 for result in scenarios.values())
     json.dumps(second, allow_nan=False)
+    for policy in costs.POLICIES:
+        for slip in costs.SLIPPAGE:
+            comparison = second['contract_sizing_comparison'][policy][f'{slip:.2f}']
+            assert set(comparison['accounts']) == {'whole_even_contracts', *costs.ONE_CONTRACT_SIZING}
+            assert all(value == 0 for delta in comparison['differences_vs_two_contracts'].values()
+                       for value in delta.values())
+
+
+def test_v1_accounts_start_a_common_explicit_v2_cohort(days, tmp_path):
+    legacy = empty_report(days, '2026-09-16', tmp_path)
+    legacy['schema_version'] = 1
+    legacy['settings']['model_version'] = 'robinhood_shadow_accounts_v1'
+    legacy['settings']['sizing_modes'] = ['fractional_equivalent', 'whole_even_contracts']
+    for policy in legacy['policies']:
+        legacy['policies'][policy] = {key: value for key, value in legacy['policies'][policy].items()
+                                     if value['sizing'] in legacy['settings']['sizing_modes']}
+    save(tmp_path, legacy)
+    original_bytes = (tmp_path / 'shadow/2026-09-16.json').read_bytes()
+    current = empty_report(days, '2026-09-17', tmp_path)
+    assert current['schema_version'] == 2
+    assert current['reset_reason'] == 'settings_changed'
+    assert current['cohort_start'] == '2026-09-17' and current['parent'] is None
+    assert all(a['starting_equity'] == a['ending_equity'] == 1500
+               for cases in current['policies'].values() for a in cases.values())
+    assert (tmp_path / 'shadow/2026-09-16.json').read_bytes() == original_bytes
 
 
 def test_missing_day_or_changed_ancestor_cannot_silently_compound(days, tmp_path):
@@ -166,6 +194,20 @@ def test_daily_cost_report_has_correct_policy_counts_and_preserves_eod_alerts(da
             assert scenario['account_trades'] == len(scenario['trades'])
             if scenario['sizing'] == 'whole_even_contracts':
                 assert all(trade['contracts'] >= 2 and trade['contracts'] % 2 == 0 for trade in scenario['trades'])
+            if scenario['sizing'] in costs.ONE_CONTRACT_SIZING:
+                for trade in scenario['trades']:
+                    assert trade['contracts'] >= 1 and int(trade['contracts']) == trade['contracts']
+                    assert trade['tp1_contracts'] + trade['runner_contracts'] == trade['contracts']
+                    assert trade['tp1_contracts'] == int(trade['tp1_contracts'])
+                    assert trade['runner_contracts'] == int(trade['runner_contracts'])
+        for slip, comparison in execution['contract_sizing_comparison'][policy].items():
+            for sizing, account in comparison['accounts'].items():
+                expected = scenarios[f'{sizing}|{slip}']
+                assert account == {field: expected[field] for field in account}
+            baseline = scenarios[f'whole_even_contracts|{slip}']
+            for sizing, delta in comparison['differences_vs_two_contracts'].items():
+                actual = scenarios[f'{sizing}|{slip}']
+                assert all(value == actual[field] - baseline[field] for field, value in delta.items())
 
     def fail(*args, **kwargs):
         raise ValueError('cost failure')
@@ -177,3 +219,84 @@ def test_daily_cost_report_has_correct_policy_counts_and_preserves_eod_alerts(da
     assert failed['execution_costs']['error'] == 'cost failure'
     assert failed['current'] == report['current']
     assert posts[0] == posts[1]
+
+
+def sized_metadata(basis):
+    return {'basis': basis, 'tp': 0.5, 'legs': 1, 'entry_sell': 0.0,
+            'unit_value': np.array([basis, basis * 1.1, basis * 1.1]),
+            'exit_sell': np.array([basis, basis * 1.1, basis * 1.1]) * 100}
+
+
+def closed_event(minute=2):
+    return event('EXIT', minute, {'trade': {'m_entry': 0, 'm_exit': minute,
+                                          'hold_mins': minute, 'roi': 0.3,
+                                          'exit_reason': 'profit_trail'}})
+
+
+@pytest.mark.parametrize('sizing,basis,gross,tp_qty,runner_qty', [
+    ('whole_contracts_keep_runner', 3, 30, 0, 1),
+    ('whole_contracts_sell_odd_at_tp1', 3, 150, 1, 0),
+    ('whole_contracts_keep_runner', 1, 70, 1, 2),
+    ('whole_contracts_sell_odd_at_tp1', 1, 110, 2, 1),
+])
+def test_odd_quantities_use_integer_tp1_and_unblended_runner_returns(sizing, basis, gross, tp_qty, runner_qty):
+    a = costs.Account('test', sizing, 0.01, date(2026, 11, 10))
+    key = ('X', 'test', 0)
+    meta = {key: sized_metadata(basis)}
+    a.process([event('ENTRY', 0, {})], meta, 0)
+    qty = a.open[key]['quantity']
+    a.process([event('TP1', 1, {'m_entry': 0})], meta, 1)
+    assert a.open[key]['remaining'] == runner_qty
+    a.process([closed_event()], meta, 2)
+    result = a.summary()
+    trade = result['trades'][0]
+    assert a.gross_pnl == pytest.approx(gross)
+    assert a.slippage_paid == pytest.approx(2 * qty)
+    assert result['net_pnl'] == pytest.approx(gross - a.fees - 2 * qty)
+    assert trade['tp1_contracts'] == tp_qty and trade['runner_contracts'] == runner_qty
+    assert trade['roi'] == pytest.approx(gross / (qty * basis * 100))
+    assert trade['paper_model_roi'] == 0.3
+    assert trade['m_exit'] == (1 if not runner_qty else 2)
+    assert trade['paper_m_exit'] == 2
+    assert result['single_contract_entries'] == int(qty == 1)
+    # Model prices may be NumPy scalars; reports must remain portable JSON.
+    json.dumps(result, allow_nan=False)
+
+
+def test_single_contract_same_bar_tp1_exit_is_not_charged_twice():
+    a = costs.Account('test', 'whole_contracts_sell_odd_at_tp1', 0.01, date(2026, 11, 10))
+    key = ('X', 'test', 0)
+    meta = {key: sized_metadata(3)}
+    a.process([event('ENTRY', 0, {})], meta, 0)
+    a.process([event('TP1', 1, {'m_entry': 0}), closed_event(1)], meta, 1)
+    result = a.summary()
+    assert result['gross_pnl'] == pytest.approx(150)
+    assert result['robinhood_fees_estimated'] == pytest.approx(0.09)
+    assert result['additional_slippage_dollars'] == 2
+    assert result['net_pnl'] == pytest.approx(147.91)
+    assert result['trades'][0]['exit_reason'] == 'all_at_tp1'
+
+
+@pytest.mark.parametrize('sizing', costs.ONE_CONTRACT_SIZING)
+def test_one_contract_funding_includes_all_opening_costs_and_unsplit_exit(sizing):
+    key = ('X', 'test', 0)
+    a = costs.Account('test', sizing, 0.01, date(2026, 11, 10))
+    a.process([event('ENTRY', 0, {})], {key: sized_metadata(3.75)}, 0)
+    assert not a.open and a.summary()['skipped_for_funding'] == 1
+    meta = {key: sized_metadata(3)}
+    a.process([event('ENTRY', 0, {})], meta, 0)
+    assert a.open[key]['quantity'] == 1
+    a.process([closed_event()], meta, 2)
+    result = a.summary()
+    assert result['gross_pnl'] == pytest.approx(90)
+    assert result['net_pnl'] == pytest.approx(87.91)
+    assert result['trades'][0]['tp1_contracts'] == 0
+
+
+def test_keeping_single_runner_marks_actual_remaining_quantity_and_close_costs():
+    a = costs.Account('test', 'whole_contracts_keep_runner', 0.01, date(2026, 11, 10))
+    key = ('X', 'test', 0)
+    meta = {key: sized_metadata(3)}
+    a.process([event('ENTRY', 0, {})], meta, 0)
+    a.process([event('TP1', 1, {'m_entry': 0})], meta, 1)
+    assert a.last_equity == pytest.approx(1500 - 301.04 + 330 - 1.05)
