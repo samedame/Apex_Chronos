@@ -57,6 +57,7 @@ and run it as a shadow forward test first.
 Strategy reference: [`docs/STRATEGY.md`](docs/STRATEGY.md).
 Entry-alert confidence score (what the 1-100 number means, and what it does not): [`docs/CONFIDENCE.md`](docs/CONFIDENCE.md).
 Independent $1,500 cash-only listed-options experiment: [`docs/CASH_SHADOW.md`](docs/CASH_SHADOW.md).
+Tradier quote capture and prospective paper-trial controls (initially observation-only): [`docs/QUOTE_TRIAL.md`](docs/QUOTE_TRIAL.md).
 
 ## Layout
 

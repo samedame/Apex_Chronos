@@ -1,0 +1,48 @@
+name: quote-paper-trial
+
+# Independent paper-only process. Never receives Discord credentials.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "20 13 * * 1-5"
+    - cron: "20 14 * * 1-5"
+
+concurrency:
+  group: quote-paper-trial
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  quotes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 160
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-quotes.txt
+      - run: pip install -r requirements-quotes.txt
+      - name: Capture quotes and evaluate frozen paper accounts
+        env:
+          TRADIER_API_KEY: ${{ secrets.TRADIER_API_KEY }}
+          APCA_API_KEY_ID: ${{ secrets.APCA_API_KEY_ID }}
+          APCA_API_SECRET_KEY: ${{ secrets.APCA_API_SECRET_KEY }}
+          CHRONOS_QUOTE_ARCHIVE_KEY: ${{ secrets.CHRONOS_QUOTE_ARCHIVE_KEY }}
+          APEX_GIT_PUSH: "1"
+          PYTHONUNBUFFERED: "1"
+        run: python -m apex_chronos.quote_collector collect
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: encrypted-quote-trial-checkpoint
+          path: |
+            state/quote_trial_archive/
+            state/quote_observation_archive/
+            ledger/quote_trials/
+            ledger/quote_observations/

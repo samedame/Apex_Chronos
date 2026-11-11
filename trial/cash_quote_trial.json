@@ -1,0 +1,139 @@
+{
+  "arms": {
+    "candidate": {
+      "p1a_max_retrace": 1.0,
+      "p1a_max_rvol": 1.0
+    },
+    "original_p1a_control": {
+      "p1a_max_retrace": 0.75,
+      "p1a_max_rvol": 1.25
+    }
+  },
+  "automatic_live_promotion": false,
+  "benchmark_cash_daily_return": 0.0,
+  "capital": 1500.0,
+  "daily_entry_limit": 4,
+  "entry_quote_timeout_seconds": 60,
+  "even_lots": true,
+  "feed": "opra",
+  "floor_fraction": 0.6,
+  "frozen_at": "2026-11-11T22:06:12.982755+00:00",
+  "hold_minutes": 50,
+  "inference": {
+    "block_sessions": 5,
+    "comparisons": [
+      "candidate_vs_cash",
+      "candidate_vs_original_p1a_control"
+    ],
+    "confidence_level": 0.9916666666666667,
+    "method": "basic",
+    "resamples": 9999,
+    "seed": 731062
+  },
+  "management": "minute_close_quote_decisions",
+  "max_spread_fraction": 0.2,
+  "min_quote_poll_coverage": 0.95,
+  "minimum_contracts": 2,
+  "not_before_session": "2026-11-12",
+  "operating_mode": "observation_only",
+  "poll_seconds": 5,
+  "primary_scenario": "slip_0.01",
+  "proposed_risk": {
+    "max_daily_loss": 75.0,
+    "max_drawdown": 150.0,
+    "max_trade_risk": 30.0
+  },
+  "provider": "tradier_realtime",
+  "quote_max_age_seconds": 15,
+  "required_closed_trades": 100,
+  "required_sessions": 60,
+  "review_session_counts": [
+    60,
+    90,
+    120
+  ],
+  "risk": {
+    "approved": false,
+    "max_daily_loss": null,
+    "max_drawdown": null,
+    "max_trade_risk": null
+  },
+  "scenarios": {
+    "delay_120s": {
+      "entry_delay_seconds": 120,
+      "extra_slippage": 0.01,
+      "miss_first_entry": false
+    },
+    "delay_60s": {
+      "entry_delay_seconds": 60,
+      "extra_slippage": 0.01,
+      "miss_first_entry": false
+    },
+    "miss_first_entry": {
+      "entry_delay_seconds": 0,
+      "extra_slippage": 0.01,
+      "miss_first_entry": true
+    },
+    "slip_0.00": {
+      "entry_delay_seconds": 0,
+      "extra_slippage": 0,
+      "miss_first_entry": false
+    },
+    "slip_0.01": {
+      "entry_delay_seconds": 0,
+      "extra_slippage": 0.01,
+      "miss_first_entry": false
+    },
+    "slip_0.03": {
+      "entry_delay_seconds": 0,
+      "extra_slippage": 0.03,
+      "miss_first_entry": false
+    },
+    "slip_0.05": {
+      "entry_delay_seconds": 0,
+      "extra_slippage": 0.05,
+      "miss_first_entry": false
+    }
+  },
+  "schema_version": 1,
+  "session_maximum_minutes": 120,
+  "session_minimum_minutes": 90,
+  "signal_max_lag_seconds": 30,
+  "size_units_confirmed": false,
+  "slot_fraction": 0.25,
+  "slots": 3,
+  "source_sha256": {
+    "calendar_nyse.py": "74694016ee119e947cd9a18a12f2dd02573ed982a00012ba31c086e8cfa604e2",
+    "cash_catalog.py": "cf1cf5bdcf486e207b04a500aab3e9212d61200301c578f51c27a538dcb9e61e",
+    "cash_shadow.py": "c536e5f41749e6bd123327da30107744801284720645d2ba7ff365c5949a9097",
+    "config.py": "a65f3fa1398be4ba4a182633e55c1c27c09ebb463c9addd6ba15e9d2f1894e43",
+    "engine.py": "5d8ab8a403654fa547e70faac3f11074e8a1641f860e753dd27add91cb485511",
+    "features.py": "659149b7162693312fd6ea2318f290b199a994f408b1e0d94842afcc08a191c8",
+    "option_quotes.py": "6c92cbe144f36ed17499aa4fa0b0e81a4bf099f4c49fff2e454a1dd0efbeccb2",
+    "pricing.py": "8f76dd0a369846937fc857c39f45ae4aa74452de1fadefc1cbd9ed3b65f5a7d5",
+    "quote_collector.py": "fbbf9ab46f56c27b51c00e02d61b4f2e7ef00f2b8d1c10b56c651e06773a5828",
+    "quote_trial.py": "05b8c6af252bf8d690a70daa3d76d54a8528c5a41b32fba2682d85e68f37d8be",
+    "requirements-quotes.txt": "25190692b2ad995d5aff06f5a83e1ef6ab8ea62188cb066b850dfb91d785e170",
+    "requirements.txt": "31a7b99f4b5f18864d53e97008abdecdb9abc25b34357ed2779210f117cf0902",
+    "signals.py": "736d76967614cb27cfcb0a9b7a2a1e4bd43d37aff6752478cb5e424ca7c0939c",
+    "trial_engine.py": "e9bacc4b87f0ce8c3dee979159f4cde1fe37ea5d406aec18393f31c24589775c"
+  },
+  "stop_fraction": 0.26,
+  "tickers": [
+    "SPY",
+    "QQQ",
+    "IWM",
+    "NVDA",
+    "TSLA",
+    "META",
+    "AMD",
+    "AAPL",
+    "MSFT",
+    "AMZN",
+    "COIN",
+    "MSTR"
+  ],
+  "tp1_fraction": 0.9,
+  "trail_fraction": 0.72,
+  "trial_id": "cash_quotes_p1a_v1"
+}

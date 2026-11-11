@@ -90,3 +90,38 @@ def test_archive_without_key_or_with_naive_time_is_rejected(tmp_path):
         oq.archive_batch(tmp_path, '2026-11-11', 'x', [{'observed_at': NOW.isoformat()}], '')
     with pytest.raises(ValueError, match='timezone'):
         quote(market_at='2026-11-11T14:36:00')
+
+
+def test_tradier_reads_both_side_times_and_keeps_unknown_size_units_unqualified():
+    class Response:
+        status_code = 200
+        def json(self):
+            return {'quotes': {'quote': {'symbol': SYMBOL, 'type': 'option', 'contract_size': 100,
+                    'bid': .99, 'ask': 1., 'bidsize': 20, 'asksize': 30,
+                    'bid_date': int((NOW-timedelta(seconds=4)).timestamp()*1000),
+                    'ask_date': int(NOW.timestamp()*1000), 'bidexch': 'C', 'askexch': 'C'}}}
+    class HTTP:
+        def get(self, url, **kwargs):
+            assert url == oq.TRADIER_URL and 'sandbox' not in url
+            assert kwargs['headers']['Authorization'] == 'Bearer test-only-token'
+            assert kwargs['params']['includeLotSize'] == 'true'
+            assert kwargs['allow_redirects'] is False
+            return Response()
+    provider = oq.TradierOPRA('test-only-token', http=HTTP(), clock=lambda: NOW)
+    q = provider.latest([SYMBOL])[0]
+    assert q.provider == 'tradier_realtime' and q.condition == 'not_supplied'
+    assert q.bid_market_at != q.ask_market_at
+    assert q.rejection(NOW) == 'unverified_size_units'
+    provider.sizes_confirmed = True
+    q = provider.latest([SYMBOL])[0]
+    assert q.rejection(NOW) is None
+    assert q.rejection(NOW + timedelta(seconds=12)) == 'stale_quote'  # Older bid side governs.
+
+
+def test_ask_side_update_cannot_replenish_bid_side_capacity():
+    q = quote(bid_market_at=NOW.isoformat(), ask_market_at=NOW.isoformat())
+    updated = replace(q, ask=1.01, ask_market_at=(NOW+timedelta(seconds=1)).isoformat(),
+                      observed_at=(NOW+timedelta(seconds=1)).isoformat())
+    assert q.identity != updated.identity
+    assert q.side_identity('sell') == updated.side_identity('sell')
+    assert q.side_identity('buy') != updated.side_identity('buy')

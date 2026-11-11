@@ -10,7 +10,7 @@ from .cash_shadow import fees, next_settlement_day
 
 
 class PaperAccount:
-    def __init__(self, spec, session, arm, scenario, prior=None):
+    def __init__(self, spec, session, arm, scenario, prior=None, *, funding_enabled=True):
         self.spec, self.session, self.arm, self.scenario = spec, date.fromisoformat(session), arm, scenario
         self.prior = prior or {}
         self.capital = spec['capital']
@@ -34,6 +34,7 @@ class PaperAccount:
         self.quote_gaps = 0
         self.first_missed = False
         self.used_tickers = set()
+        self.funding_enabled = funding_enabled
 
     @property
     def cash(self):
@@ -60,7 +61,8 @@ class PaperAccount:
         if observed < signal or (observed - signal).total_seconds() > self.spec['signal_max_lag_seconds']:
             self.decisions.append({'candidate_id': identity, 'reason': 'late_or_future_signal'})
             return
-        if not self.spec['risk']['approved']:
+        if (not self.funding_enabled or self.spec['operating_mode'] != 'paper_evaluation'
+                or not self.spec['risk']['approved']):
             self.decisions.append({'candidate_id': identity, 'reason': 'risk_limits_pending'})
             return
         if self.halted or self.daily_halted:
@@ -179,7 +181,7 @@ class PaperAccount:
         if self.last_tick is not None and now < self.last_tick:
             raise ValueError('paper quote replay must be chronological')
         self.last_tick = now
-        valid = {symbol: q for symbol, q in quotes.items() if q.rejection(now,
+        valid = {symbol: q for symbol, q in quotes.items() if q.provider == self.spec['provider'] and q.rejection(now,
                  max_age_seconds=self.spec['quote_max_age_seconds'],
                  max_spread_fraction=self.spec['max_spread_fraction']) is None}
         # Funding decisions precede this poll's exits, as in the existing bot.
@@ -252,6 +254,7 @@ class PaperAccount:
             'cumulative_net_pnl': self.equity - self.capital, 'equity_peak': self.peak,
             'max_drawdown': self.max_dd, 'max_drawdown_dollars': self.max_dd_dollars,
             'day_drawdown': self.day_dd, 'fees': self.fee_total, 'extra_slippage_paid': self.slip_total,
+            'day_max_loss_dollars': max(0.0, self.start - min((p['equity'] for p in self.curve), default=self.start)),
             'funded_entries': self.funded, 'closed_quote_validated_trades': len(self.trades),
             'cumulative_closed_trades': self.prior.get('cumulative_closed_trades', 0) + len(self.trades),
             'candidates': self.candidate_count, 'missed_entries': self.missed,

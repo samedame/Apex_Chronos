@@ -376,6 +376,12 @@ def run_eod(cfg: Settings, d: Optional[date] = None) -> int:
         except Exception as cash_error:
             report['cash_only'] = {'date': d.isoformat(), 'status': 'error', 'error': str(cash_error)}
             print(f'cash-only shadow failed for {d}: {cash_error!r}')
+        try:
+            from . import quote_trial
+            report['cash_quote_trial'] = quote_trial.daily_attachment(cfg.ledger_dir, d.isoformat())
+        except Exception as trial_error:
+            report['cash_quote_trial'] = {'date': d.isoformat(), 'status': 'error', 'error': str(trial_error)}
+            print(f'quote trial status failed for {d}: {type(trial_error).__name__}')
         shadow.save_report(cfg.ledger_dir, report)
     except Exception as e:
         print(f'shadow comparison failed for {d}: {e!r}')

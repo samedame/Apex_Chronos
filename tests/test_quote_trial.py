@@ -18,6 +18,8 @@ SYMBOL = 'SPY261111C00700000'
 @pytest.fixture
 def spec():
     result = qt.proposed_spec(datetime(2026, 11, 10, 18, tzinfo=timezone.utc))
+    result['provider'] = 'alpaca_opra'
+    result['operating_mode'] = 'paper_evaluation'
     result['risk'] = {'approved': True, 'max_trade_risk': 300., 'max_daily_loss': 600., 'max_drawdown': 900.}
     return result
 
@@ -200,6 +202,7 @@ def test_day_block_intervals_use_predeclared_blocks_and_show_uncertainty(spec):
 
 
 def test_no_access_is_explicit_and_does_not_contact_market_or_send_alerts(spec, tmp_path, monkeypatch):
+    monkeypatch.delenv('TRADIER_API_KEY', raising=False)
     monkeypatch.delenv('APCA_API_KEY_ID', raising=False)
     monkeypatch.delenv('APCA_API_SECRET_KEY', raising=False)
     monkeypatch.delenv('CHRONOS_QUOTE_ARCHIVE_KEY', raising=False)
@@ -210,3 +213,161 @@ def test_no_access_is_explicit_and_does_not_contact_market_or_send_alerts(spec, 
     assert 'awaiting_quote_credentials' in result['status']
     assert result['eligible_sessions_added'] == result['quote_validated_trades_added'] == 0
     assert (tmp_path / 'ledger/quote_trials/setup-status.json').is_file()
+
+
+def test_observation_only_mode_cannot_fund_even_when_risk_is_approved(spec):
+    session = TrialSession(spec, '2026-11-11', observation_only=True)
+    session.ingest({'sequence': 0, 'observed_at': NOW.isoformat(), 'capture_mode': 'live_api',
+                    'candidates': [candidate()], 'quotes': [asdict(quote())], 'covered_minutes': [5], 'errors': []})
+    r = session.report()
+    assert r['status'] == 'observation_only' and not r['counts_for_trial']
+    assert not r['synthetic']
+    assert all(a['funded_entries'] == 0 for arm in r['accounts'].values() for a in arm.values())
+    spec['operating_mode'] = 'observation_only'
+    standalone = account(spec)
+    standalone.candidate(candidate())
+    standalone.tick(NOW, {SYMBOL: quote()})
+    assert standalone.funded == 0
+
+
+def test_another_provider_cannot_enter_a_frozen_provider_trial(spec):
+    a = account(spec)
+    a.candidate(candidate())
+    q = quote(provider='tradier_realtime', condition='not_supplied')
+    assert q.rejection(NOW) is None
+    a.tick(NOW, {SYMBOL: q})
+    assert not a.open
+
+
+def test_capture_restart_replays_the_same_paper_state_and_deduplicates_candidate_ids(spec):
+    records = [
+        {'sequence': 0, 'observed_at': NOW.isoformat(), 'capture_mode': 'fixture', 'covered_minutes': [5],
+         'candidates': [candidate()], 'quotes': [asdict(quote())], 'errors': []},
+        {'sequence': 1, 'observed_at': (NOW+timedelta(minutes=1)).isoformat(), 'capture_mode': 'fixture',
+         'covered_minutes': [6], 'candidates': [candidate()],
+         'quotes': [asdict(quote(NOW+timedelta(minutes=1), bid=.7, ask=.71))], 'errors': []},
+    ]
+    first, restarted = TrialSession(spec, '2026-11-11'), TrialSession(spec, '2026-11-11')
+    for record in records:
+        first.ingest(record)
+    for record in deepcopy(records):
+        restarted.ingest(record)
+    assert first.report() == restarted.report()
+    assert first.accounts['candidate']['slip_0.00'].funded == 1
+    with pytest.raises(ValueError, match='out-of-order'):
+        restarted.ingest(records[-1])
+
+
+def write_history(root, spec, *, sessions=60, trades=2, candidate_return=.001, control_return=0.):
+    from datetime import date
+    dates = qt.scheduled_sessions(date(2026, 11, 11), date(2027, 10, 1))[:sessions]
+    directory = root / spec['trial_id']
+    directory.mkdir(parents=True)
+    previous = None
+    equity = {arm: spec['capital'] for arm in qt.ARMS}
+    for index, day in enumerate(dates):
+        account_rows = {}
+        for arm, ret in [('candidate', candidate_return), ('original_p1a_control', control_return)]:
+            start = equity[arm]
+            equity[arm] *= 1 + ret
+            account_rows[arm] = {name: {
+                'starting_equity': start, 'ending_equity': equity[arm], 'settled_cash': equity[arm],
+                'unsettled_proceeds': [], 'cumulative_net_pnl': equity[arm] - spec['capital'],
+                'net_pnl': equity[arm] - start, 'funded_entries': trades,
+                'equity_peak': max(spec['capital'], equity[arm]), 'daily_return': ret,
+                'closed_quote_validated_trades': trades, 'cumulative_closed_trades': (index+1)*trades,
+                'unresolved': False, 'open_positions': 0, 'drawdown_halted': False, 'daily_loss_halted': False,
+                'day_max_loss_dollars': max(0., start-equity[arm]), 'max_drawdown_dollars': max(0., spec['capital']-equity[arm]),
+            } for name in spec['scenarios']}
+        r = {'date': day, 'trial_digest': qt.validate_spec(spec), 'synthetic': False,
+             'eligible_session': True, 'accounts': account_rows,
+             'parent': {'date': previous['date'], 'digest': digest(previous)} if previous else None}
+        (directory / f'{day}.json').write_text(json.dumps(r))
+        previous = r
+    return dates
+
+
+def test_both_review_sample_requirements_are_needed_and_no_automatic_promotion(spec, tmp_path):
+    dates = write_history(tmp_path, spec)
+    result = qt.progress(tmp_path, spec, through=dates[-1])
+    assert result['eligible_sessions'] == 60 and result['closed_quote_validated_trades'] == 120
+    assert result['status'] == 'review_checkpoint_passed'
+    assert result['automatic_live_promotion'] is False
+    earlier = qt.progress(tmp_path, spec, through=dates[-2])
+    assert earlier['status'] == 'not_ready' and not earlier['gates']['minimum_sessions']
+
+
+def test_beating_a_losing_control_is_not_enough_to_pass(spec, tmp_path):
+    dates = write_history(tmp_path, spec, candidate_return=-.001, control_return=-.002)
+    result = qt.progress(tmp_path, spec, through=dates[-1])
+    assert result['gates']['improvement_over_original_p1a_control']
+    assert not result['gates']['positive_net_expectancy'] and result['status'] == 'not_ready'
+
+
+def test_tampered_history_and_test_reports_cannot_count(spec, tmp_path):
+    dates = write_history(tmp_path, spec, sessions=3)
+    path = tmp_path / spec['trial_id'] / f'{dates[0]}.json'
+    row = json.loads(path.read_text())
+    row['accounts']['candidate']['slip_0.01']['ending_equity'] += 1
+    path.write_text(json.dumps(row))
+    with pytest.raises(ValueError, match='intact chronological chain'):
+        qt.progress(tmp_path, spec, through=dates[-1])
+    with pytest.raises(ValueError, match='ancestor changed'):
+        qt.previous_report(tmp_path, '2026-11-16', spec)
+    row['synthetic'] = True
+    path.write_text(json.dumps(row))
+    with pytest.raises(ValueError, match='invalid report'):
+        qt.progress(tmp_path, spec, through=dates[-1])
+
+
+def test_latest_report_cash_flow_tampering_is_rejected_without_a_child(spec, tmp_path):
+    dates = write_history(tmp_path, spec, sessions=1)
+    path = tmp_path/spec['trial_id']/f'{dates[0]}.json'
+    r = json.loads(path.read_text())
+    r['accounts']['candidate']['slip_0.01']['ending_equity'] += 20
+    path.write_text(json.dumps(r))
+    with pytest.raises(ValueError):
+        qt.progress(tmp_path, spec, through=dates[-1])
+
+
+def test_quote_trial_failure_does_not_change_existing_alerts_or_accounts(days, tmp_path, monkeypatch):
+    from datetime import date
+    from apex_chronos import runner
+    day = date(2026, 9, 18)
+    cfg = runner.Settings(state_dir=str(tmp_path/'state'), ledger_dir=str(tmp_path/'ledger'))
+    (tmp_path/'state').mkdir()
+    monkeypatch.setattr(runner, 'final_day_inputs', lambda *_: (days[1][str(day)], {}))
+    monkeypatch.setattr(runner.state, 'git_commit_push', lambda *_: None)
+    messages = []
+    monkeypatch.setattr(runner.alerts, 'post_discord', lambda _, msg, __: messages.append(msg))
+    monkeypatch.setattr(qt, 'daily_attachment', lambda *_: {'status': 'observation_only'})
+    assert runner.run_eod(cfg, day) == 0
+    report_path = tmp_path/'ledger/shadow'/f'{day}.json'
+    first = json.loads(report_path.read_text())
+    first.pop('cash_quote_trial')
+    ledger_bytes = (tmp_path/'ledger/trades.csv').read_bytes()
+    def fail(*_):
+        raise ValueError('frozen trial unavailable')
+    monkeypatch.setattr(qt, 'daily_attachment', fail)
+    assert runner.run_eod(cfg, day) == 0
+    second = json.loads(report_path.read_text())
+    assert second.pop('cash_quote_trial')['status'] == 'error'
+    assert first == second
+    assert messages[0] == messages[1]
+    assert ledger_bytes == (tmp_path/'ledger/trades.csv').read_bytes()
+
+
+def test_daily_peeking_does_not_add_an_unplanned_review_look(spec, tmp_path):
+    dates = write_history(tmp_path, spec, sessions=61)
+    result = qt.progress(tmp_path, spec, through=dates[-1])
+    assert result['eligible_sessions'] == 61 and result['review_sessions_used'] == 60
+    assert result['next_review_session_count'] == 90
+    assert result['candidate_vs_cash_interval']['sessions_used'] == 60
+
+
+def test_hundredth_trade_between_review_looks_does_not_retest_early(spec, tmp_path):
+    dates = write_history(tmp_path, spec, sessions=100, trades=1)
+    result = qt.progress(tmp_path, spec, through=dates[-1])
+    assert result['closed_quote_validated_trades'] == 100
+    assert result['review_closed_trades_used'] == 90 and result['review_sessions_used'] == 90
+    assert not result['gates']['minimum_funded_trades'] and result['status'] == 'not_ready'

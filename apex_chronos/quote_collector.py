@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import time
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 from datetime import date, datetime, timedelta, timezone
@@ -41,15 +42,17 @@ def save_json(path, value):
 
 
 class TrialSession:
-    def __init__(self, spec, session, *, previous=None):
+    def __init__(self, spec, session, *, previous=None, observation_only=False):
         self.spec, self.session = spec, session
         self.fingerprint = quote_trial.validate_spec(spec)
         self.previous = previous
+        self.observation_only = observation_only
         self.records, self.quotes = [], {}
         self.accounts = {}
         for arm in quote_trial.ARMS:
             self.accounts[arm] = {name: PaperAccount(spec, session, arm, settings,
-                                  previous['accounts'][arm][name] if previous else None)
+                                  previous['accounts'][arm][name] if previous else None,
+                                  funding_enabled=not observation_only)
                                   for name, settings in spec['scenarios'].items()}
 
     def ingest(self, record):
@@ -90,18 +93,28 @@ class TrialSession:
         account_results = {arm: {name: a.summary() for name, a in scenarios.items()} for arm, scenarios in self.accounts.items()}
         unresolved = any(a['unresolved'] for scenarios in account_results.values() for a in scenarios.values())
         holding_gaps = any(a['quote_gap_polls'] for scenarios in account_results.values() for a in scenarios.values())
-        verified_polls = sum(any(Quote(**q).rejection(timestamp(r['observed_at']),
+        verified_polls = sum(any(q.get('provider') == self.spec['provider'] and Quote(**q).rejection(timestamp(r['observed_at']),
                              max_age_seconds=self.spec['quote_max_age_seconds'],
                              max_spread_fraction=self.spec['max_spread_fraction']) is None for q in r['quotes']) for r in active)
         quote_coverage = verified_polls / len(active) if active else 0.0
+        rejections = Counter()
+        for r in active:
+            for raw in r['quotes']:
+                q = Quote(**raw)
+                reason = ('provider_mismatch' if q.provider != self.spec['provider'] else
+                          q.rejection(timestamp(r['observed_at']), max_age_seconds=self.spec['quote_max_age_seconds'],
+                                      max_spread_fraction=self.spec['max_spread_fraction']))
+                if reason:
+                    rejections[reason] += 1
         valid_window = (full_window and not errors and gaps <= self.spec['quote_max_age_seconds']
                         and set(range(86)).issubset(covered) and not unresolved and not holding_gaps
                         and quote_coverage >= self.spec['min_quote_poll_coverage'])
         in_period = self.session >= self.spec['not_before_session']
-        eligible = bool(valid_window and in_period and self.spec['risk']['approved'] and not synthetic)
+        eligible = bool(valid_window and in_period and self.spec['risk']['approved'] and not synthetic and not self.observation_only)
         return {'schema_version': 1, 'date': self.session, 'trial_id': self.spec['trial_id'],
                 'trial_digest': self.fingerprint, 'synthetic': synthetic, 'eligible_session': eligible,
-                'status': 'complete_quote_session' if eligible else 'incomplete_or_observation_only',
+                'status': 'observation_only' if self.observation_only else 'complete_quote_session' if eligible else 'incomplete_quote_session',
+                'counts_for_trial': eligible,
                 'first_observed_at': first.isoformat() if first else None,
                 'last_observed_at': last.isoformat() if last else None,
                 'parent': {'date': self.previous['date'], 'digest': digest(self.previous)} if self.previous else None,
@@ -109,6 +122,7 @@ class TrialSession:
                             'error_polls': errors, 'max_poll_gap_seconds': gaps, 'unresolved_positions': unresolved,
                             'holding_quote_gaps': holding_gaps, 'after_trial_start': in_period,
                             'verified_quote_poll_fraction': quote_coverage,
+                            'quote_rejections': dict(rejections),
                             'quote_records': sum(len(r['quotes']) for r in self.records)},
                 'accounts': account_results,
                 'raw_data_storage': 'Authenticated encrypted archives; raw prices/sizes/fills are not published.',
@@ -126,7 +140,7 @@ class Candidates:
         self.engines = {arm: SessionEngine(str(session), spec['tickers'], n_slots=0, n_bars=390, **filters)
                         for arm, filters in spec['arms'].items()}
         self.last = -1
-        self.reference_symbol = None
+        self.reference_symbols = set()
         self.catalogs = cash_catalog.load_snapshots(self.state_dir / 'cash_options', session)
 
     def update(self, requested_at):
@@ -148,15 +162,16 @@ class Candidates:
         fs = {t: compute_features(self.contexts[t], b.O[:n], b.H[:n], b.L[:n], b.C[:n], b.V[:n], vix)
               for t, b in bars.items()}
         observed = now_utc()
-        if self.reference_symbol is None:
-            ticker = self.spec['tickers'][0]
-            contracts, _, _ = cash_catalog.contracts_at(self.catalogs, ticker, observed)
-            if contracts:
-                f = fs[ticker]
-                contract = cash_shadow.choose_contract(contracts, self.session, n - 1, ticker, 1,
-                                                       float(f.C[-1]), float(f.iv[-1]))
-                if contract:
-                    self.reference_symbol = contract['symbol']
+        if not self.reference_symbols:
+            for ticker in self.spec['tickers']:
+                contracts, _, _ = cash_catalog.contracts_at(self.catalogs, ticker, observed)
+                if contracts:
+                    f = fs[ticker]
+                    for direction in (1, -1):
+                        contract = cash_shadow.choose_contract(contracts, self.session, n - 1, ticker, direction,
+                                                               float(f.C[-1]), float(f.iv[-1]))
+                        if contract:
+                            self.reference_symbols.add(contract['symbol'])
         new, covered = [], list(range(self.last + 1, n))
         for m in covered:
             for arm, engine in self.engines.items():
@@ -213,25 +228,27 @@ def collect(spec, state_dir, ledger_dir, *, max_runtime_minutes=140):
         missing.append('quote_credentials')
     if not key:
         missing.append('archive_key')
-    if not spec['risk']['approved']:
-        missing.append('risk_limits')
     if missing:
         return health(ledger_dir, spec, 'awaiting_' + '_and_'.join(missing))
     cipher(key)  # key must validate before a network call or plaintext capture
     opened = session_open(session).astimezone(timezone.utc)
+    active_trial = (spec['operating_mode'] == 'paper_evaluation' and spec['risk']['approved']
+                    and (spec['provider'] == 'alpaca_opra' or spec['size_units_confirmed']))
+    end_minute = spec['session_maximum_minutes'] if active_trial else C.SESSION_BARS
     if (not is_full_session(session) or started < opened - timedelta(minutes=20)
-            or started >= opened + timedelta(minutes=spec['session_maximum_minutes'])):
+            or started >= opened + timedelta(minutes=end_minute)):
         return health(ledger_dir, spec, 'outside_collection_window')
-    if str(session) < spec['not_before_session']:
+    if active_trial and str(session) < spec['not_before_session']:
         return health(ledger_dir, spec, 'before_frozen_trial_start')
-    existing_path = Path(ledger_dir) / 'quote_trials' / spec['trial_id'] / f'{session}.json'
+    report_root = Path(ledger_dir) / 'quote_trials' / spec['trial_id'] if active_trial else Path(ledger_dir) / 'quote_observations' / fingerprint[:16]
+    existing_path = report_root / f'{session}.json'
     if existing_path.exists():
         existing = json.loads(existing_path.read_text())
-        if existing.get('eligible_session') and existing.get('trial_digest') == fingerprint and not existing.get('synthetic'):
+        if existing.get('quality', {}).get('full_collection_window') and existing.get('trial_digest') == fingerprint and not existing.get('synthetic'):
             return {'trial_id': spec['trial_id'], 'status': 'session_already_complete'}
-    previous = quote_trial.previous_report(Path(ledger_dir) / 'quote_trials', str(session), spec)
-    replay = TrialSession(spec, str(session), previous=previous)
-    archive_dir = Path(state_dir) / 'quote_trial_archive'
+    previous = quote_trial.previous_report(Path(ledger_dir) / 'quote_trials', str(session), spec) if active_trial else None
+    replay = TrialSession(spec, str(session), previous=previous, observation_only=not active_trial)
+    archive_dir = Path(state_dir) / 'quote_trial_archive' if active_trial else Path(state_dir) / 'quote_observation_archive' / fingerprint[:16]
     old = load_archive(archive_dir, str(session), fingerprint, key)
     watch = set()
     for record in old:
@@ -247,10 +264,14 @@ def collect(spec, state_dir, ledger_dir, *, max_runtime_minutes=140):
     flushed_at = now_utc()
     sequence = old[-1]['sequence'] + 1 if old else 0
     last_bucket = None
+    minimum_end = opened + timedelta(minutes=spec['session_minimum_minutes'])
+    if not active_trial:
+        minimum_end = min(opened + timedelta(minutes=C.SESSION_BARS),
+                          max(minimum_end, started + timedelta(minutes=spec['session_minimum_minutes'])))
     try:
         while True:
             current = now_utc()
-            if current >= opened + timedelta(minutes=spec['session_maximum_minutes']):
+            if current >= opened + timedelta(minutes=end_minute):
                 break
             if (current - started).total_seconds() >= max_runtime_minutes * 60:
                 break
@@ -261,8 +282,7 @@ def collect(spec, state_dir, ledger_dir, *, max_runtime_minutes=140):
                     new, covered = candidates.update(current)
                     last_bucket = bucket
                 watch.update(c['contract']['symbol'] for c in new if 'contract' in c)
-                if candidates.reference_symbol:
-                    watch.add(candidates.reference_symbol)
+                watch.update(candidates.reference_symbols)
                 quotes = [asdict(q) for q in provider.latest(watch)]
             except Exception as error:
                 # Only stable error class names enter the public health/quality
@@ -270,7 +290,8 @@ def collect(spec, state_dir, ledger_dir, *, max_runtime_minutes=140):
                 errors = [type(error).__name__]
             observed = now_utc()
             record = {'sequence': sequence, 'observed_at': observed.isoformat(), 'capture_mode': 'live_api',
-                      'candidates': new, 'covered_minutes': covered, 'quotes': quotes, 'errors': errors}
+                      'candidates': new, 'covered_minutes': covered, 'quotes': quotes, 'errors': errors,
+                      'requested_symbols': len(watch)}
             replay.ingest(record)
             buffer.append(record)
             sequence += 1
@@ -279,7 +300,7 @@ def collect(spec, state_dir, ledger_dir, *, max_runtime_minutes=140):
                 buffer = []
                 flushed_at = observed
             flat = all(not a.open and not a.pending_entries for accounts in replay.accounts.values() for a in accounts.values())
-            if observed >= opened + timedelta(minutes=spec['session_minimum_minutes']) and flat:
+            if observed >= minimum_end and flat:
                 break
             time.sleep(spec['poll_seconds'])
     finally:
@@ -287,12 +308,15 @@ def collect(spec, state_dir, ledger_dir, *, max_runtime_minutes=140):
         report = replay.report()
         # Public report contains aggregate account metrics only. Raw quotes,
         # displayed sizes, exact contracts, fills and candidates stay encrypted.
-        path = Path(ledger_dir) / 'quote_trials' / spec['trial_id'] / f'{session}.json'
+        path = report_root / f'{session}.json'
         save_json(path, report)
         status = quote_trial.progress(Path(ledger_dir) / 'quote_trials', spec, through=str(session))
-        save_json(path.parent / 'STATUS.json', status)
+        save_json(Path(ledger_dir) / 'quote_trials' / spec['trial_id'] / 'STATUS.json', status)
         if os.environ.get('APEX_GIT_PUSH') == '1':
-            if not git_commit_push([str(archive_dir), str(Path(ledger_dir) / 'quote_trials')],
+            publish_paths = [str(archive_dir), str(Path(ledger_dir) / 'quote_trials')]
+            if not active_trial:
+                publish_paths.append(str(Path(ledger_dir) / 'quote_observations'))
+            if not git_commit_push(publish_paths,
                                    f'apex-chronos {session} quote paper trial [skip ci]'):
                 raise RuntimeError('quote trial archive/report could not be published')
     return report
