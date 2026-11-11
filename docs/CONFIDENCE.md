@@ -123,3 +123,11 @@ so a newly admitted candidate is recorded even if the current bot never consider
 it. The policy summary includes selections, mean and summed model ROI, and the
 difference from the current scheduler. These limits were selected from the
 historical optimization search, so future comparisons are required to validate them.
+
+The `combined_p1a_skip_p1c_p3` policy applies both changes in one independent
+end-of-day replay. It uses P1A RVOL <= 1.00 and retrace < 1.00, excludes P1C and P3,
+and retains the original ranking, phase limits, and exits. Its own slot availability
+can admit trades that neither separate policy selected. The daily report records
+its selections alongside the current scheduler and both separate policies, plus
+mean and summed model ROI and the difference from the current scheduler.
+Live defaults and alert formatting are unaffected.
