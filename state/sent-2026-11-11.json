@@ -43,6 +43,17 @@
   "posted": true,
   "t": "2026-11-11T09:36:07-05:00"
  },
+ "2026-11-11|ENTRY|TSLA|Phase2_MiddayPin_CreditSpread|92": {
+  "conf": 49,
+  "late_s": 6.4,
+  "pos": [
+   "TSLA",
+   "Phase2_MiddayPin_CreditSpread",
+   92
+  ],
+  "posted": true,
+  "t": "2026-11-11T11:03:06-05:00"
+ },
  "2026-11-11|EXIT|AMD|Phase1C_BullTrap_PutDebitSpread|83": {
   "late_s": 0.0,
   "pos": null,
