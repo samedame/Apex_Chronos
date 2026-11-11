@@ -43,6 +43,12 @@
   "posted": true,
   "t": "2026-11-11T09:36:07-05:00"
  },
+ "2026-11-11|EXIT|AMD|Phase1C_BullTrap_PutDebitSpread|83": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-11T10:54:06-05:00"
+ },
  "2026-11-11|EXIT|IWM|Phase1A_GapTrap_Single0DTE|55": {
   "late_s": 0.0,
   "pos": null,
