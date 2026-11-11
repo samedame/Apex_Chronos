@@ -17,11 +17,18 @@ from .calendar_nyse import prev_full_sessions
 from .features import compute_features
 from .pricing import Structure, bs_option_price_and_delta, minutes_to_T
 
-MODEL_VERSION = 'robinhood_shadow_accounts_v1'
+MODEL_VERSION = 'robinhood_shadow_accounts_v2'
 FEE_AS_OF = '2026-11-10'
 FEE_SOURCE = 'https://robinhood.com/us/en/support/articles/trading-fees-on-robinhood/'
 SLIPPAGE = (0.0, 0.01, 0.03, 0.05)
-SIZING = ('fractional_equivalent', 'whole_even_contracts')
+ONE_CONTRACT_SIZING = ('whole_contracts_keep_runner', 'whole_contracts_sell_odd_at_tp1')
+SIZING = ('fractional_equivalent', 'whole_even_contracts', *ONE_CONTRACT_SIZING)
+SIZING_RULES = {
+    'fractional_equivalent': 'Theoretical exact allocation and half exits; fractional contracts are not executable.',
+    'whole_even_contracts': 'Largest affordable even quantity, minimum two; sell exactly half at TP1.',
+    'whole_contracts_keep_runner': 'Largest affordable integer quantity, minimum one; sell floor(quantity/2) at TP1 and keep the remainder on the paper runner exit.',
+    'whole_contracts_sell_odd_at_tp1': 'Largest affordable integer quantity, minimum one; sell ceil(quantity/2) at TP1 and keep the remainder on the paper runner exit.',
+}
 POLICIES = ('current', 'skip_p1c_p3', 'p1a_rvol1_retrace1', 'combined_p1a_skip_p1c_p3')
 
 def trade_key(ticker, module, entry):
@@ -49,6 +56,8 @@ def regulatory_fees(quantity, legs, sell_principal_per_contract, session):
 
 class Account:
     def __init__(self, policy, sizing, slippage, session, capital=1500.0, slot_fraction=0.25, prior=None):
+        if sizing not in SIZING:
+            raise ValueError(f'unknown shadow sizing mode: {sizing}')
         self.policy = policy
         self.sizing = sizing
         self.slippage = slippage
@@ -74,6 +83,8 @@ class Account:
         self.skipped = 0
         self.one_contract_affordable = 0
         self.two_contracts_affordable = 0
+        self.single_contract_entries = 0
+        self.odd_contract_entries = 0
         self.closed = []
 
     def opening_cost(self, qty, meta):
@@ -82,10 +93,11 @@ class Account:
         return qty * meta['basis'] * 100 + fees + slip
 
     def quantity(self, budget, meta):
-        if self.sizing == 'whole_even_contracts':
-            qty = 2 * math.floor(budget / (meta['basis'] * 100) / 2)
+        if self.sizing != 'fractional_equivalent':
+            step = 2 if self.sizing == 'whole_even_contracts' else 1
+            qty = step * math.floor(budget / (meta['basis'] * 100) / step)
             while qty > 0 and self.opening_cost(qty, meta) > budget + 1e-9:
-                qty -= 2
+                qty -= step
             return qty
         low, high = 0.0, budget / (meta['basis'] * 100)
         for _ in range(35):
@@ -121,15 +133,28 @@ class Account:
                 if self.cash < -1e-7:
                     raise ValueError('shadow account spent more than its available cash')
                 self.open[key] = {'quantity': qty, 'remaining': qty, 'tp_gross_paid': 0.0,
-                                  'fees': fees, 'slippage': slip}
+                                  'fees': fees, 'slippage': slip, 'tp_seen': False,
+                                  'tp_contracts': 0, 'last_sale_minute': None}
                 self.executed += 1
+                if self.sizing != 'fractional_equivalent':
+                    self.single_contract_entries += qty == 1
+                    self.odd_contract_entries += qty % 2 == 1
             elif event.kind == 'TP1':
                 key = trade_key(event.ticker, event.module, event.data['m_entry'])
                 position = self.open.get(key)
                 if position is None:
                     continue
                 meta = metadata[key]
-                qty = position['quantity'] / 2
+                position['tp_seen'] = True
+                if self.sizing == 'whole_contracts_keep_runner':
+                    qty = position['quantity'] // 2
+                elif self.sizing == 'whole_contracts_sell_odd_at_tp1':
+                    qty = math.ceil(position['quantity'] / 2)
+                else:
+                    qty = position['quantity'] / 2
+                position['tp_contracts'] = qty
+                if qty == 0:
+                    continue
                 gross = qty * meta['basis'] * 100 * (1 + meta['tp'])
                 sale = gross / qty if meta['legs'] == 1 else float(meta['exit_sell'][minute])
                 fees, slip = self.charge(qty, meta, sale)
@@ -138,6 +163,7 @@ class Account:
                 position['tp_gross_paid'] += gross
                 position['fees'] += fees
                 position['slippage'] += slip
+                position['last_sale_minute'] = minute
             elif event.kind == 'EXIT':
                 trade = event.data['trade']
                 key = trade_key(event.ticker, event.module, trade['m_entry'])
@@ -146,13 +172,35 @@ class Account:
                     continue
                 meta = metadata[key]
                 qty = position['remaining']
-                gross = position['quantity'] * meta['basis'] * 100 * (1 + trade['roi']) - position['tp_gross_paid']
+                if self.sizing in ONE_CONTRACT_SIZING:
+                    # Paper ROI blends equal halves. Apply the recovered runner
+                    # return only to the actual integer quantity still held.
+                    runner_roi = 2 * trade['roi'] - meta['tp'] if position['tp_seen'] else trade['roi']
+                    gross = qty * meta['basis'] * 100 * (1 + runner_roi)
+                else:
+                    gross = position['quantity'] * meta['basis'] * 100 * (1 + trade['roi']) - position['tp_gross_paid']
                 if gross < -1e-7:
                     raise ValueError('negative modeled exit proceeds')
-                sale = max(0.0, gross / qty) if meta['legs'] == 1 else float(meta['exit_sell'][minute])
-                fees, slip = self.charge(qty, meta, sale)
-                self.cash += gross - fees - slip
-                gross_profit = position['quantity'] * meta['basis'] * 100 * trade['roi']
+                fees = slip = 0.0
+                if qty > 0:
+                    sale = max(0.0, gross / qty) if meta['legs'] == 1 else float(meta['exit_sell'][minute])
+                    fees, slip = self.charge(qty, meta, sale)
+                    self.cash += gross - fees - slip
+                    position['last_sale_minute'] = minute
+                principal = position['quantity'] * meta['basis'] * 100
+                if self.sizing in ONE_CONTRACT_SIZING:
+                    gross_profit = position['tp_gross_paid'] + gross - principal
+                    trade = {
+                        **trade, 'paper_m_exit': trade['m_exit'], 'paper_model_roi': trade['roi'],
+                        'paper_exit_reason': trade['exit_reason'],
+                        'm_exit': position['last_sale_minute'],
+                        'hold_mins': position['last_sale_minute'] - trade['m_entry'],
+                        'roi': gross_profit / principal,
+                        'exit_reason': 'all_at_tp1' if qty == 0 else trade['exit_reason'],
+                        'tp1_contracts': position['tp_contracts'], 'runner_contracts': qty,
+                    }
+                else:
+                    gross_profit = principal * trade['roi']
                 self.gross_pnl += gross_profit
                 total_fees = position['fees'] + fees
                 total_slip = position['slippage'] + slip
@@ -167,6 +215,8 @@ class Account:
         for key, position in self.open.items():
             meta = metadata[key]
             qty = position['remaining']
+            if qty == 0:
+                continue
             sale = float(meta['unit_value'][minute] * 100) if meta['legs'] == 1 else float(meta['exit_sell'][minute])
             exit_fee = regulatory_fees(qty, meta['legs'], sale, self.session)
             exit_slip = qty * meta['legs'] * self.slippage * 100
@@ -206,6 +256,11 @@ class Account:
             'day_minimum_equity': self.minimum_equity,
             'paper_trades': self.paper_entries, 'account_trades': self.executed,
             'skipped_for_funding': self.skipped,
+            'single_contract_entries': self.single_contract_entries,
+            'odd_contract_entries': self.odd_contract_entries,
+            'cumulative_paper_trades': self.prior.get('cumulative_paper_trades', 0) + self.paper_entries,
+            'cumulative_account_trades': self.prior.get('cumulative_account_trades', 0) + self.executed,
+            'cumulative_skipped_for_funding': self.prior.get('cumulative_skipped_for_funding', 0) + self.skipped,
             'one_contract_affordable': int(self.one_contract_affordable),
             'two_contracts_affordable': int(self.two_contracts_affordable),
             'positive_days': int(self.prior.get('positive_days', 0)) + int(net_pnl > 0),
@@ -246,6 +301,37 @@ def metadata_for(event, features):
 
 def scenario_key(sizing, slippage):
     return f'{sizing}|{slippage:.2f}'
+
+
+def contract_sizing_comparison(results):
+    """Compact daily/cumulative account comparison, without copying trade arrays."""
+    fields = (
+        'net_pnl', 'cumulative_net_pnl', 'ending_equity',
+        'day_max_minute_close_drawdown', 'max_minute_close_drawdown',
+        'robinhood_fees_estimated', 'cumulative_fees',
+        'additional_slippage_dollars', 'cumulative_slippage',
+        'paper_trades', 'account_trades', 'skipped_for_funding', 'single_contract_entries',
+        'cumulative_paper_trades', 'cumulative_account_trades', 'cumulative_skipped_for_funding',
+    )
+    differences = ('net_pnl', 'cumulative_net_pnl', 'day_max_minute_close_drawdown',
+                   'max_minute_close_drawdown', 'account_trades', 'skipped_for_funding')
+    comparison = {}
+    for policy, scenarios in results.items():
+        comparison[policy] = {}
+        for slip in SLIPPAGE:
+            accounts = {
+                sizing: {field: scenarios[scenario_key(sizing, slip)][field] for field in fields}
+                for sizing in ('whole_even_contracts', *ONE_CONTRACT_SIZING)
+            }
+            baseline = accounts['whole_even_contracts']
+            comparison[policy][f'{slip:.2f}'] = {
+                'baseline_sizing': 'whole_even_contracts', 'accounts': accounts,
+                'differences_vs_two_contracts': {
+                    sizing: {field: accounts[sizing][field] - baseline[field] for field in differences}
+                    for sizing in ONE_CONTRACT_SIZING
+                },
+            }
+    return comparison
 
 
 def digest(report):
@@ -383,11 +469,13 @@ def evaluate(session_date, day, tickers, event_streams, *, capital=1500.0,
                 account.process(events, metadata, minute)
         results[policy] = {key: account.summary() for key, account in accounts.items()}
     return {
-        'status': 'ok', 'schema_version': 1, 'date': session_date,
+        'status': 'ok', 'schema_version': 2, 'date': session_date,
         'settings': settings, 'cohort_start': previous['cohort_start'] if previous else session_date,
         'reset_reason': reset_reason,
         'parent': {'date': previous['date'], 'digest': digest(previous)} if previous else None,
         'policies': results, 'universe_used': sorted(day),
+        'sizing_rules': SIZING_RULES,
+        'contract_sizing_comparison': contract_sizing_comparison(results),
         'fee_source': FEE_SOURCE,
         'fee_model': {
             'commission': 0.0, 'orf_occ_per_contract_leg_side': 0.04,
@@ -398,6 +486,8 @@ def evaluate(session_date, day, tickers, event_streams, *, capital=1500.0,
         'limitations': [
             'Model prices and estimated fees/slippage, without real option quotes, fills or verified listings.',
             'Fractional-equivalent sizing is theoretical; even whole lots require at least two contracts for half exits.',
+            'One-contract modes allow any affordable integer quantity; odd lots require the stated TP1 rounding rule.',
+            'Early account exits keep their original paper scheduler slots and do not create replacement trades.',
             'Unfunded account orders retain their paper scheduler slots and do not create replacement alerts.',
             'Drawdowns use minute-close modeled net liquidation including estimated remaining closing costs.',
             'All additional slippage scenarios are beyond the existing model spread assumption.',
