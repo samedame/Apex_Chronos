@@ -34,6 +34,9 @@ jobs:
       - name: Verification against the backtest
         run: python -m verification.verify_against_backtest --data-dir verification/fixtures.tar.gz --fuzz-seeds 4 --workers 2
 
+      - name: Cash-only catalog and settlement replay
+        run: python -m verification.verify_cash_shadow --data-dir verification/fixtures.tar.gz
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
