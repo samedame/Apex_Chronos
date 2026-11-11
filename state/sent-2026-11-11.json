@@ -1,0 +1,35 @@
+{
+ "2026-11-11|ENTRY|IWM|Phase1A_GapTrap_Single0DTE|5": {
+  "conf": 92,
+  "late_s": 6.4,
+  "pos": [
+   "IWM",
+   "Phase1A_GapTrap_Single0DTE",
+   5
+  ],
+  "posted": true,
+  "t": "2026-11-11T09:36:07-05:00"
+ },
+ "2026-11-11|ENTRY|QQQ|Phase1A_GapTrap_Single0DTE|5": {
+  "conf": 89,
+  "late_s": 6.4,
+  "pos": [
+   "QQQ",
+   "Phase1A_GapTrap_Single0DTE",
+   5
+  ],
+  "posted": true,
+  "t": "2026-11-11T09:36:07-05:00"
+ },
+ "2026-11-11|ENTRY|SPY|Phase1A_GapTrap_Single0DTE|5": {
+  "conf": 89,
+  "late_s": 6.4,
+  "pos": [
+   "SPY",
+   "Phase1A_GapTrap_Single0DTE",
+   5
+  ],
+  "posted": true,
+  "t": "2026-11-11T09:36:07-05:00"
+ }
+}
