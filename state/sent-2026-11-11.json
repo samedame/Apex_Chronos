@@ -1,4 +1,14 @@
 {
+ "2026-11-11|ENTRY|AMD|Phase1A_GapTrap_Single0DTE|5": {
+  "late_s": 20506.4,
+  "pos": [
+   "AMD",
+   "Phase1A_GapTrap_Single0DTE",
+   5
+  ],
+  "posted": false,
+  "t": "2026-11-11T15:17:46-05:00"
+ },
  "2026-11-11|ENTRY|AMD|Phase1C_BullTrap_PutDebitSpread|41": {
   "conf": 49,
   "late_s": 6.4,
