@@ -12,6 +12,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
+from pathlib import Path
 from typing import Dict, List, Optional, Set
 
 import numpy as np
@@ -366,6 +367,15 @@ def run_eod(cfg: Settings, d: Optional[date] = None) -> int:
             slot_fraction=cfg.slot_fraction, ledger_dir=cfg.ledger_dir, baseline_events=final_events,
         )
         report['excluded_tickers'] = excluded
+        try:
+            from . import cash_shadow
+            report['cash_only'] = cash_shadow.evaluate(
+                d.isoformat(), days, cfg.tickers, capital=1500.0, slot_fraction=0.25,
+                ledger_dir=cfg.ledger_dir, catalog_dir=Path(cfg.state_dir) / 'cash_options',
+            )
+        except Exception as cash_error:
+            report['cash_only'] = {'date': d.isoformat(), 'status': 'error', 'error': str(cash_error)}
+            print(f'cash-only shadow failed for {d}: {cash_error!r}')
         shadow.save_report(cfg.ledger_dir, report)
     except Exception as e:
         print(f'shadow comparison failed for {d}: {e!r}')
