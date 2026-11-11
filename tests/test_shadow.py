@@ -56,6 +56,10 @@ def test_eod_shadow_failure_leaves_alert_and_ledger_intact(days, tmp_path, monke
     assert report['training_trades'] == 0
     assert report['current'] == report['shadow']
     assert report['current_only'] == report['shadow_only'] == 0
+    assert report['combined_p1a_skip_p1c_p3']['entry_filters'] == {
+        'p1a_max_rvol': 1.0, 'p1a_max_retrace': 1.0,
+    }
+    assert report['combined_p1a_skip_p1c_p3']['excluded_modules'] == ['P1C', 'P3']
 
     def fail(*_):
         raise ValueError('shadow failed')
@@ -142,3 +146,35 @@ def test_p1a_policy_logs_new_candidates_and_preserves_current_events(days):
     after, after_events = replay.run_session(day, session, tickers)
     assert baseline.trades == after.trades
     assert events == after_events
+
+
+def test_combined_policy_replays_interactions_and_logs_every_selection(days):
+    day = '2026-10-02'
+    tickers = list(C.TICKERS)
+    baseline, _ = replay.run_session(day, days[1][day], tickers)
+    original_trades = list(baseline.trades)
+    report = shadow.compare(day, days[1][day], tickers, baseline, [])
+    name = 'combined_p1a_skip_p1c_p3'
+    combined = report[name]
+    assert baseline.trades == original_trades
+    assert combined['selected'] == 6
+    assert combined['unclosed'] == 0
+    assert combined['current_only'] == 4
+    assert combined['shadow_only'] == 3
+    selected = [row for row in report['candidates'] if row[name] is not None]
+    assert len(selected) == combined['selected']
+    assert all(not row['module'].startswith(('Phase1C_', 'Phase3_')) for row in selected)
+    assert all(row['rvol_entry'] <= 1.0 for row in selected if row['module'].startswith('Phase1A_'))
+    key = lambda row: (row['ticker'], row['module'], row['m_entry'])
+    separate_selections = {
+        key(row) for row in report['candidates']
+        if row['p1a_rvol1_retrace1'] is not None or row['skip_p1c_p3'] is not None
+    }
+    assert {key(row) for row in selected} - separate_selections == {
+        ('NVDA', C.MODULES['P2'].name, 117),
+        ('SPY', C.MODULES['P1B'].name, 59),
+    }
+    total = sum(row[name]['roi'] for row in selected)
+    assert combined['sum_model_roi'] == pytest.approx(total)
+    assert combined['mean_model_roi'] == pytest.approx(total / len(selected))
+    assert combined['delta_sum_model_roi'] == pytest.approx(total - report['current']['sum_model_roi'])
