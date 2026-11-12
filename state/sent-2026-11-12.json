@@ -1,0 +1,24 @@
+{
+ "2026-11-12|ENTRY|QQQ|Phase1A_GapTrap_Single0DTE|5": {
+  "conf": 89,
+  "late_s": 12.5,
+  "pos": [
+   "QQQ",
+   "Phase1A_GapTrap_Single0DTE",
+   5
+  ],
+  "posted": true,
+  "t": "2026-11-12T09:36:12-05:00"
+ },
+ "2026-11-12|ENTRY|SPY|Phase1A_GapTrap_Single0DTE|5": {
+  "conf": 89,
+  "late_s": 12.5,
+  "pos": [
+   "SPY",
+   "Phase1A_GapTrap_Single0DTE",
+   5
+  ],
+  "posted": true,
+  "t": "2026-11-12T09:36:13-05:00"
+ }
+}
