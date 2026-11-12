@@ -1,0 +1,46 @@
+{
+  "automatic_live_promotion": false,
+  "candidate_vs_cash_interval": {
+    "blocks": 0,
+    "lower": null,
+    "sessions_used": 0,
+    "upper": null
+  },
+  "candidate_vs_control_interval": {
+    "blocks": 0,
+    "lower": null,
+    "sessions_used": 0,
+    "upper": null
+  },
+  "closed_quote_validated_trades": 0,
+  "eligible_sessions": 0,
+  "gates": {
+    "all_reports_quote_eligible": false,
+    "complete_calendar": true,
+    "improvement_over_original_p1a_control": false,
+    "minimum_funded_trades": false,
+    "minimum_sessions": false,
+    "paper_evaluation_activated": false,
+    "positive_net_expectancy": false,
+    "predeclared_execution_stresses_pass": false,
+    "quote_size_units_confirmed": false,
+    "risk_limits_approved": false,
+    "risk_limits_respected": false
+  },
+  "limitations": [
+    "Quote-sized paper fills are simulations, not broker fill confirmations.",
+    "The 60-session/100-trade target is a review checkpoint; uncertainty can require more data.",
+    "Missing, late, stale, indicative or synthetic evidence never counts as prospective qualified trades.",
+    "All selected sessions and failed executions remain visible; reports are not picked for profitability."
+  ],
+  "missing_sessions": [],
+  "next_review_session_count": 60,
+  "recorded_sessions": 0,
+  "required_closed_trades": 100,
+  "required_sessions": 60,
+  "review_closed_trades_used": 0,
+  "review_sessions_used": 0,
+  "status": "not_ready",
+  "trial_digest": "69d5d343213a9bb56dde456d6d3c40e7374b6eda497f0680ec7a10db61ec894d",
+  "trial_id": "cash_quotes_p1a_v1"
+}
