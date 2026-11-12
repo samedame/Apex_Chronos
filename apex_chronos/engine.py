@@ -105,7 +105,8 @@ class SessionEngine:
                 if fire is None:
                     continue
                 det.done = True                       # first trigger only, win or lose
-                if tkr in degraded:
+                if (tkr in degraded or not np.isfinite([f.C[m], f.iv[m], f.rvol_cum[m]]).all()
+                        or f.C[m] <= 0 or f.iv[m] <= 0):
                     events.append(Event('SKIP', tkr, C.MODULES[det.module].name, m,
                                         {'reason': 'signal fired on a minute with degraded data; skipped (fail-closed)'}))
                     continue
@@ -116,7 +117,11 @@ class SessionEngine:
         # pending candidates (Phase 1B waits for the 5-minute boundary)
         for (tkr, key, direction) in self.pending.pop(m, []):
             f = feats.get(tkr)
-            if f is None or f.n <= m:
+            if (tkr in degraded or f is None or f.n <= m
+                    or not np.isfinite([f.C[m], f.iv[m], f.rvol_cum[m]]).all()
+                    or f.C[m] <= 0 or f.iv[m] <= 0):
+                events.append(Event('SKIP', tkr, C.MODULES[key].name, m,
+                                    {'reason': 'pending entry reached degraded or missing data; skipped (fail-closed)'}))
                 continue
             spec = C.MODULES[key]
             if m >= self._nb[tkr] - 15 or m < 1:
@@ -161,6 +166,11 @@ class SessionEngine:
             f = feats.get(pos.ticker)
             if f is None or f.n <= m:
                 raise RuntimeError(f"missing bar {m} for open position {pos.ticker}")
+            if (pos.ticker in degraded or not np.isfinite([f.H[m], f.L[m], f.C[m], f.iv[m]]).all()
+                    or min(f.H[m], f.L[m], f.C[m], f.iv[m]) <= 0):
+                events.append(Event('SKIP', pos.ticker, pos.spec.name, m,
+                                    {'reason': 'held position has degraded data; no modeled fill; manage manually'}))
+                continue
             evs, closed = pos.on_bar(m, float(f.H[m]), float(f.L[m]), float(f.C[m]), float(f.iv[m]))
             for e in evs:
                 events.append(Event(e['kind'], pos.ticker, pos.spec.name, m, {**e, 'slot': pos.slot}))

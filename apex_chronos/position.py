@@ -76,7 +76,9 @@ class Position:
             return events, self._close(m, rc, 'stop_loss')
         if m >= self.m_end:
             final = 0.5 * self.locked_half1 + 0.5 * rc if self.half_scaled else rc
-            return events, self._close(self.m_end, final, 'time_stop')
+            # A missing/degraded deadline bar cannot be valued retrospectively
+            # with a later observation. Normal uninterrupted runs have m == m_end.
+            return events, self._close(m, final, 'time_stop')
         return events, None
 
     def _close(self, m_exit: int, roi: float, reason: str) -> Dict:

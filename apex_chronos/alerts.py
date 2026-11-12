@@ -45,7 +45,7 @@ def _sizing_line(cost_basis: float, capital: Optional[float], slot_fraction: flo
 
 
 def fmt_entry(date: str, ev, capital=None, slot_fraction=0.25, late_s: float = 0.0, grace_s: float = 150.0,
-              confidence: Optional[str] = None) -> str:
+              confidence: Optional[str] = None, cash_reservation: Optional[dict] = None) -> str:
     d = ev.data
     side = 'CALL' if d['direction'] == 1 else 'PUT'
     m = ev.minute
@@ -65,7 +65,14 @@ def fmt_entry(date: str, ev, capital=None, slot_fraction=0.25, late_s: float = 0
                      f"(${cb * 100:,.0f}/contract). ROI below is measured on the collateral. RVOL {d['rvol_entry']:.2f} · IV(model) {d['iv_entry'] * 100:.0f}%")
     else:
         lines.append(f"Model cost: ${cb:.2f}/share (${cb * 100:,.0f}/contract) · RVOL {d['rvol_entry']:.2f} · IV(model) {d['iv_entry'] * 100:.0f}%")
-    lines.append(_sizing_line(cb, capital, slot_fraction))
+    if cash_reservation is None:
+        lines.append(_sizing_line(cb, capital, slot_fraction))
+    else:
+        r = cash_reservation
+        lines.append(f"Cash order cap: BUY LIMIT {r['quantity']} whole contracts of {r['symbol']} at no more than "
+                     f"${r['limit_price_cents'] / 100:.2f}/share; reserved ${r['unfilled_reserve_cents'] / 100:.2f} "
+                     f"including fee/closing reserves. This cap is based on the MODEL, not a verified live quote.")
+        lines.append(f"Reservation: {r['identity']}. Record actual fills or confirmed cancellation; an alert is not a fill.")
     sl, tp = plan['stop_roi'], plan['tp1_roi']
     if credit:
         cr = d['credit']
