@@ -1,6 +1,6 @@
 name: quote-paper-trial
 
-# Independent paper-only process. Never receives Discord credentials.
+# Independent quote observer. Never receives Discord or cash-book credentials.
 on:
   workflow_dispatch:
   schedule:
@@ -28,12 +28,11 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-quotes.txt
       - run: pip install -r requirements-quotes.txt
-      - name: Capture quotes and evaluate frozen paper accounts
+      - name: Capture observation-only Tradier quotes
         env:
           TRADIER_API_KEY: ${{ secrets.TRADIER_API_KEY }}
-          APCA_API_KEY_ID: ${{ secrets.APCA_API_KEY_ID }}
-          APCA_API_SECRET_KEY: ${{ secrets.APCA_API_SECRET_KEY }}
           CHRONOS_QUOTE_ARCHIVE_KEY: ${{ secrets.CHRONOS_QUOTE_ARCHIVE_KEY }}
+          CASH_CONTROLS_ENABLED: "false"
           APEX_GIT_PUSH: "1"
           PYTHONUNBUFFERED: "1"
         run: python -m apex_chronos.quote_collector collect

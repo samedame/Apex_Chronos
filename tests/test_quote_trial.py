@@ -46,6 +46,24 @@ def test_freeze_covers_underlying_data_and_signal_execution_dependencies():
     assert {'data.py', 'history.py', 'position.py', 'replay.py'}.issubset(qt.source_hashes())
 
 
+def test_probe_uses_unexpired_contracts_after_the_close():
+    from verification.quote_provider_probe import first_usable_expiry
+    assert first_usable_expiry(datetime(2026, 11, 11, 20, 59, tzinfo=timezone.utc)) == '2026-11-11'
+    assert first_usable_expiry(datetime(2026, 11, 11, 21, 0, tzinfo=timezone.utc)) == '2026-11-12'
+
+
+def test_committed_spec_observes_only_and_never_enables_live_cash_controls():
+    from pathlib import Path
+    from apex_chronos.runner import Settings, LiveSession
+    from datetime import date
+    root = Path(__file__).resolve().parents[1]
+    frozen = qt.load_spec(root / 'trial/cash_quote_trial.json')
+    assert frozen['operating_mode'] == 'observation_only' and frozen['risk']['approved'] is False
+    assert all(frozen['risk'][k] is None for k in ('max_trade_risk', 'max_daily_loss', 'max_drawdown'))
+    assert Settings().cash_controls_enabled is False
+    assert LiveSession(Settings(), date(2026, 11, 11)).engine.protect_degraded is False
+
+
 def test_real_quote_funding_whole_contracts_and_t_plus_one(spec):
     a = account(spec)
     a.candidate(candidate())

@@ -2,7 +2,7 @@
 import json
 import os
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
@@ -11,6 +11,11 @@ from apex_chronos import cash_catalog, config as C, data
 from apex_chronos.calendar_nyse import NY
 from apex_chronos.option_quotes import TradierOPRA, archive_batch, cipher, digest
 from apex_chronos.quote_collector import save_json
+
+
+def first_usable_expiry(observed):
+    local = observed.astimezone(NY)
+    return str(local.date() + timedelta(days=local.hour >= 16))
 
 
 def main():
@@ -26,12 +31,13 @@ def main():
     with ThreadPoolExecutor(max_workers=4) as pool:
         spots = dict(pool.map(one, C.TICKERS))
     symbols = []
+    first_expiry = first_usable_expiry(observed)
     for ticker, spot in spots.items():
         contracts, _, error = cash_catalog.contracts_at(snapshots, ticker, observed)
         if error:
             raise RuntimeError('No causally observed catalog is available for this probe')
         for right in ('C', 'P'):
-            choices = [c for c in contracts if c['right'] == right and c['expiry'] >= str(session)]
+            choices = [c for c in contracts if c['right'] == right and c['expiry'] >= first_expiry]
             if not choices:
                 continue
             expiry = min(c['expiry'] for c in choices)

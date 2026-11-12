@@ -71,3 +71,8 @@ state/ ledger/   written by the bot: sent-alert ledger and session history · th
 ```
 
 Commands: `python -m apex_chronos live | eod | once | replay | selftest`.
+# Cash-control draft
+
+See [cash sizing, settlement and degraded-data fixes](docs/CASH_CONTROLS.md).
+The optional cash gate is disabled by default and requires separately approved
+limits and confirmed account/fill reconciliation before activation.

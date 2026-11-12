@@ -5,6 +5,12 @@ selected data connection. Risk limits remain unapproved and no paper entries
 are funded. Collecting quote observations does not advance the 60-session or
 100-trade evaluation counters. No live alert or broker order is sent.
 
+The observation specification is refreshed against the merged cash-control
+code. Live cash controls and its associated data guards remain disabled. The
+quote workflow explicitly sets `CASH_CONTROLS_ENABLED=false` and receives
+neither a Discord credential nor the private cash-book key. It cannot turn on
+cash alerts or fund a prospective trial through quote collection.
+
 ## What runs independently
 
 `quote-paper-trial.yml` is separate from the live session and receives no Discord

@@ -18,7 +18,7 @@ from .pricing import Structure, minutes_to_T
 class Position:
     def __init__(self, spec: C.ModuleSpec, module_key: str, ticker: str, date: str, m_entry: int,
                  direction: int, S_entry: float, iv_entry: float, n_bars: int, score: float,
-                 rvol_entry: float, slot: int):
+                 rvol_entry: float, slot: int, actual_exit_minute: bool = False):
         self.spec = spec
         self.module_key = module_key
         self.ticker = ticker
@@ -31,6 +31,7 @@ class Position:
         self.rvol_entry = float(rvol_entry)
         self.slot = int(slot)
         self.n_bars = n_bars
+        self.actual_exit_minute = actual_exit_minute
 
         T_entry = minutes_to_T(self.m_entry)
         self.struct = Structure(ticker, spec.structure, self.direction, S_entry, iv_entry, T_entry, spec.target_delta)
@@ -76,7 +77,9 @@ class Position:
             return events, self._close(m, rc, 'stop_loss')
         if m >= self.m_end:
             final = 0.5 * self.locked_half1 + 0.5 * rc if self.half_scaled else rc
-            return events, self._close(self.m_end, final, 'time_stop')
+            # Protected mode uses the real recovery minute. Legacy mode stays
+            # identical until the user separately activates the new controls.
+            return events, self._close(m if self.actual_exit_minute else self.m_end, final, 'time_stop')
         return events, None
 
     def _close(self, m_exit: int, roi: float, reason: str) -> Dict:
