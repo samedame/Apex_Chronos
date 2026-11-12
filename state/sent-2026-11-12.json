@@ -1,4 +1,14 @@
 {
+ "2026-11-12|ENTRY|AAPL|Phase1C_BullTrap_PutDebitSpread|33": {
+  "late_s": 17190.6,
+  "pos": [
+   "AAPL",
+   "Phase1C_BullTrap_PutDebitSpread",
+   33
+  ],
+  "posted": false,
+  "t": "2026-11-12T14:50:31-05:00"
+ },
  "2026-11-12|ENTRY|AMD|Phase2_MiddayPin_CreditSpread|171": {
   "conf": 49,
   "late_s": 12.5,
@@ -20,6 +30,16 @@
   ],
   "posted": true,
   "t": "2026-11-12T09:37:06-05:00"
+ },
+ "2026-11-12|ENTRY|COIN|Phase2_MiddayPin_CreditSpread|91": {
+  "late_s": 13710.6,
+  "pos": [
+   "COIN",
+   "Phase2_MiddayPin_CreditSpread",
+   91
+  ],
+  "posted": false,
+  "t": "2026-11-12T14:50:31-05:00"
  },
  "2026-11-12|ENTRY|MSTR|Phase1C_BullTrap_PutDebitSpread|77": {
   "conf": 71,
@@ -65,6 +85,16 @@
   "posted": true,
   "t": "2026-11-12T09:36:13-05:00"
  },
+ "2026-11-12|ENTRY|SPY|Phase2_MiddayPin_CreditSpread|78": {
+  "late_s": 14490.6,
+  "pos": [
+   "SPY",
+   "Phase2_MiddayPin_CreditSpread",
+   78
+  ],
+  "posted": false,
+  "t": "2026-11-12T14:50:31-05:00"
+ },
  "2026-11-12|EXIT|AMD|Phase2_MiddayPin_CreditSpread|251": {
   "late_s": 0.0,
   "pos": null,
@@ -94,6 +124,12 @@
   "pos": null,
   "posted": true,
   "t": "2026-11-12T09:37:06-05:00"
+ },
+ "2026-11-12|EXIT|SPY|Phase1A_GapTrap_Single0DTE|10": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-12T14:50:30-05:00"
  },
  "2026-11-12|EXIT|SPY|Phase1A_GapTrap_Single0DTE|11": {
   "late_s": 0.0,
