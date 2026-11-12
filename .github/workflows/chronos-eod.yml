@@ -60,3 +60,14 @@ jobs:
           else
             python -m apex_chronos eod
           fi
+
+      - name: Preserve alert outcome checkpoint
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alert-tracking-eod-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            state/alert_journal/
+            state/sent-*.json
+            ledger/alert_outcomes/
+          if-no-files-found: ignore

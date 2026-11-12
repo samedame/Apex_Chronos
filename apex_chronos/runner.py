@@ -77,6 +77,17 @@ class LiveSession:
         self.feed_fail = 0
         self.feed_alerted = False
         self.vix_delay = 0
+        from .alert_journal import Observer
+        self.tracking = Observer(cfg, d)
+
+    def _track(self, method, *args):
+        try:
+            return getattr(self.tracking, method)(*args)
+        except Exception as error:
+            self.tracking.error_count += 1
+            # Observability must not change existing delivery/trading behavior.
+            print(f'alert tracking incomplete: {method} ({type(error).__name__})')
+            return None
 
     # -- before the open ----------------------------------------------------------------------
     def prepare(self) -> None:
@@ -89,6 +100,7 @@ class LiveSession:
         hist = history.load_history(self.cfg.state_dir, self.cfg.tickers, self.date, http=self.http)
         self.ctxs, ex = history.build_contexts(hist, daily, [t for t in self.cfg.tickers if t not in self.excluded], self.date)
         self.excluded.update(ex)
+        self._track('contexts', self.ctxs, self.excluded)
         miss = next(iter(hist.values()))['missing'] if hist else []
         if miss:
             print(f'history sessions unavailable: {miss}')
@@ -157,8 +169,16 @@ class LiveSession:
     # -- alerting -----------------------------------------------------------------------------
     def _post(self, text: str, key: Optional[str] = None, pos=None, posted=True, late=0.0, conf: Optional[int] = None) -> bool:
         if key is not None and key in self.sent:
+            self._track('observe', 'delivery_deduplicated', {
+                'alert_key': key, 'event_reference': self.tracking.current})
             return True
-        ok = alerts.post_discord(self.cfg.webhook, text, dry_run=self.cfg.dry_run)
+        intent = self._track('intent', key, text, posted, late, conf)
+        try:
+            ok = alerts.post_discord(self.cfg.webhook, text, dry_run=self.cfg.dry_run)
+        except Exception:
+            self._track('result', intent, None, True)
+            raise
+        self._track('result', intent, ok)
         if key is not None and ok:
             self.sent[key] = {'t': now_et().isoformat(timespec='seconds'), 'posted': posted, 'late_s': round(late, 1),
                               'pos': list(pos) if pos else None}
@@ -234,6 +254,16 @@ class LiveSession:
 
     def dispatch(self, events: List[Event], now: datetime) -> int:
         n = 0
+        for event in events:
+            self._track('event', event)
+            try:
+                n += self._dispatch([event], now)
+            finally:
+                self.tracking.current = None
+        return n
+
+    def _dispatch(self, events: List[Event], now: datetime) -> int:
+        n = 0
         for ev in events:
             key = f"{self.date.isoformat()}|{ev.key}"
             close_dt = session_open(self.date) + timedelta(minutes=ev.minute + 1)
@@ -299,6 +329,7 @@ class LiveSession:
                 time.sleep(5)
                 continue
             events: List[Event] = []
+            self._track('inputs', feats, degraded, m_next, m_closed)
             for m in range(m_next, m_closed + 1):
                 deg = {t for t, mins in degraded.items() if m in mins}
                 events += self.engine.step(m, feats, deg)
@@ -388,6 +419,11 @@ def run_eod(cfg: Settings, d: Optional[date] = None) -> int:
     days, excluded = final_day_inputs(http, cfg, d)
     if not days:
         alerts.post_discord(cfg.webhook, f'🔴 APEX-CHRONOS EOD {d}: no final bars available - cannot reconcile.', cfg.dry_run)
+        try:
+            from .alert_journal import reconcile
+            reconcile(cfg.state_dir, cfg.ledger_dir, d.isoformat(), [], excluded=excluded, final_available=False)
+        except Exception as tracking_error:
+            print(f'alert outcome reconciliation incomplete for {d}: {type(tracking_error).__name__}')
         return 1
     protected = {'engine_kwargs': {'protect_degraded': True}} if cfg.cash_controls_enabled else {}
     eng, final_events = run_session(d.isoformat(), days, cfg.tickers, mode='fast', **protected)
@@ -427,6 +463,12 @@ def run_eod(cfg: Settings, d: Optional[date] = None) -> int:
     if excluded:
         lines.append(f"Excluded today: {excluded}")
     alerts.post_discord(cfg.webhook, '\n'.join(lines), cfg.dry_run)
+    try:
+        from .alert_journal import entry_key, reconcile
+        reconcile(cfg.state_dir, cfg.ledger_dir, d.isoformat(), trades, days=days, excluded=excluded,
+                  open_position_ids=[entry_key(d, p.ticker, p.spec.name, p.m_entry) for p in eng.open])
+    except Exception as tracking_error:
+        print(f'alert outcome reconciliation incomplete for {d}: {type(tracking_error).__name__}')
     try:
         from . import shadow
         report = shadow.compare(
