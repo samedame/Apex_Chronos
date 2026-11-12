@@ -1,4 +1,15 @@
 {
+ "2026-11-12|ENTRY|COIN|Phase1A_GapTrap_Single0DTE|6": {
+  "conf": 72,
+  "late_s": 6.2,
+  "pos": [
+   "COIN",
+   "Phase1A_GapTrap_Single0DTE",
+   6
+  ],
+  "posted": true,
+  "t": "2026-11-12T09:37:06-05:00"
+ },
  "2026-11-12|ENTRY|QQQ|Phase1A_GapTrap_Single0DTE|5": {
   "conf": 89,
   "late_s": 12.5,
@@ -20,5 +31,11 @@
   ],
   "posted": true,
   "t": "2026-11-12T09:36:13-05:00"
+ },
+ "2026-11-12|EXIT|QQQ|Phase1A_GapTrap_Single0DTE|6": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-12T09:37:06-05:00"
  }
 }
