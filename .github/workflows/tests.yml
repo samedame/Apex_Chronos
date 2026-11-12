@@ -10,6 +10,10 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      historical_probe:
+        description: "Check historical Tradier data availability without orders or alerts"
+        type: boolean
+        default: false
       probe_quotes:
         description: "Run a read-only encrypted Tradier quote connection probe"
         type: boolean
@@ -19,6 +23,28 @@ permissions:
   contents: read
 
 jobs:
+  historical-data:
+    if: github.event_name == 'workflow_dispatch' && inputs.historical_probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-quotes.txt
+      - name: Check historical market data without alerts or orders
+        env:
+          TRADIER_API_KEY: ${{ secrets.TRADIER_API_KEY }}
+          CHRONOS_QUOTE_ARCHIVE_KEY: ${{ secrets.CHRONOS_QUOTE_ARCHIVE_KEY }}
+        run: python -m verification.historical_availability_probe
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: historical-data-availability
+          path: |
+            historical-availability-summary.json
+            historical-probe-private/
   quote-probe:
     if: github.event_name == 'workflow_dispatch' && inputs.probe_quotes
     runs-on: ubuntu-latest
