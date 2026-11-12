@@ -1,3 +1,4 @@
 -r requirements.txt
+-r requirements-quotes.txt
 -r requirements-cash-controls.txt
 pytest==8.3.4

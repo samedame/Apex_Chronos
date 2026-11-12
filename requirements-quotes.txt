@@ -1,0 +1,3 @@
+# Optional collector/test dependency; the live bot requirements stay unchanged.
+-r requirements.txt
+cryptography==50.0.2

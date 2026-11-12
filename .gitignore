@@ -5,6 +5,8 @@ __pycache__/
 venv/
 *.egg-info/
 .DS_Store
+.private_quotes/
+*.quote-key
 .private_cash/
 *.cash-confirmation.json
 cash-controls.enc.lock
