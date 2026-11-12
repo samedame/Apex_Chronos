@@ -38,12 +38,16 @@ class Settings:
     poll_delay_s: float = 6.0
     max_runtime_min: Optional[float] = None
     tickers: List[str] = field(default_factory=lambda: list(C.TICKERS))
+    cash_controls_enabled: bool = False
 
     @classmethod
     def from_env(cls) -> 'Settings':
         def f(name, default=None):
             v = os.environ.get(name, '').strip()
             return float(v) if v else default
+        enabled = os.environ.get('CASH_CONTROLS_ENABLED', '').strip().lower()
+        if enabled not in ('', '0', 'false', 'no', '1', 'true', 'yes'):
+            raise ValueError('CASH_CONTROLS_ENABLED must be explicitly true or false')
         return cls(
             state_dir=os.environ.get('APEX_STATE_DIR', 'state'),
             ledger_dir=os.environ.get('APEX_LEDGER_DIR', 'ledger'),
@@ -53,6 +57,7 @@ class Settings:
             slot_fraction=f('SLOT_FRACTION', 0.25),
             entry_grace_s=f('ENTRY_GRACE_SECONDS', 150.0),
             poll_delay_s=f('POLL_DELAY_SECONDS', 6.0),
+            cash_controls_enabled=enabled in ('1', 'true', 'yes'),
         )
 
 
@@ -64,7 +69,8 @@ class LiveSession:
         self.http = requests.Session()
         self.ctxs = {}
         self.excluded: Dict[str, str] = {}
-        self.engine = SessionEngine(d.isoformat(), cfg.tickers, n_bars=C.SESSION_BARS)
+        self.engine = SessionEngine(d.isoformat(), cfg.tickers, n_bars=C.SESSION_BARS,
+                                    protect_degraded=cfg.cash_controls_enabled)
         self.sent = state.load_sent(cfg.state_dir, d)
         self.posted_entries: Set[tuple] = {tuple(v['pos']) for v in self.sent.values() if v.get('pos') and v.get('posted')}
         self.last = -1
@@ -161,7 +167,7 @@ class LiveSession:
             state.save_sent(self.cfg.state_dir, self.date, self.sent)
         return ok
 
-    def _confidence(self, ev, late: float):
+    def _confidence(self, ev, late: float, contracts: Optional[int] = None):
         """Score an entry alert. A scoring failure must never suppress an actionable alert, so it returns None instead of raising."""
         try:
             cb = ev.data['cost_basis']
@@ -170,11 +176,61 @@ class LiveSession:
                 'ticker': ev.ticker,
                 'late_s': late,
                 'data_age_s': self.vix_delay * 60.0,          # vix_delay is in minutes
-                'contracts': alerts.contracts_for(cb, self.cfg.capital, self.cfg.slot_fraction),
+                'contracts': contracts if contracts is not None else alerts.contracts_for(cb, self.cfg.capital, self.cfg.slot_fraction),
             }, grace_s=self.cfg.entry_grace_s)
         except Exception as e:                                 # noqa: BLE001
             print(f'confidence scoring failed for {ev.ticker} {ev.module}: {e!r}')
             return None
+
+    def _dispatch_cash(self, ev: Event, now: datetime, key: str, late: float) -> int:
+        """Explicit opt-in only. No exception can fall back to an unguarded entry."""
+        from .cash_controls import CashBook, CashControlError
+        if key in self.sent:
+            return 0
+        try:
+            if self.cfg.dry_run:
+                raise CashControlError('dry run cannot reserve real account funds')
+            book = CashBook(Path(self.cfg.state_dir) / 'cash-controls.enc')
+            if ev.kind == 'ENTRY':
+                if now < session_open(self.date) + timedelta(minutes=ev.minute + 1) or late > self.cfg.entry_grace_s:
+                    raise CashControlError('entry is outside the fresh-alert window')
+                reservation = book.reserve(key, ev, now, catalog_dir=Path(self.cfg.state_dir) / 'cash_options',
+                                           slot_fraction=self.cfg.slot_fraction)
+                self._cash_delivery_barrier(book, key, key)
+                conf = self._confidence(ev, late, contracts=reservation['quantity'])
+                text = alerts.fmt_entry(str(self.date), ev, self.cfg.capital, self.cfg.slot_fraction,
+                                        late, self.cfg.entry_grace_s, confidence=conf.lines() if conf else None,
+                                        cash_reservation=reservation)
+                pos = (ev.ticker, ev.module, ev.minute)
+                ok = self._post(text, key=key, pos=pos, posted=True, late=late, conf=conf.score if conf else None)
+                if ok:
+                    self.posted_entries.add(pos)
+                return int(ok)
+            if ev.kind in ('TP1', 'EXIT'):
+                minute = ev.data['m_entry'] if ev.kind == 'TP1' else ev.data['trade']['m_entry']
+                identity = f'{self.date}|ENTRY|{ev.ticker}|{ev.module}|{minute}'
+                qty = book.request_exit(identity, key, ev.kind)
+                self._cash_delivery_barrier(book, identity, key)
+                text = (f"**APEX-CHRONOS cash exit signal** {ev.ticker}: {ev.kind} — sell up to {qty} confirmed whole "
+                        f"contract(s). Reconcile actual sale fills before proceeds become settled funds. "
+                        f"Reservation: {identity}; exit reference: {key}. MODEL signal, not a broker fill.")
+                return int(self._post(text, key=key, posted=False))
+        except Exception as error:
+            # Stable messages only: never print private ledger/fill/provider data.
+            reason = str(error) if isinstance(error, CashControlError) else 'cash controls unavailable; reconciliation required'
+            self._post(f'⚪ Cash action blocked: {ev.ticker} {ev.kind}: {reason}. '
+                       'Reconcile orders and manage any actual holding manually.', key=key, posted=False)
+        return 0
+
+    def _cash_delivery_barrier(self, book, identity, key):
+        from .cash_controls import CashControlError
+        if not book.claim_delivery(identity, key):
+            raise CashControlError('cash alert delivery already attempted; reconcile before retrying')
+        if os.environ.get('APEX_GIT_PUSH') == '1':
+            if not state.git_commit_push([str(book.path)], f'apex-chronos {self.date} private cash reservation'):
+                raise CashControlError('cash reservation could not be published durably; action blocked')
+        elif os.environ.get('GITHUB_ACTIONS') == 'true':
+            raise CashControlError('durable cash-book publishing is required on an ephemeral runner')
 
     def dispatch(self, events: List[Event], now: datetime) -> int:
         n = 0
@@ -182,6 +238,9 @@ class LiveSession:
             key = f"{self.date.isoformat()}|{ev.key}"
             close_dt = session_open(self.date) + timedelta(minutes=ev.minute + 1)
             late = max(0.0, (now - close_dt).total_seconds())
+            if self.cfg.cash_controls_enabled and ev.kind in ('ENTRY', 'TP1', 'EXIT'):
+                n += self._dispatch_cash(ev, now, key, late)
+                continue
             if ev.kind == 'ENTRY':
                 pos = (ev.ticker, ev.module, ev.minute)
                 if late > self.cfg.stale_after_s:
@@ -305,8 +364,16 @@ def final_day_inputs(http, cfg: Settings, d: date):
         if not sb.ok or len(sb.C) < C.MIN_SESSION_BARS:
             excluded[t] = f'final bars unavailable ({sb.reason or len(sb.C)})'
             continue
+        if cfg.cash_controls_enabled and (sb.holes or sb.last_real != C.SESSION_BARS - 1
+                or not all(np.isfinite(a).all() for a in (sb.O, sb.H, sb.L, sb.C, sb.V))
+                or any(np.any(a <= 0) for a in (sb.O, sb.H, sb.L, sb.C))):
+            excluded[t] = f'final bars unavailable ({sb.reason or len(sb.C)})'
+            continue
         sb = data.pad_to(sb, C.SESSION_BARS)
-        vix, _ = data.align_vix(vix_df, d, len(sb.C))
+        vix, stale = data.align_vix(vix_df, d, len(sb.C))
+        if cfg.cash_controls_enabled and (stale > C.VIX_MAX_STALE_MIN or not np.isfinite(vix).all()):
+            excluded[t] = 'final volatility data unavailable or stale'
+            continue
         days[t] = TickerDay(ctxs[t], sb.O, sb.H, sb.L, sb.C, sb.V, vix)
     return days, excluded
 
@@ -322,7 +389,8 @@ def run_eod(cfg: Settings, d: Optional[date] = None) -> int:
     if not days:
         alerts.post_discord(cfg.webhook, f'🔴 APEX-CHRONOS EOD {d}: no final bars available - cannot reconcile.', cfg.dry_run)
         return 1
-    eng, final_events = run_session(d.isoformat(), days, cfg.tickers, mode='fast')
+    protected = {'engine_kwargs': {'protect_degraded': True}} if cfg.cash_controls_enabled else {}
+    eng, final_events = run_session(d.isoformat(), days, cfg.tickers, mode='fast', **protected)
     trades = eng.trades
     sent = state.load_sent(cfg.state_dir, d)
     live_entries = {tuple(k.split('|')[2:5]) for k in sent if '|ENTRY|' in k}

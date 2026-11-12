@@ -58,7 +58,8 @@ class SessionEngine:
                  expected_returns: Optional[Dict[tuple[str, str], float]] = None,
                  excluded_modules: Optional[Set[str]] = None,
                  p1a_max_rvol: Optional[float] = None,
-                 p1a_max_retrace: Optional[float] = None):
+                 p1a_max_retrace: Optional[float] = None,
+                 protect_degraded: bool = False):
         self.date = date
         self.tickers = list(tickers)
         # n_bars: int for every ticker, or {ticker: bars} (the original uses each ticker-day's own row count)
@@ -67,6 +68,7 @@ class SessionEngine:
         self.n_slots = n_slots
         self.phase_limits = dict(phase_limits or C.PHASE_LIMITS)
         self.expected_returns = expected_returns
+        self.protect_degraded = protect_degraded
         self.excluded_modules = set(excluded_modules or ())
         self.p1a_max_rvol = C.P1A_MAX_RVOL if p1a_max_rvol is None else p1a_max_rvol
         self.p1a_max_retrace = C.P1A_MAX_RETRACE if p1a_max_retrace is None else p1a_max_retrace
@@ -105,7 +107,9 @@ class SessionEngine:
                 if fire is None:
                     continue
                 det.done = True                       # first trigger only, win or lose
-                if tkr in degraded:
+                if (tkr in degraded or (self.protect_degraded
+                        and (not np.isfinite([f.C[m], f.iv[m], f.rvol_cum[m]]).all()
+                             or f.C[m] <= 0 or f.iv[m] <= 0))):
                     events.append(Event('SKIP', tkr, C.MODULES[det.module].name, m,
                                         {'reason': 'signal fired on a minute with degraded data; skipped (fail-closed)'}))
                     continue
@@ -116,6 +120,12 @@ class SessionEngine:
         # pending candidates (Phase 1B waits for the 5-minute boundary)
         for (tkr, key, direction) in self.pending.pop(m, []):
             f = feats.get(tkr)
+            if self.protect_degraded and (tkr in degraded or f is None or f.n <= m
+                    or not np.isfinite([f.C[m], f.iv[m], f.rvol_cum[m]]).all()
+                    or f.C[m] <= 0 or f.iv[m] <= 0):
+                events.append(Event('SKIP', tkr, C.MODULES[key].name, m,
+                                    {'reason': 'pending entry reached degraded or missing data; skipped (fail-closed)'}))
+                continue
             if f is None or f.n <= m:
                 continue
             spec = C.MODULES[key]
@@ -145,7 +155,8 @@ class SessionEngine:
             for s in range(self.n_slots):
                 if m >= self.slot_free[s]:
                     pos = Position(spec, c.key, c.ticker, self.date, m, c.direction, c.S_entry, c.iv_entry,
-                                   self._nb[c.ticker], c.score, c.rvol_entry, s)
+                                   self._nb[c.ticker], c.score, c.rvol_entry, s,
+                                   actual_exit_minute=self.protect_degraded)
                     self.slot_free[s] = 10 ** 9           # occupied until it exits
                     self.slot_pos[s] = pos
                     self.p_counts[ph] += 1
@@ -161,6 +172,11 @@ class SessionEngine:
             f = feats.get(pos.ticker)
             if f is None or f.n <= m:
                 raise RuntimeError(f"missing bar {m} for open position {pos.ticker}")
+            if self.protect_degraded and (pos.ticker in degraded or not np.isfinite([f.H[m], f.L[m], f.C[m], f.iv[m]]).all()
+                    or min(f.H[m], f.L[m], f.C[m], f.iv[m]) <= 0):
+                events.append(Event('SKIP', pos.ticker, pos.spec.name, m,
+                                    {'reason': 'held position has degraded data; no modeled fill; manage manually'}))
+                continue
             evs, closed = pos.on_bar(m, float(f.H[m]), float(f.L[m]), float(f.C[m]), float(f.iv[m]))
             for e in evs:
                 events.append(Event(e['kind'], pos.ticker, pos.spec.name, m, {**e, 'slot': pos.slot}))
