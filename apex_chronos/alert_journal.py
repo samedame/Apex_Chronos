@@ -349,7 +349,7 @@ def build_report(directory, session, *, final_record_id=None):
                         and r['payload'].get('position_id') == key
                         and r['payload']['event']['kind'] == 'TP1'
                         and r['payload'].get('model_entry_record_id') == originating['record_id']
-                        and r['observed_at'] <= ex['observed_at']]
+                        and r['payload']['event']['minute'] <= ex['payload']['event']['minute']]
                     delivered_tp = set()
                     for message in messages:
                         if message['event']['payload']['event']['kind'] != 'TP1':
@@ -391,7 +391,7 @@ def build_report(directory, session, *, final_record_id=None):
                 'final_model_only_entry_keys': len(final_keys - posted_keys) if final_available else None,
                 'closed_communicated_model_outcomes': len(closed), 'unresolved_posted_positions': len(unresolved),
                 'mean_communicated_model_roi_closed_subset': sum(closed) / len(closed) if closed else None,
-                'complete_posted_cohort_mean_model_roi': sum(closed) / len(closed) if closed and not unresolved else None,
+                'complete_posted_cohort_mean_model_roi': sum(closed) / len(closed) if closed and not unresolved and not pending else None,
                 'broker_verified_trade_count': 0, 'broker_verified_pnl': None,
                 'unconfirmed_delivery_attempts': len(pending), 'simulated_or_unconfigured_attempts': len(simulated)},
             'posted_positions': positions,

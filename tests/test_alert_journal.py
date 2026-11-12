@@ -151,6 +151,19 @@ def test_crash_between_intent_and_result_is_unconfirmed(tmp_path):
     assert r['summary']['unconfirmed_delivery_attempts'] == 1
 
 
+def test_unconfirmed_additional_entry_blocks_complete_cohort_mean(tmp_path,monkeypatch):
+    sess, _ = session(tmp_path,monkeypatch)
+    entry, exit = events()
+    dispatch(sess,entry); dispatch(sess,exit)
+    extra=deepcopy(entry);extra.ticker='QQQ'
+    monkeypatch.setattr(alerts,'post_discord',lambda *a,**kw:False)
+    dispatch(sess,extra)
+    r=report(sess)
+    assert r['summary']['closed_communicated_model_outcomes']==1
+    assert r['summary']['unconfirmed_delivery_attempts']==1
+    assert r['summary']['complete_posted_cohort_mean_model_roi'] is None
+
+
 def test_restart_dedup_does_not_create_acknowledged_delivery(tmp_path, monkeypatch):
     sess, texts = session(tmp_path, monkeypatch)
     entry, exit = events()

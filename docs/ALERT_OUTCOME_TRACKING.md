@@ -59,7 +59,7 @@ records. Its important fields are:
 | `posted_only_entry_keys` | Posted identities the final replay did not select; never deleted from the alert cohort. |
 | `final_model_only_entry_keys` | Final-model identities without posted-entry evidence. |
 | `communicated_model_roi` | The original model ROI in an acknowledged exit, only with consistent original entry/scaleout evidence. |
-| `complete_posted_cohort_mean_model_roi` | Null unless every posted position has recoverable, consistent communicated model outcome evidence. |
+| `complete_posted_cohort_mean_model_roi` | Null unless every posted position has recoverable, consistent communicated model outcome evidence and there are no unconfirmed delivery attempts. |
 | `broker_verified_pnl` | Always null; this observer does not infer fills, actual quantity, costs or account PnL. |
 
 A transport false return or interrupted intent is **unconfirmed**, not proof of
