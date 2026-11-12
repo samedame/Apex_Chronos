@@ -6,7 +6,14 @@ definitions, strategy thresholds and base runtime dependencies are unchanged.
 No real account file, approved risk limits or encryption credential is created
 by this PR. Keep the PR draft and unmerged until reviewed.
 
-The proposed engine fixes apply only to missing/degraded/invalid data. Ordinary
+All new data-handling behavior is opt-in with the cash controls. The live runner
+passes `protect_degraded=True` to its engine only when cash controls are enabled;
+otherwise pending entries, held-position timing and EOD data handling retain
+their previous behavior, including the known degraded-data limitations. This
+preserves the user's explicit instruction to leave live alerts unchanged after
+merge. A separate activation is required to turn on these fixes.
+
+In protected mode, the proposed engine fixes apply to missing/degraded/invalid data. Ordinary
 historical decisions must continue to match all 110 original trades and 198
 candidates. A frozen 235-message production corpus verifies unchanged default
 alert text and quantities on the same normal-data events.
@@ -129,7 +136,7 @@ reconciled private book. Nothing is enabled by merely opening this draft PR.
 If integrated with the separate frozen quote-trial PR, changed engine sources
 require a freshly prepared dated trial specification before collecting evidence.
 
-## Degraded-data behavior
+## Degraded-data behavior (protected mode only)
 
 Queued P1B entries now reject degraded, missing, short, nonfinite or nonpositive
 entry data before slot admission. They produce an explicit SKIP and are not

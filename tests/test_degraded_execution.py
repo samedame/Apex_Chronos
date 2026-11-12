@@ -13,7 +13,7 @@ def features(days, session):
 
 def test_known_degraded_pending_p1b_entry_is_rejected_without_consuming_a_slot(days):
     fs = features(days, '2026-09-17')
-    engine = SessionEngine('2026-09-17', list(C.TICKERS))
+    engine = SessionEngine('2026-09-17', list(C.TICKERS), protect_degraded=True)
     for m in range(35):
         events = engine.step(m, fs, {'AMD'} if m == 34 else frozenset())
     assert not any(e.kind == 'ENTRY' and e.ticker == 'AMD' for e in events)
@@ -24,7 +24,7 @@ def test_known_degraded_pending_p1b_entry_is_rejected_without_consuming_a_slot(d
 def test_missing_or_nan_pending_bar_is_rejected(days):
     for missing in (True, False):
         fs = features(days, '2026-09-17')
-        engine = SessionEngine('2026-09-17', list(C.TICKERS))
+        engine = SessionEngine('2026-09-17', list(C.TICKERS), protect_degraded=True)
         for m in range(34):
             engine.step(m, fs)
         if missing:
@@ -45,7 +45,7 @@ def test_degraded_held_deadline_never_fabricates_or_backdates_an_exit(days):
         if target is None:
             continue
         fs = features(days, session)
-        engine = SessionEngine(session, list(C.TICKERS))
+        engine = SessionEngine(session, list(C.TICKERS), protect_degraded=True)
         for m in range(target.minute + 1):
             events = engine.step(m, fs, {target.ticker} if m == target.minute else frozenset())
         assert not any(e.kind in ('EXIT', 'TP1') and e.ticker == target.ticker for e in events)
@@ -58,7 +58,8 @@ def test_degraded_held_deadline_never_fabricates_or_backdates_an_exit(days):
 
 
 @pytest.mark.parametrize('holes,last_real,stale', [([20], 389, 0), ([], 388, 0), ([], 389, 999)])
-def test_eod_does_not_create_final_valuations_from_filled_or_stale_bars(tmp_path, monkeypatch, holes, last_real, stale):
+@pytest.mark.parametrize('protected', [False, True])
+def test_eod_data_guards_only_activate_with_cash_controls(tmp_path, monkeypatch, holes, last_real, stale, protected):
     from datetime import date
     from apex_chronos import data, history, runner
     values = np.ones(390)
@@ -69,6 +70,16 @@ def test_eod_does_not_create_final_valuations_from_filled_or_stale_bars(tmp_path
     monkeypatch.setattr(data, 'align_vix', lambda *args: (values, stale))
     monkeypatch.setattr(history, 'load_history', lambda *args, **kw: {})
     monkeypatch.setattr(history, 'build_contexts', lambda *args: ({'SPY': None}, {}))
-    cfg = runner.Settings(state_dir=str(tmp_path), tickers=['SPY'])
+    cfg = runner.Settings(state_dir=str(tmp_path), tickers=['SPY'], cash_controls_enabled=protected)
     day, excluded = runner.final_day_inputs(None, cfg, date(2026, 11, 10))
-    assert day == {} and 'SPY' in excluded
+    assert bool(day) is not protected
+    assert ('SPY' in excluded) is protected
+
+
+def test_default_pending_entry_behavior_is_unchanged_until_controls_are_enabled(days):
+    fs = features(days, '2026-09-17')
+    engine = SessionEngine('2026-09-17', list(C.TICKERS))
+    assert engine.protect_degraded is False
+    for m in range(35):
+        events = engine.step(m, fs, {'AMD'} if m == 34 else frozenset())
+    assert any(e.kind == 'ENTRY' and e.ticker == 'AMD' for e in events)

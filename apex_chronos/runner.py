@@ -69,7 +69,8 @@ class LiveSession:
         self.http = requests.Session()
         self.ctxs = {}
         self.excluded: Dict[str, str] = {}
-        self.engine = SessionEngine(d.isoformat(), cfg.tickers, n_bars=C.SESSION_BARS)
+        self.engine = SessionEngine(d.isoformat(), cfg.tickers, n_bars=C.SESSION_BARS,
+                                    protect_degraded=cfg.cash_controls_enabled)
         self.sent = state.load_sent(cfg.state_dir, d)
         self.posted_entries: Set[tuple] = {tuple(v['pos']) for v in self.sent.values() if v.get('pos') and v.get('posted')}
         self.last = -1
@@ -360,14 +361,17 @@ def final_day_inputs(http, cfg: Settings, d: date):
         if t not in ctxs:
             continue
         sb = data.to_grid(data.fetch_1m_today(http, t), d, t, C.SESSION_BARS - 1)
-        if (not sb.ok or sb.holes or sb.last_real != C.SESSION_BARS - 1
+        if not sb.ok or len(sb.C) < C.MIN_SESSION_BARS:
+            excluded[t] = f'final bars unavailable ({sb.reason or len(sb.C)})'
+            continue
+        if cfg.cash_controls_enabled and (sb.holes or sb.last_real != C.SESSION_BARS - 1
                 or not all(np.isfinite(a).all() for a in (sb.O, sb.H, sb.L, sb.C, sb.V))
                 or any(np.any(a <= 0) for a in (sb.O, sb.H, sb.L, sb.C))):
             excluded[t] = f'final bars unavailable ({sb.reason or len(sb.C)})'
             continue
         sb = data.pad_to(sb, C.SESSION_BARS)
         vix, stale = data.align_vix(vix_df, d, len(sb.C))
-        if stale > C.VIX_MAX_STALE_MIN or not np.isfinite(vix).all():
+        if cfg.cash_controls_enabled and (stale > C.VIX_MAX_STALE_MIN or not np.isfinite(vix).all()):
             excluded[t] = 'final volatility data unavailable or stale'
             continue
         days[t] = TickerDay(ctxs[t], sb.O, sb.H, sb.L, sb.C, sb.V, vix)
@@ -385,7 +389,8 @@ def run_eod(cfg: Settings, d: Optional[date] = None) -> int:
     if not days:
         alerts.post_discord(cfg.webhook, f'🔴 APEX-CHRONOS EOD {d}: no final bars available - cannot reconcile.', cfg.dry_run)
         return 1
-    eng, final_events = run_session(d.isoformat(), days, cfg.tickers, mode='fast')
+    protected = {'engine_kwargs': {'protect_degraded': True}} if cfg.cash_controls_enabled else {}
+    eng, final_events = run_session(d.isoformat(), days, cfg.tickers, mode='fast', **protected)
     trades = eng.trades
     sent = state.load_sent(cfg.state_dir, d)
     live_entries = {tuple(k.split('|')[2:5]) for k in sent if '|ENTRY|' in k}

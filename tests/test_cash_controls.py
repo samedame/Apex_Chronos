@@ -235,6 +235,13 @@ def test_cash_settings_stay_disabled_by_default_and_reject_malformed_enable(monk
         runner.Settings.from_env()
 
 
+@pytest.mark.parametrize('enabled', [False, True])
+def test_runner_data_guard_activation_matches_cash_flag(tmp_path, enabled):
+    cfg = runner.Settings(state_dir=str(tmp_path), cash_controls_enabled=enabled)
+    sess = runner.LiveSession(cfg, date(2026, 11, 10))
+    assert sess.engine.protect_degraded is enabled
+
+
 def test_guarded_dispatch_uses_fixed_quantity_and_reserves_before_delivery(setup, monkeypatch):
     book, _, key = setup
     monkeypatch.setenv('CHRONOS_CASH_BOOK_KEY', key)
