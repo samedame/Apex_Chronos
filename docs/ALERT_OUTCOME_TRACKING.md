@@ -108,7 +108,10 @@ push or artifact upload. No synchronous Git/network barrier is inserted before
 alerts, and the existing retry behavior is not changed in this PR.
 
 Observation failures print a stable `alert tracking incomplete` diagnostic and
-do not suppress existing alerts. Corrupted records fail reconciliation, never
+do not suppress existing alerts. Failed input captures clear the old snapshot
+reference; failed reconstructed entries clear the old entry-origin reference.
+Reported capture errors leave the affected model outcome unresolved and block
+a complete-cohort average. Corrupted records fail reconciliation, never
 produce a successful partial report. A previous derived report can remain after
 a failed refresh. Consumers must first check `YYYY-MM-DD.status.json` for
 `projection_ready`, matching snapshot ID and recency; `refreshing` or

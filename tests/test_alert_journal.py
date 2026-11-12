@@ -246,6 +246,37 @@ def test_input_deltas_preserve_prior_revisions_and_nonfinite_values(tmp_path):
     assert array == [1.,3.,{'nonfinite_float':'nan'}]
 
 
+def test_failed_input_capture_cannot_reuse_old_evidence_or_complete_outcome(tmp_path,monkeypatch):
+    sess, texts=session(tmp_path,monkeypatch)
+    f=SimpleNamespace(n=1,prev_c=99.,**{a:np.array([1.]) for a in J.ARRAYS})
+    sess.tracking.inputs({'SPY':f},{},0,0)
+    old=sess.tracking.input_id
+    real=J.Journal.put
+    def failed_input(self,kind,payload,**kwargs):
+        if kind=='consumed_inputs':raise OSError('storage')
+        return real(self,kind,payload,**kwargs)
+    monkeypatch.setattr(J.Journal,'put',failed_input)
+    sess.tracking.inputs({'SPY':f},{},1,1)
+    assert old and sess.tracking.input_id is None and not sess.tracking.previous
+    entry,exit=events()
+    dispatch(sess,entry);dispatch(sess,exit)
+    r=report(sess)
+    assert len(texts)==2
+    assert r['posted_positions'][0]['outcome_status']=='unresolved_tracking_gap'
+    assert r['summary']['complete_posted_cohort_mean_model_roi'] is None
+
+
+def test_failed_reconstructed_entry_capture_clears_older_origin(tmp_path,monkeypatch):
+    sess,_=session(tmp_path,monkeypatch)
+    entry=events()[0]
+    sess.tracking.event(entry)
+    key=J.position_key(DAY,entry)
+    assert key in sess.tracking.entries
+    monkeypatch.setattr(J.Journal,'put',lambda *a,**kw:(_ for _ in ()).throw(OSError('storage')))
+    sess.tracking.event(entry)
+    assert key not in sess.tracking.entries
+
+
 def test_legacy_metadata_is_preserved_without_reconstructed_returns(tmp_path):
     state_dir, ledger = tmp_path/'state', tmp_path/'ledger'
     key = J.entry_key(DAY,'SPY',MODULE,5)

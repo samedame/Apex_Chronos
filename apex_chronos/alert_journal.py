@@ -127,7 +127,11 @@ class Journal:
                 try:
                     os.link(temporary, path)
                 except FileExistsError:
-                    if gzip.decompress(path.read_bytes()) != encoded:
+                    try:
+                        existing = gzip.decompress(path.read_bytes())
+                    except Exception as error:
+                        raise IntegrityError('existing journal record is invalid') from error
+                    if existing != encoded:
                         raise IntegrityError('existing journal record was altered')
                 directory_fd = os.open(self.directory, os.O_RDONLY)
                 try:
@@ -190,6 +194,11 @@ class Observer:
         if identity is not None:
             self.input_id = identity
             self.previous = next_previous
+        else:
+            # Never attach a newly delivered alert to an older input capture.
+            # The next successful poll starts a complete independent snapshot.
+            self.input_id = None
+            self.previous = {}
 
     def event(self, event):
         if self.sources is None:
@@ -197,6 +206,8 @@ class Observer:
             self.sources = {k: sources[k] for k in ('config.py', 'data.py', 'history.py',
                             'features.py', 'pricing.py', 'position.py', 'engine.py')}
         position = position_key(self.session, event)
+        if event.kind == 'ENTRY':
+            self.entries.pop(position, None)
         model_entry = self.entries.get(position)
         identity = self.observe('engine_event', {
             'event': event, 'position_id': position, 'input_record_id': self.input_id,
@@ -326,13 +337,19 @@ def build_report(directory, session, *, final_record_id=None):
                 row['flags'].append('entry_consumed_inputs_unavailable')
             if len(entries) > 1:
                 row['flags'].append('multiple_acknowledged_entry_attempts')
+            capture_errors = any(receipt['payload'].get('prior_tracking_errors', 0) for message in messages
+                                 for receipt in results.get(message['intent']['record_id'], []))
+            if capture_errors:
+                row['flags'].append('capture_errors_reported')
             exits = [m for m in messages if m['event']['payload']['event']['kind'] == 'EXIT']
             exits.sort(key=lambda m: (m['intent']['observed_at'], m['intent']['record_id']))
             row['acknowledged_exit_record_ids'] = [m['event']['record_id'] for m in exits]
             if exits:
                 ex = exits[0]['event']
                 originating = by_id.get(ex['payload'].get('model_entry_record_id'))
-                if len(entries) > 1:
+                if capture_errors:
+                    row['outcome_status'] = 'unresolved_tracking_gap'
+                elif len(entries) > 1:
                     row['outcome_status'] = 'unresolved_duplicate_entry_delivery'
                 elif len(exits) > 1:
                     row['outcome_status'] = 'unresolved_duplicate_exit_delivery'
@@ -391,7 +408,7 @@ def build_report(directory, session, *, final_record_id=None):
                 'final_model_only_entry_keys': len(final_keys - posted_keys) if final_available else None,
                 'closed_communicated_model_outcomes': len(closed), 'unresolved_posted_positions': len(unresolved),
                 'mean_communicated_model_roi_closed_subset': sum(closed) / len(closed) if closed else None,
-                'complete_posted_cohort_mean_model_roi': sum(closed) / len(closed) if closed and not unresolved and not pending else None,
+                'complete_posted_cohort_mean_model_roi': sum(closed) / len(closed) if closed and not unresolved and not pending and not max_tracking_errors else None,
                 'broker_verified_trade_count': 0, 'broker_verified_pnl': None,
                 'unconfirmed_delivery_attempts': len(pending), 'simulated_or_unconfigured_attempts': len(simulated)},
             'posted_positions': positions,
