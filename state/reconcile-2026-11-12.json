@@ -6,19 +6,19 @@
  "missed_by_live": [],
  "phantom_in_live": [
   [
-   "AAPL",
+   "AMD",
+   "Phase2_MiddayPin_CreditSpread",
+   "171"
+  ],
+  [
+   "MSTR",
    "Phase1C_BullTrap_PutDebitSpread",
-   "33"
+   "77"
   ],
   [
-   "COIN",
+   "NVDA",
    "Phase2_MiddayPin_CreditSpread",
-   "91"
-  ],
-  [
-   "SPY",
-   "Phase2_MiddayPin_CreditSpread",
-   "78"
+   "114"
   ]
  ],
  "excluded": {}
