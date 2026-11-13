@@ -10,6 +10,10 @@ three capital slots), ported from the original backtest code and **verified agai
 16:25 ET  chronos-eod re-runs the day on final bars, reconciles live vs final, appends ledger/trades.csv, posts the forward record
 ```
 
+**Since 2026-11-13 only Phase 2 alerts are posted.** Phase 1 and Phase 3 are muted (still evaluated and logged every evening)
+after a forward record of -3.4% a trade over 74 P1 trades and -10.3% over 6 P3 trades, on model prices. Phase 2 (+3.3% over 40) is on a
+written keep-or-retire rule decided at 100 new trades: [`docs/P2_DECISION.md`](docs/P2_DECISION.md). The evening post shows the count.
+
 ## What an alert looks like
 
 ```

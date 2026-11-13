@@ -2,9 +2,11 @@ name: chronos-session
 
 # The live loop: polls Yahoo every minute from ~09:31 to the close and posts ENTRY / TP1 / EXIT alerts to Discord.
 #
-# Start-up: the Cloudflare `open-scheduler` Worker dispatches this workflow at ~09:20 ET (see docs/SETUP.md).
-# The two cron lines are only a DST-safe BACKUP - GitHub's native schedule runs hours late on this account.
-# A late start is harmless: the engine replays the minutes it missed and the sent-alert ledger de-duplicates.
+# One trigger: the Cloudflare `open-scheduler` Worker dispatches this workflow at ~09:20 ET (see docs/SETUP.md).
+# The two GitHub cron lines that used to sit behind it were removed on 2026-11-13: on this account GitHub starts
+# scheduled runs about 7 hours late, so every one of them landed after the close and did nothing. If the Worker
+# fails, its own "did not start" alert fires, and the evening reconcile still records the day in the ledger.
+# To restore a backup: add `schedule: [{cron: "28 14 * * 1-5"}]` under `on:`.
 on:
   workflow_dispatch:
     inputs:
@@ -16,9 +18,6 @@ on:
         description: "manual | cf-scheduler | handoff"
         required: false
         default: "manual"
-  schedule:
-    - cron: "28 13 * * 1-5"   # 09:28 EDT (summer); at 08:28 EST (winter) the bot sees it is too early and exits
-    - cron: "28 14 * * 1-5"   # 09:28 EST (winter); at 10:28 EDT (summer) it joins late and catches up
 
 # One live loop at a time. A run queued behind it (hand-off or backup) waits, it never cancels the active one.
 concurrency:
@@ -50,6 +49,9 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           ACCOUNT_CAPITAL: ${{ vars.ACCOUNT_CAPITAL || '1500' }}   # default 1500; a repo variable overrides it
           SLOT_FRACTION: ${{ vars.SLOT_FRACTION }}
+          # Phases whose alerts are NOT posted (still evaluated and logged). Default P1,P3 since 2026-11-13;
+          # set the repo variable MUTED_PHASES to "none" to hear everything again. See docs/P2_DECISION.md.
+          MUTED_PHASES: ${{ vars.MUTED_PHASES || 'P1,P3' }}
           DRY_RUN: ${{ vars.DRY_RUN }}
           APEX_GIT_PUSH: "1"
           PYTHONUNBUFFERED: "1"

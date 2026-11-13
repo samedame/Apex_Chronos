@@ -18,9 +18,11 @@ on:
         description: "manual | cf-scheduler"
         required: false
         default: "manual"
+  # One backup behind the Worker's 16:25 ET dispatch. It is always after the close (16:25 EST / 17:25 EDT, and GitHub
+  # starts it hours late), and it does nothing when the day was already reconciled and posted. The second line
+  # ("25 20", 15:25 EST: before the close in winter) was removed on 2026-11-13; both used to re-post the summary.
   schedule:
-    - cron: "25 20 * * 1-5"   # 16:25 EDT / 15:25 EST - backup only, see docs/SETUP.md
-    - cron: "25 21 * * 1-5"   # 17:25 EDT / 16:25 EST
+    - cron: "25 21 * * 1-5"
 
 concurrency:
   group: chronos-eod
@@ -51,12 +53,16 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           ACCOUNT_CAPITAL: ${{ vars.ACCOUNT_CAPITAL || '1500' }}   # default 1500; a repo variable overrides it
           SLOT_FRACTION: ${{ vars.SLOT_FRACTION }}
+          MUTED_PHASES: ${{ vars.MUTED_PHASES || 'P1,P3' }}   # only labels the by-phase line; every phase is still logged
           DRY_RUN: ${{ vars.DRY_RUN }}
           APEX_GIT_PUSH: "1"
           INPUT_DATE: ${{ inputs.date }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           if [ -n "$INPUT_DATE" ]; then
             python -m apex_chronos eod --date "$INPUT_DATE"
+          elif [ "$EVENT_NAME" = "schedule" ]; then
+            python -m apex_chronos eod --skip-if-done
           else
             python -m apex_chronos eod
           fi

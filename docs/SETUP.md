@@ -61,15 +61,19 @@ Both workflows already declare the `scheduled_for_et` and `trigger` inputs the W
 `Apex_Chronos` to it; until then the Worker posts a "could not start chronos-session ... HTTP 404" alert to its own Discord channel.
 To remove the jobs, delete the two entries and redeploy; nothing else in the Worker was touched.
 
-**Winter gap (starts Sunday 2026-11-01).** The Worker's cron triggers are `* 0-1 * * 2-6` and `* 11-20 * * 2-6` (UTC), i.e. up to 16:59 ET in summer
-but only up to 15:59 ET in winter. `chronos-session` (09:20) is covered all year; `chronos-eod` (16:25) is not covered in winter, so from November the EOD
-report falls back to the workflow's own `schedule:` backup (21:25 UTC = 16:25 EST, which may run late). The EOD report is not time-critical. The
-same gap already affects `shadow-daily` (16:20). Adding one more cron trigger, `* 21 * * 2-6`, to the Worker closes it for both.
+**Winter coverage.** The Worker's cron triggers are `* 0-1 * * 2-6` and `* 11-21 * * 2-6` (UTC) since November 2026, so the 16:25 ET
+`chronos-eod` slot (21:25 UTC in winter) is covered all year. Its dispatches arrive on time (for example 21:25:16 UTC on 2026-11-12).
 
-The two cron lines in each workflow are only a backup for DST (13:28 and 14:28 UTC for the session). A backup that fires more than
-45 minutes before the open, or after the close, exits immediately. A late start is harmless: the engine replays the minutes it missed
-and the sent-alert ledger in `state/` prevents duplicates. An entry that is more than 10 minutes old when the bot first sees it is
-posted as "Missed entry (stale), not actionable" instead.
+**One trigger per job (2026-11-13).** `chronos-session` is started by the Worker only: its two GitHub cron lines were removed because
+GitHub starts scheduled runs about 7 hours late on this account, so they always landed after the close and did nothing. `chronos-eod`
+keeps one backup line (21:25 UTC, always after the close); a backup run does nothing when the day is already reconciled and its
+summary posted (`eod --skip-if-done`), so the evening summary arrives once, not three times. A late manual start of the session is
+still harmless: the engine replays the minutes it missed and the sent-alert ledger in `state/` prevents duplicates. An entry that is
+more than 10 minutes old when the bot first sees it is posted as "Missed entry (stale), not actionable" instead.
+
+**Muted phases (2026-11-13).** The repo variable `MUTED_PHASES` (default `P1,P3`) lists phases whose alerts are not posted. They are
+still evaluated, still take their slots and are still written to `ledger/trades.csv` every evening, so the forward record is unchanged.
+Set it to `none` to hear every phase again. Phase 2 is on a written keep-or-retire rule: `docs/P2_DECISION.md`.
 
 ## 5. Go live gradually
 

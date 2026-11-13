@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 import requests
 
-from . import alert_confidence, alerts, config as C, data, history, state
+from . import alert_confidence, alerts, config as C, data, history, phase_review, state
 from .calendar_nyse import NY, bar_close_clock, is_full_session, minute_clock, now_et, session_open
 from .engine import Event, SessionEngine
 from .features import Features, compute_features, session_profiles
@@ -39,6 +39,7 @@ class Settings:
     max_runtime_min: Optional[float] = None
     tickers: List[str] = field(default_factory=lambda: list(C.TICKERS))
     cash_controls_enabled: bool = False
+    muted_phases: frozenset = frozenset()      # phases whose alerts are not posted; they are still evaluated and logged
 
     @classmethod
     def from_env(cls) -> 'Settings':
@@ -58,6 +59,7 @@ class Settings:
             entry_grace_s=f('ENTRY_GRACE_SECONDS', 150.0),
             poll_delay_s=f('POLL_DELAY_SECONDS', 6.0),
             cash_controls_enabled=enabled in ('1', 'true', 'yes'),
+            muted_phases=phase_review.parse_muted(os.environ.get('MUTED_PHASES')),
         )
 
 
@@ -77,6 +79,15 @@ class LiveSession:
         self.feed_fail = 0
         self.feed_alerted = False
         self.vix_delay = 0
+        self.muted = frozenset(cfg.muted_phases)
+        self.p2_retired = False
+        try:
+            # The P2 rule enforces itself: once the ledger says RETIRE, P2 alerts stop without anyone editing a setting.
+            self.p2_retired = phase_review.p2_is_retired(state.read_ledger(cfg.ledger_dir))
+        except Exception as e:                                 # noqa: BLE001 - a broken ledger must not stop the session
+            print(f'P2 review unavailable ({e!r}); P2 alerts stay as configured')
+        if self.p2_retired:
+            self.muted = self.muted | {phase_review.RULE['phase']}
 
     # -- before the open ----------------------------------------------------------------------
     def prepare(self) -> None:
@@ -92,6 +103,12 @@ class LiveSession:
         miss = next(iter(hist.values()))['missing'] if hist else []
         if miss:
             print(f'history sessions unavailable: {miss}')
+        if self.muted:
+            print(f"muted phases (evaluated and logged, not alerted): {', '.join(sorted(self.muted))}"
+                  + (' - P2 by its own retire rule' if self.p2_retired else ''))
+        if self.p2_retired and phase_review.RULE['phase'] not in self.cfg.muted_phases:
+            self._post("⚪ **APEX-CHRONOS: P2 alerts are now muted** - the Phase 2 decision rule in docs/P2_DECISION.md reached "
+                       "RETIRE. All three phases are still recorded in the ledger every evening.", key='p2-retired')
         if self.excluded:
             self._post(f"⚠ **APEX-CHRONOS degraded universe** {self.date}: not trading {', '.join(sorted(self.excluded))} today "
                        f"({'; '.join(f'{k}: {v}' for k, v in sorted(self.excluded.items()))}). The strategy needs its full history to match the backtest.",
@@ -232,12 +249,35 @@ class LiveSession:
         elif os.environ.get('GITHUB_ACTIONS') == 'true':
             raise CashControlError('durable cash-book publishing is required on an ephemeral runner')
 
+    def _silenced(self, ev: Event, key: str, late: float) -> bool:
+        """True if this event belongs to a muted phase and must not reach Discord.
+
+        A muted ENTRY is written to the sent-alert ledger (posted=False, muted=True) so the evening reconcile still
+        counts it as seen; its TP1/EXIT are dropped with it. An entry that WAS posted always gets its TP1 and EXIT,
+        even if its phase is muted later the same day. No cash is reserved for a muted entry.
+        """
+        if phase_review.phase_of(ev.module) not in self.muted:
+            return False
+        if ev.kind == 'ENTRY':
+            if key not in self.sent:
+                self.sent[key] = {'t': now_et().isoformat(timespec='seconds'), 'posted': False, 'muted': True,
+                                  'late_s': round(late, 1), 'pos': [ev.ticker, ev.module, ev.minute]}
+                state.save_sent(self.cfg.state_dir, self.date, self.sent)
+                print(f"muted (logged only): {ev.ticker} {ev.module} bar {minute_clock(ev.minute)}")
+            return True
+        if ev.kind in ('TP1', 'EXIT'):
+            m_entry = ev.data['m_entry'] if ev.kind == 'TP1' else ev.data['trade']['m_entry']
+            return (ev.ticker, ev.module, m_entry) not in self.posted_entries
+        return ev.kind == 'SKIP'
+
     def dispatch(self, events: List[Event], now: datetime) -> int:
         n = 0
         for ev in events:
             key = f"{self.date.isoformat()}|{ev.key}"
             close_dt = session_open(self.date) + timedelta(minutes=ev.minute + 1)
             late = max(0.0, (now - close_dt).total_seconds())
+            if self._silenced(ev, key, late):
+                continue
             if self.cfg.cash_controls_enabled and ev.kind in ('ENTRY', 'TP1', 'EXIT'):
                 n += self._dispatch_cash(ev, now, key, late)
                 continue
@@ -378,11 +418,24 @@ def final_day_inputs(http, cfg: Settings, d: date):
     return days, excluded
 
 
-def run_eod(cfg: Settings, d: Optional[date] = None) -> int:
+def eod_already_done(state_dir: str, d: date) -> bool:
+    """True if this session was reconciled AND its summary reached Discord (or was a dry run)."""
+    import json
+    try:
+        with open(os.path.join(state_dir, f'reconcile-{d.isoformat()}.json')) as fh:
+            return bool(json.load(fh).get('summary_posted'))
+    except (OSError, ValueError):
+        return False
+
+
+def run_eod(cfg: Settings, d: Optional[date] = None, skip_if_done: bool = False) -> int:
     from .replay import run_session
     d = d or now_et().date()
     if not is_full_session(d):
         print(f'{d}: not a full session; nothing to reconcile')
+        return 0
+    if skip_if_done and eod_already_done(cfg.state_dir, d):
+        print(f'{d}: already reconciled and posted by an earlier run; this backup run has nothing to do')
         return 0
     http = requests.Session()
     days, excluded = final_day_inputs(http, cfg, d)
@@ -424,9 +477,19 @@ def run_eod(cfg: Settings, d: Optional[date] = None) -> int:
         pf = w.sum() / max(abs(l.sum()), 1e-4)
         lines.append(f"Forward record since go-live: {len(r)} trades · win rate {len(w) / len(r) * 100:.1f}% · profit factor {pf:.2f} · "
                      f"mean {r.mean() * 100:+.2f}%/trade   (backtest: 110 trades · 57.3% · 1.86 · +7.01%)")
+    if rows:
+        try:
+            muted = set(cfg.muted_phases)
+            if phase_review.p2_is_retired(rows):
+                muted.add(phase_review.RULE['phase'])
+            lines += phase_review.eod_lines(rows, frozenset(muted))
+        except Exception as e:                                 # noqa: BLE001 - the summary must still go out
+            print(f'phase review failed for {d}: {e!r}')
     if excluded:
         lines.append(f"Excluded today: {excluded}")
-    alerts.post_discord(cfg.webhook, '\n'.join(lines), cfg.dry_run)
+    rec['summary_posted'] = bool(alerts.post_discord(cfg.webhook, '\n'.join(lines), cfg.dry_run))
+    with open(os.path.join(cfg.state_dir, f'reconcile-{d.isoformat()}.json'), 'w') as fh:
+        json.dump(rec, fh, indent=1)
     try:
         from . import shadow
         report = shadow.compare(
