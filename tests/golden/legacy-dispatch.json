@@ -1,0 +1,11 @@
+{
+  "baseline_commit": "f1b58bcf50269086d8f711f12f9bb85e9bca0e99",
+  "baseline_runner_sha256": "22349418d9aa1ce27d50b7584db02b35bd0d33b19694bd42b19386d9f3580089",
+  "messages": 235,
+  "message_sha256": "61e306fc4a9a3d29760cc71bece9f7ef2d8d8410c1dc7aba2d64bac54c58e7cc",
+  "capital": 1500,
+  "slot_fraction": 0.25,
+  "lateness_seconds": 7,
+  "vix_delay_minutes": 0,
+  "capture_mode": "offline_synthetic_no_network"
+}

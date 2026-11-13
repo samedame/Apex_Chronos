@@ -66,8 +66,13 @@ jobs:
       - name: Cash-only catalog and settlement replay
         run: python -m verification.verify_cash_shadow --data-dir verification/fixtures.tar.gz
 
+      - name: Immutable alert and outcome replay
+        run: python -m verification.verify_alert_tracking --data-dir verification/fixtures.tar.gz --output verification/alert-tracking-results.json
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: verification-report
-          path: verification/VERIFICATION_REPORT.md
+          path: |
+            verification/VERIFICATION_REPORT.md
+            verification/alert-tracking-results.json
