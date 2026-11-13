@@ -1,4 +1,15 @@
 {
+ "2026-11-13|ENTRY|AMD|Phase2_MiddayPin_CreditSpread|97": {
+  "conf": 49,
+  "late_s": 12.5,
+  "pos": [
+   "AMD",
+   "Phase2_MiddayPin_CreditSpread",
+   97
+  ],
+  "posted": true,
+  "t": "2026-11-13T11:08:12-05:00"
+ },
  "2026-11-13|ENTRY|COIN|Phase1A_GapTrap_Single0DTE|9": {
   "conf": 72,
   "late_s": 6.3,
