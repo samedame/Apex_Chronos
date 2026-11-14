@@ -65,6 +65,7 @@ def cmd_selftest(cfg: Settings, args) -> int:
     d = now_et().date()
     print(f'today {d}: full session = {is_full_session(d)}')
     print(f'webhook configured: {bool(cfg.webhook)} · capital: {cfg.capital} · slot fraction: {cfg.slot_fraction}')
+    print(f"muted phases: {', '.join(sorted(cfg.muted_phases)) or 'none'}")
     if args.post:
         ok = alerts.post_discord(cfg.webhook, '✅ APEX-CHRONOS self-test: Discord webhook works.', cfg.dry_run)
         print('discord post:', 'ok' if ok else 'FAILED')
@@ -79,6 +80,8 @@ def main(argv=None) -> int:
     p.add_argument('--max-runtime-min', type=float, default=None, help='stop after this many minutes and ask for a hand-off run')
     p = sub.add_parser('eod')
     p.add_argument('--date', default=None)
+    p.add_argument('--skip-if-done', action='store_true',
+                   help='backup trigger: do nothing if this session was already reconciled and its summary posted')
     p = sub.add_parser('once')
     p.add_argument('--date', default=None)
     p.add_argument('--at', default=None, help='evaluate through the bar closing at HH:MM ET (default: now)')
@@ -98,7 +101,7 @@ def main(argv=None) -> int:
         cfg.max_runtime_min = args.max_runtime_min
         return run_live(cfg)
     if args.cmd == 'eod':
-        return run_eod(cfg, date.fromisoformat(args.date) if args.date else None)
+        return run_eod(cfg, date.fromisoformat(args.date) if args.date else None, skip_if_done=args.skip_if_done)
     if args.cmd == 'once':
         return cmd_once(cfg, args)
     if args.cmd == 'replay':
