@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 import requests
 
-from . import alert_confidence, alerts, config as C, data, history, phase_review, state
+from . import alert_confidence, alerts, config as C, data, history, phase_review, state, verdict
 from .calendar_nyse import NY, bar_close_clock, is_full_session, minute_clock, now_et, session_open
 from .engine import Event, SessionEngine
 from .features import Features, compute_features, session_profiles
@@ -32,7 +32,7 @@ class Settings:
     webhook: Optional[str] = None
     dry_run: bool = False
     capital: Optional[float] = None
-    slot_fraction: float = 0.25
+    slot_fraction: float = 0.25                # production default is verdict.DEFAULT_SLOT_FRACTION (10%), set in from_env()
     entry_grace_s: float = 150.0
     stale_after_s: float = 600.0
     poll_delay_s: float = 6.0
@@ -40,6 +40,10 @@ class Settings:
     tickers: List[str] = field(default_factory=lambda: list(C.TICKERS))
     cash_controls_enabled: bool = False
     muted_phases: frozenset = frozenset()      # phases whose alerts are not posted; they are still evaluated and logged
+    # 2026-11-14 verdict controls (docs/VERDICT_2026-11-14.md): P1/P3 retired from alerts, P2 alerted only when a
+    # same-day expiry is listed, kill switch, P2 fair-vol grading and the raw-bar archive. On in production (from_env);
+    # off by default here so the verification harness and legacy tests exercise the unchanged engine and alerts.
+    verdict_controls: bool = False
 
     @classmethod
     def from_env(cls) -> 'Settings':
@@ -55,12 +59,17 @@ class Settings:
             webhook=os.environ.get('DISCORD_WEBHOOK_URL') or None,
             dry_run=os.environ.get('DRY_RUN', '').lower() in ('1', 'true', 'yes'),
             capital=f('ACCOUNT_CAPITAL'),
-            slot_fraction=f('SLOT_FRACTION', 0.25),
+            slot_fraction=f('SLOT_FRACTION', verdict.DEFAULT_SLOT_FRACTION),
             entry_grace_s=f('ENTRY_GRACE_SECONDS', 150.0),
             poll_delay_s=f('POLL_DELAY_SECONDS', 6.0),
             cash_controls_enabled=enabled in ('1', 'true', 'yes'),
             muted_phases=phase_review.parse_muted(os.environ.get('MUTED_PHASES')),
+            verdict_controls=True,
         )
+
+    @property
+    def retired_phases(self) -> frozenset:
+        return verdict.RETIRED_PHASES if self.verdict_controls else frozenset()
 
 
 # ---------------------------------------------------------------------------------------------
@@ -88,6 +97,12 @@ class LiveSession:
             print(f'P2 review unavailable ({e!r}); P2 alerts stay as configured')
         if self.p2_retired:
             self.muted = self.muted | {phase_review.RULE['phase']}
+        # Retired phases are muted in code: no repo variable can turn their alerts back on (they are still logged).
+        self.muted = self.muted | cfg.retired_phases
+        self.kill = verdict.load_kill_switch(cfg.state_dir) if cfg.verdict_controls else {'tripped': False, 'reasons': []}
+        if self.kill.get('tripped'):
+            self.muted = self.muted | frozenset(C.PHASE_LIMITS)
+        self.listing: Dict[tuple, str] = {}
 
     # -- before the open ----------------------------------------------------------------------
     def prepare(self) -> None:
@@ -106,6 +121,10 @@ class LiveSession:
         if self.muted:
             print(f"muted phases (evaluated and logged, not alerted): {', '.join(sorted(self.muted))}"
                   + (' - P2 by its own retire rule' if self.p2_retired else ''))
+        if self.kill.get('tripped'):
+            self._post("🛑 **APEX-CHRONOS kill switch tripped** - " + '; '.join(self.kill.get('reasons', [])) +
+                       ". No alerts today; every phase is still recorded in the ledger. It clears by itself at the first "
+                       "evening review where neither trigger holds.", key='kill-switch')
         if self.p2_retired and phase_review.RULE['phase'] not in self.cfg.muted_phases:
             self._post("⚪ **APEX-CHRONOS: P2 alerts are now muted** - the Phase 2 decision rule in docs/P2_DECISION.md reached "
                        "RETIRE. All three phases are still recorded in the ledger every evening.", key='p2-retired')
@@ -217,7 +236,8 @@ class LiveSession:
                 conf = self._confidence(ev, late, contracts=reservation['quantity'])
                 text = alerts.fmt_entry(str(self.date), ev, self.cfg.capital, self.cfg.slot_fraction,
                                         late, self.cfg.entry_grace_s, confidence=conf.lines() if conf else None,
-                                        cash_reservation=reservation)
+                                        cash_reservation=reservation,
+                                        listing=self.listing.get((ev.ticker, ev.module, ev.minute)))
                 pos = (ev.ticker, ev.module, ev.minute)
                 ok = self._post(text, key=key, pos=pos, posted=True, late=late, conf=conf.score if conf else None)
                 if ok:
@@ -249,6 +269,28 @@ class LiveSession:
         elif os.environ.get('GITHUB_ACTIONS') == 'true':
             raise CashControlError('durable cash-book publishing is required on an ephemeral runner')
 
+    def _unlisted(self, ev: Event, key: str, late: float, now: datetime) -> bool:
+        """True if this ENTRY has no same-day expiry listed for its ticker, so it must not be alerted.
+
+        The engine and the ledger are untouched (the trade is still recorded); only the Discord alert is withheld,
+        and its TP1/EXIT stay silent because the entry was never posted.
+        """
+        if not self.cfg.verdict_controls or ev.kind != 'ENTRY':
+            return False
+        pos = (ev.ticker, ev.module, ev.minute)
+        listed, source = verdict.listed_same_day(ev.ticker, self.date, now, Path(self.cfg.state_dir) / 'cash_options')
+        self.listing[pos] = source
+        if listed:
+            return False
+        if key not in self.sent:
+            self._post(f"⚪ {ev.ticker} {ev.module} at {minute_clock(ev.minute)}: no same-day expiry listed for {ev.ticker} "
+                       f"today ({source}) - not actionable, recorded in the paper ledger only.", key=key, pos=pos,
+                       posted=False, late=late)
+            if key in self.sent:
+                self.sent[key]['unlisted'] = True
+                state.save_sent(self.cfg.state_dir, self.date, self.sent)
+        return True
+
     def _silenced(self, ev: Event, key: str, late: float) -> bool:
         """True if this event belongs to a muted phase and must not reach Discord.
 
@@ -278,6 +320,8 @@ class LiveSession:
             late = max(0.0, (now - close_dt).total_seconds())
             if self._silenced(ev, key, late):
                 continue
+            if self._unlisted(ev, key, late, now):
+                continue
             if self.cfg.cash_controls_enabled and ev.kind in ('ENTRY', 'TP1', 'EXIT'):
                 n += self._dispatch_cash(ev, now, key, late)
                 continue
@@ -290,7 +334,8 @@ class LiveSession:
                 else:
                     conf = self._confidence(ev, late)
                     text = alerts.fmt_entry(self.date.isoformat(), ev, self.cfg.capital, self.cfg.slot_fraction, late, self.cfg.entry_grace_s,
-                                            confidence=conf.lines() if conf else None)
+                                            confidence=conf.lines() if conf else None,
+                                            listing=self.listing.get((ev.ticker, ev.module, ev.minute)))
                     if self._post(text, key=key, pos=pos, posted=True, late=late, conf=conf.score if conf else None):
                         self.posted_entries.add(pos)
                         n += 1
@@ -457,6 +502,16 @@ def run_eod(cfg: Settings, d: Optional[date] = None, skip_if_done: bool = False)
     state.replace_day_in_ledger(cfg.ledger_dir, d, trades)
     profiles = {t: session_profiles(td.O, td.C, td.V) for t, td in days.items()}
     history.save_session(cfg.state_dir, d, profiles)
+    if cfg.verdict_controls:
+        try:
+            verdict.save_bars(cfg.state_dir, d, days)
+        except Exception as e:                                 # noqa: BLE001 - the archive must never block the reconcile
+            print(f'bar archive failed for {d}: {e!r}')
+        try:
+            verdict.write_grading(cfg.ledger_dir, d, verdict.grade_p2_day(
+                d, days, trades, Path(cfg.state_dir) / 'cash_options', session_open(d), state_dir=cfg.state_dir))
+        except Exception as e:                                 # noqa: BLE001
+            print(f'P2 grading failed for {d}: {e!r}')
     rec = {'date': d.isoformat(), 'live_entries': len(live_entries), 'final_entries': len(final_entries),
            'matched': matched, 'missed_by_live': [list(x) for x in missed], 'phantom_in_live': [list(x) for x in phantom],
            'excluded': excluded}
@@ -479,12 +534,20 @@ def run_eod(cfg: Settings, d: Optional[date] = None, skip_if_done: bool = False)
                      f"mean {r.mean() * 100:+.2f}%/trade   (backtest: 110 trades · 57.3% · 1.86 · +7.01%)")
     if rows:
         try:
-            muted = set(cfg.muted_phases)
+            muted = set(cfg.muted_phases) | set(cfg.retired_phases)
             if phase_review.p2_is_retired(rows):
                 muted.add(phase_review.RULE['phase'])
             lines += phase_review.eod_lines(rows, frozenset(muted))
         except Exception as e:                                 # noqa: BLE001 - the summary must still go out
             print(f'phase review failed for {d}: {e!r}')
+    if rows and cfg.verdict_controls:
+        try:
+            lines += verdict.grading_lines(cfg.ledger_dir)
+            ks = verdict.kill_switch_status(rows, cfg.slot_fraction, alerted_phases=frozenset(C.PHASE_LIMITS) - cfg.retired_phases)
+            verdict.save_kill_switch(cfg.state_dir, ks)
+            lines.append(verdict.kill_switch_line(ks))
+        except Exception as e:                                 # noqa: BLE001 - the summary must still go out
+            print(f'verdict controls failed for {d}: {e!r}')
     if excluded:
         lines.append(f"Excluded today: {excluded}")
     rec['summary_posted'] = bool(alerts.post_discord(cfg.webhook, '\n'.join(lines), cfg.dry_run))

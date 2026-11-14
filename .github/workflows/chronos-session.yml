@@ -49,8 +49,9 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           ACCOUNT_CAPITAL: ${{ vars.ACCOUNT_CAPITAL || '1500' }}   # default 1500; a repo variable overrides it
           SLOT_FRACTION: ${{ vars.SLOT_FRACTION }}
-          # Phases whose alerts are NOT posted (still evaluated and logged). Default P1,P3 since 2026-11-13;
-          # set the repo variable MUTED_PHASES to "none" to hear everything again. See docs/P2_DECISION.md.
+          # Phases whose alerts are NOT posted (still evaluated and logged). P1 and P3 are retired in code since
+          # 2026-11-14 (docs/VERDICT_2026-11-14.md), so "none" no longer brings them back; this can still mute P2.
+          # SLOT_FRACTION unset = 10% per slot (verdict default).
           MUTED_PHASES: ${{ vars.MUTED_PHASES || 'P1,P3' }}
           DRY_RUN: ${{ vars.DRY_RUN }}
           TRADIER_API_KEY: ${{ secrets.TRADIER_API_KEY }}

@@ -45,7 +45,8 @@ def _sizing_line(cost_basis: float, capital: Optional[float], slot_fraction: flo
 
 
 def fmt_entry(date: str, ev, capital=None, slot_fraction=0.25, late_s: float = 0.0, grace_s: float = 150.0,
-              confidence: Optional[str] = None, cash_reservation: Optional[dict] = None) -> str:
+              confidence: Optional[str] = None, cash_reservation: Optional[dict] = None,
+              listing: Optional[str] = None) -> str:
     d = ev.data
     side = 'CALL' if d['direction'] == 1 else 'PUT'
     m = ev.minute
@@ -58,7 +59,8 @@ def fmt_entry(date: str, ev, capital=None, slot_fraction=0.25, late_s: float = 0
     lines.append(f"{head} **APEX-CHRONOS ENTRY** - {ev.ticker} {d['phase']} · slot {d['slot'] + 1}/{C.N_SLOTS}{late}")
     if confidence:
         lines.append(confidence)
-    lines.append(f"**{d['legs']}**   exp TODAY (0DTE) - the backtest assumed a same-day expiry")
+    lines.append(f"**{d['legs']}**   exp TODAY (0DTE) - "
+                 + (f"same-day expiry listed today ({listing})" if listing else "the backtest assumed a same-day expiry"))
     lines.append(f"Signal: {ev.module} · bar {minute_clock(m)} closed {bar_close_clock(m)} ET · underlying {d['S_entry']:.2f}")
     if credit:
         lines.append(f"Model credit ${d['credit']:.2f}/share on a ${d['width']:g}-wide spread -> collateral (max loss) ${cb:.2f}/share "
