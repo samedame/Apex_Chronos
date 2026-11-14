@@ -1,0 +1,63 @@
+date,time_et,event,kind,source
+2026-01-28,14:00,FOMC statement,fomc,federalreserve.gov/monetarypolicy/fomccalendars.htm (decision day = second day; 14:00 ET is standard practice and is not stated on the page)
+2026-03-18,14:00,FOMC statement,fomc,federalreserve.gov (as above)
+2026-04-29,14:00,FOMC statement,fomc,federalreserve.gov (as above)
+2026-06-17,14:00,FOMC statement,fomc,federalreserve.gov (as above)
+2026-07-29,14:00,FOMC statement,fomc,federalreserve.gov (as above)
+2026-09-16,14:00,FOMC statement,fomc,federalreserve.gov (as above)
+2026-10-28,14:00,FOMC statement,fomc,federalreserve.gov (as above)
+2026-12-09,14:00,FOMC statement,fomc,federalreserve.gov (as above; no press conference listed)
+2027-01-27,14:00,FOMC statement,fomc,federalreserve.gov (2027 dates tentative until confirmed)
+2027-03-17,14:00,FOMC statement,fomc,federalreserve.gov (tentative)
+2027-04-28,14:00,FOMC statement,fomc,federalreserve.gov (tentative)
+2027-06-09,14:00,FOMC statement,fomc,federalreserve.gov (tentative)
+2027-07-28,14:00,FOMC statement,fomc,federalreserve.gov (tentative)
+2027-09-15,14:00,FOMC statement,fomc,federalreserve.gov (tentative)
+2027-10-27,14:00,FOMC statement,fomc,federalreserve.gov (tentative; also labeled Monetary Policy Strategy Meeting)
+2027-11-17,14:00,FOMC statement,fomc,federalreserve.gov (tentative)
+2026-11-10,08:30,CPI (Oct 2026),cpi,bls.gov/schedule/news_release/cpi.htm
+2026-12-10,08:30,CPI (Nov 2026),cpi,bls.gov
+2027-01-13,08:30,CPI (Dec 2026),cpi,bls.gov
+2027-02-11,08:30,CPI (Jan 2027),cpi,bls.gov
+2027-03-10,08:30,CPI (Feb 2027),cpi,bls.gov
+2027-04-13,08:30,CPI (Mar 2027),cpi,bls.gov
+2027-05-12,08:30,CPI (Apr 2027),cpi,bls.gov
+2027-06-10,08:30,CPI (May 2027),cpi,bls.gov
+2027-07-14,08:30,CPI (Jun 2027),cpi,bls.gov
+2027-08-11,08:30,CPI (Jul 2027),cpi,bls.gov
+2027-09-14,08:30,CPI (Aug 2027),cpi,bls.gov
+2027-10-14,08:30,CPI (Sep 2027),cpi,bls.gov
+2027-11-10,08:30,CPI (Oct 2027),cpi,bls.gov
+2027-12-10,08:30,CPI (Nov 2027),cpi,bls.gov
+2026-11-06,08:30,Employment Situation (Oct 2026),nfp,bls.gov/schedule/news_release/empsit.htm
+2026-12-04,08:30,Employment Situation (Nov 2026),nfp,bls.gov
+2027-01-08,08:30,Employment Situation (Dec 2026),nfp,bls.gov
+2027-02-05,08:30,Employment Situation (Jan 2027),nfp,bls.gov
+2027-03-05,08:30,Employment Situation (Feb 2027),nfp,bls.gov
+2027-04-02,08:30,Employment Situation (Mar 2027),nfp,bls.gov
+2027-05-07,08:30,Employment Situation (Apr 2027),nfp,bls.gov
+2027-06-04,08:30,Employment Situation (May 2027),nfp,bls.gov
+2027-07-02,08:30,Employment Situation (Jun 2027),nfp,bls.gov
+2027-08-06,08:30,Employment Situation (Jul 2027),nfp,bls.gov
+2027-09-03,08:30,Employment Situation (Aug 2027),nfp,bls.gov
+2027-10-08,08:30,Employment Situation (Sep 2027),nfp,bls.gov
+2027-11-05,08:30,Employment Situation (Oct 2027),nfp,bls.gov
+2027-12-03,08:30,Employment Situation (Nov 2027),nfp,bls.gov
+2026-11-13,08:30,PPI (Oct 2026),ppi,bls.gov/schedule/news_release/ppi.htm
+2026-12-15,08:30,PPI (Nov 2026),ppi,bls.gov
+2027-01-14,08:30,PPI (Dec 2026),ppi,bls.gov
+2027-02-12,08:30,PPI (Jan 2027),ppi,bls.gov
+2027-03-12,08:30,PPI (Feb 2027),ppi,bls.gov
+2027-04-14,08:30,PPI (Mar 2027),ppi,bls.gov
+2027-05-13,08:30,PPI (Apr 2027),ppi,bls.gov
+2027-06-11,08:30,PPI (May 2027),ppi,bls.gov
+2027-07-15,08:30,PPI (Jun 2027),ppi,bls.gov
+2027-08-10,08:30,PPI (Jul 2027),ppi,bls.gov
+2027-09-10,08:30,PPI (Aug 2027),ppi,bls.gov
+2027-10-15,08:30,PPI (Sep 2027),ppi,bls.gov
+2027-11-12,08:30,PPI (Oct 2027),ppi,bls.gov
+2027-12-15,08:30,PPI (Nov 2027),ppi,bls.gov
+2026-11-25,08:30,Personal Income and Outlays (Oct 2026),pce,bea.gov/news/schedule
+2026-12-23,08:30,Personal Income and Outlays (Nov 2026),pce,bea.gov/news/schedule
+2026-11-25,08:30,GDP second estimate Q3 2026,gdp,bea.gov/news/schedule
+2026-12-23,08:30,GDP third estimate Q3 2026,gdp,bea.gov/news/schedule

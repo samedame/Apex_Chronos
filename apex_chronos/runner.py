@@ -44,6 +44,9 @@ class Settings:
     # same-day expiry is listed, kill switch, P2 fair-vol grading and the raw-bar archive. On in production (from_env);
     # off by default here so the verification harness and legacy tests exercise the unchanged engine and alerts.
     verdict_controls: bool = False
+    # 2026-11-14 lab programme (docs/LAB_PROGRAMME.md): observation-only chain snapshots, quote ledger and shadow rows. It never
+    # changes a signal, threshold, exit, ticker or alert byte. Off by default; on in production via from_env (LAB_ENABLED=0 turns it off).
+    lab_enabled: bool = False
 
     @classmethod
     def from_env(cls) -> 'Settings':
@@ -65,6 +68,7 @@ class Settings:
             cash_controls_enabled=enabled in ('1', 'true', 'yes'),
             muted_phases=phase_review.parse_muted(os.environ.get('MUTED_PHASES')),
             verdict_controls=True,
+            lab_enabled=os.environ.get('LAB_ENABLED', '1').strip().lower() not in ('0', 'false', 'no'),
         )
 
     @property
@@ -103,6 +107,23 @@ class LiveSession:
         if self.kill.get('tripped'):
             self.muted = self.muted | frozenset(C.PHASE_LIMITS)
         self.listing: Dict[tuple, str] = {}
+        self.lab = None
+
+    def _start_lab(self) -> None:
+        """Observation-only lab runtime (docs/LAB_PROGRAMME.md). Any failure leaves the session exactly as it was."""
+        if not self.cfg.lab_enabled:
+            return
+        try:
+            from .lab import runtime as lab_runtime
+            post = None
+            if os.environ.get('LAB_DISCORD', '1').strip().lower() not in ('0', 'false', 'no'):
+                post = lambda key, text: alerts.post_discord(self.cfg.webhook, text, dry_run=self.cfg.dry_run)    # noqa: E731
+            self.lab = lab_runtime.LabRuntime(self.cfg.state_dir, self.date, self.cfg.tickers, self.http, post=post)
+            self.lab.pre_open()
+            self.lab.start()
+        except Exception as e:                                 # noqa: BLE001
+            print(f'lab runtime unavailable: {type(e).__name__}: {str(e)[:100]}')
+            self.lab = None
 
     # -- before the open ----------------------------------------------------------------------
     def prepare(self) -> None:
@@ -125,6 +146,7 @@ class LiveSession:
             self._post("🛑 **APEX-CHRONOS kill switch tripped** - " + '; '.join(self.kill.get('reasons', [])) +
                        ". No alerts today; every phase is still recorded in the ledger. It clears by itself at the first "
                        "evening review where neither trigger holds.", key='kill-switch')
+        self._start_lab()
         if self.p2_retired and phase_review.RULE['phase'] not in self.cfg.muted_phases:
             self._post("⚪ **APEX-CHRONOS: P2 alerts are now muted** - the Phase 2 decision rule in docs/P2_DECISION.md reached "
                        "RETIRE. All three phases are still recorded in the ledger every evening.", key='p2-retired')
@@ -322,6 +344,8 @@ class LiveSession:
                 continue
             if self._unlisted(ev, key, late, now):
                 continue
+            if self.lab is not None:
+                self.lab.on_event(ev, key, alerted=late <= self.cfg.stale_after_s)
             if self.cfg.cash_controls_enabled and ev.kind in ('ENTRY', 'TP1', 'EXIT'):
                 n += self._dispatch_cash(ev, now, key, late)
                 continue
@@ -425,6 +449,8 @@ def run_live(cfg: Settings) -> int:
     sess.prepare()
     # sanity guard: if SPY has no 09:30 bar 10 minutes after the open, the market is closed or the feed is broken
     finished = sess.run(started)
+    if sess.lab is not None:
+        sess.lab.close()
     state.git_commit_push([cfg.state_dir], f'apex-chronos {d} session state')
     set_out(not finished)
     print('session finished' if finished else 'runtime cap reached - handing off to the next run')
@@ -502,16 +528,26 @@ def run_eod(cfg: Settings, d: Optional[date] = None, skip_if_done: bool = False)
     state.replace_day_in_ledger(cfg.ledger_dir, d, trades)
     profiles = {t: session_profiles(td.O, td.C, td.V) for t, td in days.items()}
     history.save_session(cfg.state_dir, d, profiles)
+    grading: List[Dict] = []
     if cfg.verdict_controls:
         try:
             verdict.save_bars(cfg.state_dir, d, days)
         except Exception as e:                                 # noqa: BLE001 - the archive must never block the reconcile
             print(f'bar archive failed for {d}: {e!r}')
         try:
-            verdict.write_grading(cfg.ledger_dir, d, verdict.grade_p2_day(
-                d, days, trades, Path(cfg.state_dir) / 'cash_options', session_open(d), state_dir=cfg.state_dir))
+            grading = verdict.grade_p2_day(
+                d, days, trades, Path(cfg.state_dir) / 'cash_options', session_open(d), state_dir=cfg.state_dir)
+            verdict.write_grading(cfg.ledger_dir, d, grading)
         except Exception as e:                                 # noqa: BLE001
             print(f'P2 grading failed for {d}: {e!r}')
+    if cfg.lab_enabled and cfg.verdict_controls:
+        try:
+            from .lab import runtime as lab_runtime
+            fair = {(g['date'], g['ticker'], int(g['m_entry'])): g['roi_fair'] for g in grading if g.get('roi_fair') is not None}
+            lab_rows = lab_runtime.eod(cfg, d, days, trades, fair)
+            print(f'lab shadow rows written: {lab_rows}')
+        except Exception as e:                                 # noqa: BLE001
+            print(f'lab EOD failed for {d}: {e!r}')
     rec = {'date': d.isoformat(), 'live_entries': len(live_entries), 'final_entries': len(final_entries),
            'matched': matched, 'missed_by_live': [list(x) for x in missed], 'phantom_in_live': [list(x) for x in phantom],
            'excluded': excluded}
