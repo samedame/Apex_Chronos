@@ -14,6 +14,8 @@ three capital slots), ported from the original backtest code and **verified agai
 after a forward record of -3.4% a trade over 74 P1 trades and -10.3% over 6 P3 trades, on model prices. Phase 2 (+3.3% over 40) is on a
 written keep-or-retire rule decided at 100 new trades: [`docs/P2_DECISION.md`](docs/P2_DECISION.md). The evening post shows the count.
 
+**Since 2026-11-14 ([`docs/VERDICT_2026-11-14.md`](docs/VERDICT_2026-11-14.md)):** P1 and P3 are retired from alerting in code; a P2 entry is alerted only when a same-day expiry is listed; every P2 trade is also graded at a fair implied vol (`ledger/p2_grading.csv`); a kill switch mutes everything after a 15% model drawdown or a -3% session; default sizing is 10% per slot; final 1-minute bars are archived in `state/bars/`. No signal, exit or ledger trade changed.
+
 ## What an alert looks like
 
 ```

@@ -2,3 +2,4 @@
 -r requirements-quotes.txt
 -r requirements-cash-controls.txt
 pytest==8.3.4
+pyyaml==6.0.3   # tests/test_phase_review.py reads the workflow files

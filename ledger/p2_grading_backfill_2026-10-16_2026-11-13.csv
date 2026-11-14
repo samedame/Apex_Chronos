@@ -1,0 +1,40 @@
+date,ticker,m_entry,m_exit_model,roi_model,exit_model,listed_same_day,listing_source,iv_model_entry,rv_forecast,rv_sessions,iv_fair_entry,roi_fair,exit_fair,m_exit_fair,regrade_matches_ledger
+2026-10-16,AMD,103,183,0.039181,time_stop,1,static schedule (no catalog snapshot),0.5318,,0,,,,,1
+2026-10-16,AMZN,155,186,-0.214231,stop_loss,1,static schedule (no catalog snapshot),0.2573,,0,,,,,1
+2026-10-19,QQQ,78,158,-0.027084,time_stop,1,static schedule (no catalog snapshot),0.2107,,1,,,,,1
+2026-10-19,MSFT,98,178,0.076015,time_stop,1,static schedule (no catalog snapshot),0.2461,,1,,,,,1
+2026-10-20,IWM,79,159,0.08218,time_stop,1,static schedule (no catalog snapshot),0.2197,,2,,,,,1
+2026-10-20,SPY,89,169,0.136702,time_stop,1,static schedule (no catalog snapshot),0.1754,,2,,,,,1
+2026-10-21,META,89,169,-4e-05,time_stop,1,static schedule (no catalog snapshot),0.4226,,3,,,,,1
+2026-10-22,SPY,79,159,0.132303,time_stop,1,static schedule (no catalog snapshot),0.1944,,4,,,,,0
+2026-10-22,QQQ,84,164,0.091998,time_stop,1,static schedule (no catalog snapshot),0.23,,4,,,,,1
+2026-10-23,TSLA,113,193,0.131804,time_stop,1,static schedule (no catalog snapshot),0.4399,0.2401,5,0.2882,0.155792,time_stop,193,1
+2026-10-23,AAPL,210,290,-0.024429,time_stop,1,static schedule (no catalog snapshot),0.2162,0.1356,5,0.1627,-0.203921,stop_loss,234,1
+2026-10-26,META,81,161,0.062155,time_stop,1,static schedule (no catalog snapshot),0.473,0.2438,6,0.2926,0.077109,time_stop,161,1
+2026-10-26,COIN,89,169,0.01527,time_stop,0,static schedule (no catalog snapshot),0.5974,0.3897,6,0.4676,0.011002,time_stop,169,0
+2026-10-27,META,95,175,0.055501,time_stop,0,static schedule (no catalog snapshot),0.4352,0.2467,7,0.296,0.06673,time_stop,175,1
+2026-10-28,AAPL,80,160,0.078424,time_stop,1,static schedule (no catalog snapshot),0.1755,0.1342,8,0.161,0.082031,time_stop,160,1
+2026-10-28,META,89,169,0.047579,time_stop,1,static schedule (no catalog snapshot),0.4125,0.2369,8,0.2843,0.051646,time_stop,169,1
+2026-10-29,MSFT,90,170,0.078204,time_stop,0,static schedule (no catalog snapshot),0.2117,0.1316,9,0.1579,0.090804,time_stop,170,1
+2026-10-29,AMD,105,185,0.073234,time_stop,0,static schedule (no catalog snapshot),0.5936,0.282,9,0.3384,0.098894,time_stop,185,1
+2026-10-30,AAPL,83,163,0.119644,time_stop,1,static schedule (no catalog snapshot),0.1927,0.1289,10,0.1547,0.151547,profit_trail,162,0
+2026-10-30,AMZN,102,182,0.051141,time_stop,1,static schedule (no catalog snapshot),0.4363,0.1635,10,0.1962,-0.215857,stop_loss,108,1
+2026-11-02,TSLA,81,161,0.048095,time_stop,1,static schedule (no catalog snapshot),0.4172,0.2344,11,0.2813,0.0532,time_stop,161,1
+2026-11-02,COIN,121,201,0.036869,time_stop,0,static schedule (no catalog snapshot),0.7684,0.3765,11,0.4518,0.041271,time_stop,201,1
+2026-11-03,SPY,84,164,0.022436,time_stop,1,static schedule (no catalog snapshot),0.2039,0.0848,12,0.1018,0.01577,time_stop,164,1
+2026-11-03,COIN,113,193,0.078923,time_stop,0,static schedule (no catalog snapshot),0.8024,0.3808,12,0.457,0.101998,time_stop,193,1
+2026-11-04,AAPL,86,166,-0.093442,time_stop,1,static schedule (no catalog snapshot),0.1923,0.1459,13,0.175,-0.094555,time_stop,166,1
+2026-11-04,IWM,119,199,0.164586,time_stop,1,static schedule (no catalog snapshot),0.229,0.1102,13,0.1323,0.185665,time_stop,199,1
+2026-11-05,META,84,164,0.190071,time_stop,0,static schedule (no catalog snapshot),0.7286,0.2287,14,0.2744,0.21645,time_stop,164,1
+2026-11-05,NVDA,86,135,0.153882,profit_trail,0,static schedule (no catalog snapshot),0.6331,0.1966,14,0.2359,-0.201115,stop_loss,90,1
+2026-11-06,MSFT,77,157,0.039617,time_stop,1,static schedule (no catalog snapshot),0.5485,0.1755,14,0.2106,0.045248,time_stop,157,1
+2026-11-06,NVDA,111,191,-0.085582,time_stop,1,static schedule (no catalog snapshot),0.7221,0.2255,14,0.2706,-0.411738,stop_loss,187,1
+2026-11-09,TSLA,85,165,0.050433,time_stop,1,static schedule (no catalog snapshot),0.7339,0.2742,14,0.3291,0.071945,time_stop,165,1
+2026-11-09,NVDA,90,138,0.141532,profit_trail,1,static schedule (no catalog snapshot),0.6081,0.248,14,0.2976,0.146496,profit_trail,143,0
+2026-11-10,IWM,87,167,0.067218,time_stop,1,static schedule (no catalog snapshot),0.2615,0.1269,14,0.1523,0.096818,time_stop,167,1
+2026-11-10,SPY,87,167,0.033752,time_stop,1,static schedule (no catalog snapshot),0.2082,0.1049,14,0.1259,0.030532,time_stop,167,1
+2026-11-11,TSLA,92,172,0.054877,time_stop,1,static schedule (no catalog snapshot),0.6747,0.2794,14,0.3353,0.076987,time_stop,172,1
+2026-11-11,NVDA,98,178,-0.029832,time_stop,1,static schedule (no catalog snapshot),0.5644,0.522,14,0.6264,-0.023842,time_stop,178,1
+2026-11-12,SPY,78,101,-0.214284,stop_loss,1,Nasdaq options directory,0.1789,0.1082,14,0.1299,-0.211865,stop_loss,96,1
+2026-11-12,COIN,91,171,-0.023519,time_stop,0,Nasdaq options directory,0.8197,0.5055,14,0.6066,-0.226545,stop_loss,99,1
+2026-11-13,AMD,97,177,0.02169,time_stop,1,Nasdaq options directory,1.6778,0.4363,14,0.5236,-0.032346,time_stop,177,1

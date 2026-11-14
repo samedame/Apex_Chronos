@@ -17,7 +17,7 @@
   "even_lots": true,
   "feed": "opra",
   "floor_fraction": 0.6,
-  "frozen_at": "2026-11-12T04:32:08.141222+00:00",
+  "frozen_at": "2026-11-14T00:00:00+00:00",
   "hold_minutes": 50,
   "inference": {
     "block_sessions": 5,
@@ -34,7 +34,7 @@
   "max_spread_fraction": 0.2,
   "min_quote_poll_coverage": 0.95,
   "minimum_contracts": 2,
-  "not_before_session": "2026-11-12",
+  "not_before_session": "2026-11-16",
   "operating_mode": "observation_only",
   "poll_seconds": 5,
   "primary_scenario": "slip_0.01",
@@ -107,7 +107,7 @@
     "cash_catalog.py": "cf1cf5bdcf486e207b04a500aab3e9212d61200301c578f51c27a538dcb9e61e",
     "cash_shadow.py": "c536e5f41749e6bd123327da30107744801284720645d2ba7ff365c5949a9097",
     "config.py": "a65f3fa1398be4ba4a182633e55c1c27c09ebb463c9addd6ba15e9d2f1894e43",
-    "data.py": "f976b1aa481b2bb25749597b6585d10ac72948e9a9672848c816c4c7c8b5ff77",
+    "data.py": "800bea11511e394192373aeab66fa789a19bd850380e1186fd5fafafeb439294",
     "engine.py": "7be6576374d8f263dc8d6609b2c8fc1401a1653850e3fb38926b9f5ff9eaa274",
     "features.py": "659149b7162693312fd6ea2318f290b199a994f408b1e0d94842afcc08a191c8",
     "history.py": "6367806d720f695886270f73996b610950002a82b0f92d1ba4ab6301e2796f7c",
@@ -139,5 +139,5 @@
   ],
   "tp1_fraction": 0.9,
   "trail_fraction": 0.72,
-  "trial_id": "cash_quotes_p1a_v1"
+  "trial_id": "cash_quotes_p1a_v2_20261114"
 }
