@@ -35,8 +35,8 @@ history the repo does not have are marked DEFER with the exact trigger that unbl
 | `apex_chronos/lab/killswitch_alt.py` | five alternative kill-switch rules evaluated daily, logged, never applied | EOD |
 | `apex_chronos/lab/fills.py` | fill-entry helper and empirical fill/latency model | manual + EOD |
 | `apex_chronos/lab/regrade_quotes.py` | regrade archived trades from any NBBO CSV (ThetaData/Massive export) at real mid and taker | on demand |
-| `scripts/lab_replay.py`, `scripts/lab_stress.py`, `scripts/lab_snapshot.py` | replay of the pre-registered tests; stress-day harness; snapshot CLI | on demand / workflow |
-| `.github/workflows/lab-snapshots.yml` | scheduled chain + cross-asset snapshots at 09:25, 09:45, 10:00, 11:30, 12:30, 13:30, 14:30, 15:30 ET | GitHub Actions |
+| `scripts/lab_replay.py`, `scripts/lab_stress.py`, `scripts/lab_snapshot.py` | replay of the pre-registered tests (refuses to run unless `docs/LAB_PREREG.md` is committed and unmodified); stress-day gate; manual capture CLI | on demand |
+| `apex_chronos/lab/runtime.py` + `lab/stress.py` | in-session scheduler (chain snapshots at 09:45, 10:00, 11:30, 12:30, 13:30, 14:30, 15:30 ET, cross-asset capture at 09:25 / 11:30 / 13:30, Cboe and earnings/dividend refresh), quote-tracker hooks, EOD shadow rows; stress-day scoring | live loop and EOD job (`LAB_ENABLED`, `LAB_DISCORD`) |
 
 Full per-item disposition: `docs/LAB_CATALOGUE.md` (generated from `apex_chronos/lab/catalogue.py`; a test checks that
 every BUILT item points at a real function).
@@ -56,3 +56,16 @@ every BUILT item points at a real function).
 
 After the Feb-2027 verdict, any flag that passes its pre-registered support criterion can be promoted to a live alert filter
 by changing `Settings` (a new pre-registered P2 variant), not by editing this code. Nothing is promoted automatically.
+
+## Switches and cost
+
+* `LAB_ENABLED` (default on in production via `Settings.from_env`, off in the harness and legacy tests): `0` turns every lab hook off.
+* `LAB_DISCORD` (default on): `0` stops the separate "observation only" quote follow-up message that follows each P2 alert.
+  The alert itself is never edited.
+* The live session starts one daemon thread for snapshots and one for the quote tracker. Both swallow their own exceptions.
+* Git growth: chain snapshots are roughly 0.3-0.5 MB per day gzipped (about 80-125 MB per year). Trim `snapshots.SNAPSHOT_LABELS`
+  if the repository size matters.
+
+## First replay
+
+`docs/LAB_REPLAY_2026-11-14.md` holds the descriptive replay of R1-R8 on the 39 archived P2 trades.

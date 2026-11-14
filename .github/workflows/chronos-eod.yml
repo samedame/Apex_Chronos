@@ -58,6 +58,8 @@ jobs:
           TRADIER_API_KEY: ${{ secrets.TRADIER_API_KEY }}
           TRADIER_BASE_URL: ${{ secrets.TRADIER_BASE_URL }}
           CHRONOS_TRADIER_BARS: ${{ vars.CHRONOS_TRADIER_BARS }}
+          LAB_ENABLED: ${{ vars.LAB_ENABLED || '1' }}          # observation-only lab programme (docs/LAB_PROGRAMME.md); 0 turns it off
+          LAB_DISCORD: ${{ vars.LAB_DISCORD || '1' }}
           APEX_GIT_PUSH: "1"
           INPUT_DATE: ${{ inputs.date }}
           EVENT_NAME: ${{ github.event_name }}
