@@ -43,6 +43,11 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: Log capital source
+        env:
+          CAPITAL_VAR: ${{ vars.ACCOUNT_CAPITAL }}
+        run: |
+          if [ -n "$CAPITAL_VAR" ]; then echo "capital=$CAPITAL_VAR source=repo-variable"; else echo "capital=1500 source=default"; fi
       - name: Run the live loop
         id: live
         env:
@@ -63,3 +68,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run chronos-session.yml --ref "${{ github.ref_name }}" -f trigger=handoff
+
+      # A job that crashes posts nothing, and "no alert" looks exactly like "no signal". Best effort, never fails the run.
+      - name: Tell Discord if this run failed
+        if: failure()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python notify_failure.py "Apex Chronos live loop"
