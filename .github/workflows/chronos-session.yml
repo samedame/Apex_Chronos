@@ -53,6 +53,9 @@ jobs:
           # set the repo variable MUTED_PHASES to "none" to hear everything again. See docs/P2_DECISION.md.
           MUTED_PHASES: ${{ vars.MUTED_PHASES || 'P1,P3' }}
           DRY_RUN: ${{ vars.DRY_RUN }}
+          TRADIER_API_KEY: ${{ secrets.TRADIER_API_KEY }}
+          TRADIER_BASE_URL: ${{ secrets.TRADIER_BASE_URL }}
+          CHRONOS_TRADIER_BARS: ${{ vars.CHRONOS_TRADIER_BARS }}
           APEX_GIT_PUSH: "1"
           PYTHONUNBUFFERED: "1"
         run: python -m apex_chronos live --max-runtime-min 330

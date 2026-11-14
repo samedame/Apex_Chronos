@@ -8,6 +8,7 @@ Live rules that keep the bot faithful to the backtest:
 """
 from __future__ import annotations
 
+import os
 import time as _time
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
@@ -18,6 +19,7 @@ import pandas as pd
 import requests
 
 from . import config as C
+from . import tradier
 from .calendar_nyse import NY, session_open
 
 _UA = {'User-Agent': 'Mozilla/5.0 (apex-chronos-bot)'}
@@ -63,7 +65,44 @@ def _frame(payload: dict) -> pd.DataFrame:
     return df.drop_duplicates(subset=['timestamp']).sort_values('timestamp').reset_index(drop=True)
 
 
+def tradier_bars_enabled() -> bool:
+    """Opt-in: CHRONOS_TRADIER_BARS=1 AND a Tradier key. Off by default because the strategy's thresholds were fitted on Yahoo
+    bars (see docs/LIVE_VS_BACKTEST.md); turn it on only after comparing the two feeds side by side (scripts/compare_feeds.py)."""
+    return os.environ.get('CHRONOS_TRADIER_BARS', '').strip() == '1' and tradier.configured()
+
+
+def tradier_frame(sym: str, now: Optional[datetime] = None) -> pd.DataFrame:
+    """Today's regular-session 1-minute bars from Tradier in the same shape _frame() returns. Bars still forming (their minute
+    has not ended) are dropped, so only COMPLETED bars reach the engine, exactly as with Yahoo."""
+    now = now or datetime.now(NY)
+    day = now.astimezone(NY).date()
+    rows = tradier.timesales(sym, f'{day:%Y-%m-%d} 09:30', f'{day:%Y-%m-%d} 16:00', interval='1min')
+    out = []
+    for r in rows:
+        try:
+            ts = pd.Timestamp(r['time']).tz_localize(NY) if pd.Timestamp(r['time']).tzinfo is None else pd.Timestamp(r['time']).tz_convert(NY)
+            out.append((ts, float(r['open']), float(r['high']), float(r['low']), float(r['close']), float(r.get('volume') or 0.0)))
+        except (KeyError, TypeError, ValueError):
+            continue
+    cols = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
+    if not out:
+        return pd.DataFrame(columns=cols)
+    df = pd.DataFrame(out, columns=cols)
+    df = df[df['timestamp'] + pd.Timedelta(minutes=1) <= pd.Timestamp(now)]
+    return df.drop_duplicates(subset=['timestamp']).sort_values('timestamp').reset_index(drop=True)
+
+
 def fetch_1m_today(session: requests.Session, sym: str) -> pd.DataFrame:
+    """Yahoo by default. With CHRONOS_TRADIER_BARS=1 and a Tradier key, equities come from Tradier first and fall back to Yahoo
+    on any Tradier failure or an empty answer (the VIX index always stays on Yahoo)."""
+    if tradier_bars_enabled() and not sym.startswith('^'):
+        try:
+            df = tradier_frame(sym)
+            if not df.empty:
+                return df
+            print(f'[data] tradier returned no bars for {sym}; using Yahoo')
+        except Exception as e:  # never let a Tradier problem silence the bot
+            print(f'[data] tradier bars failed for {sym} ({type(e).__name__}: {e}); using Yahoo')
     return _frame(_get(session, sym, {'interval': '1m', 'range': '1d', 'includePrePost': 'false'}))
 
 
