@@ -1,4 +1,14 @@
 {
+ "2026-11-16|ENTRY|AAPL|Phase2_MiddayPin_CreditSpread|151": {
+  "late_s": 10119.6,
+  "pos": [
+   "AAPL",
+   "Phase2_MiddayPin_CreditSpread",
+   151
+  ],
+  "posted": false,
+  "t": "2026-11-16T14:50:39-05:00"
+ },
  "2026-11-16|ENTRY|AAPL|Phase2_MiddayPin_CreditSpread|161": {
   "conf": 49,
   "late_s": 12.4,
@@ -59,6 +69,12 @@
   "pos": null,
   "posted": true,
   "t": "2026-11-16T13:32:06-05:00"
+ },
+ "2026-11-16|EXIT|SPY|Phase2_MiddayPin_CreditSpread|241": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-16T14:50:40-05:00"
  },
  "2026-11-16|EXIT|SPY|Phase2_MiddayPin_CreditSpread|244": {
   "late_s": 0.0,
