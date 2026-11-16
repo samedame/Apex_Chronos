@@ -1,9 +1,9 @@
 {
-  "checked_at": "2026-11-13T21:00:30.889831+00:00",
+  "checked_at": "2026-11-16T22:55:25.689678+00:00",
   "eligible_sessions_added": 0,
   "live_alerts_changed": false,
   "quote_validated_trades_added": 0,
   "status": "outside_collection_window",
-  "trial_digest": "69d5d343213a9bb56dde456d6d3c40e7374b6eda497f0680ec7a10db61ec894d",
-  "trial_id": "cash_quotes_p1a_v1"
+  "trial_digest": "7ad1b6f1bb1c3d30d223be055714a474498914bd9408a522596bd413c1ed071b",
+  "trial_id": "cash_quotes_p1a_v2_20261114"
 }
