@@ -1,0 +1,3 @@
+date,ticker,m_entry,m_exit_model,roi_model,exit_model,listed_same_day,listing_source,iv_model_entry,rv_forecast,rv_sessions,iv_fair_entry,roi_fair,exit_fair,m_exit_fair
+2026-11-16,AAPL,151,231,0.024887,time_stop,1,static schedule (no catalog snapshot),0.3664,0.1642,14,0.197,0.021164,time_stop,231
+2026-11-16,SPY,182,241,-0.200908,stop_loss,1,static schedule (no catalog snapshot),0.2188,0.1062,14,0.1275,-0.200647,stop_loss,236
