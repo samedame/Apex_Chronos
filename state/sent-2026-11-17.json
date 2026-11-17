@@ -10,6 +10,17 @@
   "t": "2026-11-17T10:57:06-05:00",
   "unlisted": true
  },
+ "2026-11-17|ENTRY|IWM|Phase1A_GapTrap_Single0DTE|12": {
+  "late_s": 18466.8,
+  "muted": true,
+  "pos": [
+   "IWM",
+   "Phase1A_GapTrap_Single0DTE",
+   12
+  ],
+  "posted": false,
+  "t": "2026-11-17T14:50:46-05:00"
+ },
  "2026-11-17|ENTRY|SPY|Phase2_MiddayPin_CreditSpread|87": {
   "conf": 49,
   "late_s": 6.3,
