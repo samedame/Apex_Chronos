@@ -9,5 +9,16 @@
   "posted": false,
   "t": "2026-11-17T10:57:06-05:00",
   "unlisted": true
+ },
+ "2026-11-17|ENTRY|SPY|Phase2_MiddayPin_CreditSpread|87": {
+  "conf": 49,
+  "late_s": 6.3,
+  "pos": [
+   "SPY",
+   "Phase2_MiddayPin_CreditSpread",
+   87
+  ],
+  "posted": true,
+  "t": "2026-11-17T10:58:07-05:00"
  }
 }
