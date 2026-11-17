@@ -1,0 +1,22 @@
+{
+ "date": "2026-11-17",
+ "live_entries": 3,
+ "final_entries": 3,
+ "matched": 2,
+ "missed_by_live": [
+  [
+   "SPY",
+   "Phase1C_BullTrap_PutDebitSpread",
+   "30"
+  ]
+ ],
+ "phantom_in_live": [
+  [
+   "IWM",
+   "Phase1A_GapTrap_Single0DTE",
+   "12"
+  ]
+ ],
+ "excluded": {},
+ "summary_posted": true
+}
