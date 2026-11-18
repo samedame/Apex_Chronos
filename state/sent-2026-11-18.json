@@ -53,5 +53,16 @@
   ],
   "posted": false,
   "t": "2026-11-18T09:36:06-05:00"
+ },
+ "2026-11-18|ENTRY|QQQ|Phase2_MiddayPin_CreditSpread|147": {
+  "conf": 49,
+  "late_s": 12.5,
+  "pos": [
+   "QQQ",
+   "Phase2_MiddayPin_CreditSpread",
+   147
+  ],
+  "posted": true,
+  "t": "2026-11-18T11:58:12-05:00"
  }
 }
