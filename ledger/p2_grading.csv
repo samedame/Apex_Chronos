@@ -5,3 +5,5 @@ date,ticker,m_entry,m_exit_model,roi_model,exit_model,listed_same_day,listing_so
 2026-11-17,SPY,87,167,0.113279,time_stop,1,Nasdaq options directory,0.263,0.1133,14,0.1359,0.149777,time_stop,167
 2026-11-18,SPY,80,160,0.055899,time_stop,1,Nasdaq options directory,0.2536,0.122,14,0.1464,0.066707,time_stop,160
 2026-11-18,MSTR,119,199,0.142508,time_stop,0,Nasdaq options directory,1.2299,0.5796,14,0.6955,0.15382,time_stop,199
+2026-11-19,MSTR,83,155,-0.203078,stop_loss,0,Nasdaq options directory,1.1579,0.6103,14,0.7324,-0.255202,stop_loss,153
+2026-11-19,IWM,87,153,-0.223463,stop_loss,1,Nasdaq options directory,0.3244,0.13,14,0.1559,-0.231755,stop_loss,142
