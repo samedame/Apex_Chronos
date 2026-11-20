@@ -32,6 +32,17 @@
   "posted": false,
   "t": "2026-11-20T10:02:12-05:00"
  },
+ "2026-11-20|ENTRY|NVDA|Phase2_MiddayPin_CreditSpread|79": {
+  "late_s": 12.7,
+  "muted": true,
+  "pos": [
+   "NVDA",
+   "Phase2_MiddayPin_CreditSpread",
+   79
+  ],
+  "posted": false,
+  "t": "2026-11-20T10:50:12-05:00"
+ },
  "2026-11-20|ENTRY|TSLA|Phase1A_GapTrap_Single0DTE|21": {
   "late_s": 19.0,
   "muted": true,
