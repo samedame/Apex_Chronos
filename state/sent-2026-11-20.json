@@ -1,4 +1,15 @@
 {
+ "2026-11-20|ENTRY|AMD|Phase1A_GapTrap_Single0DTE|27": {
+  "late_s": 12.6,
+  "muted": true,
+  "pos": [
+   "AMD",
+   "Phase1A_GapTrap_Single0DTE",
+   27
+  ],
+  "posted": false,
+  "t": "2026-11-20T09:58:12-05:00"
+ },
  "2026-11-20|ENTRY|TSLA|Phase1A_GapTrap_Single0DTE|21": {
   "late_s": 19.0,
   "muted": true,
