@@ -1,0 +1,37 @@
+{
+ "date": "2026-11-20",
+ "live_entries": 7,
+ "final_entries": 6,
+ "matched": 4,
+ "missed_by_live": [
+  [
+   "COIN",
+   "Phase1C_BullTrap_PutDebitSpread",
+   "36"
+  ],
+  [
+   "SPY",
+   "Phase2_MiddayPin_CreditSpread",
+   "78"
+  ]
+ ],
+ "phantom_in_live": [
+  [
+   "META",
+   "Phase1C_BullTrap_PutDebitSpread",
+   "31"
+  ],
+  [
+   "NVDA",
+   "Phase2_MiddayPin_CreditSpread",
+   "79"
+  ],
+  [
+   "TSLA",
+   "Phase1A_GapTrap_Single0DTE",
+   "21"
+  ]
+ ],
+ "excluded": {},
+ "summary_posted": true
+}
