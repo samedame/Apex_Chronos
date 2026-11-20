@@ -43,6 +43,17 @@
   "posted": false,
   "t": "2026-11-20T10:50:12-05:00"
  },
+ "2026-11-20|ENTRY|QQQ|Phase3_AfternoonVanna_CallSpread|215": {
+  "late_s": 6.4,
+  "muted": true,
+  "pos": [
+   "QQQ",
+   "Phase3_AfternoonVanna_CallSpread",
+   215
+  ],
+  "posted": false,
+  "t": "2026-11-20T13:06:06-05:00"
+ },
  "2026-11-20|ENTRY|TSLA|Phase1A_GapTrap_Single0DTE|21": {
   "late_s": 19.0,
   "muted": true,
