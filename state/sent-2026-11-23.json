@@ -21,6 +21,17 @@
   "posted": false,
   "t": "2026-11-23T09:36:12-05:00"
  },
+ "2026-11-23|ENTRY|META|Phase1C_BullTrap_PutDebitSpread|59": {
+  "late_s": 13.4,
+  "muted": true,
+  "pos": [
+   "META",
+   "Phase1C_BullTrap_PutDebitSpread",
+   59
+  ],
+  "posted": false,
+  "t": "2026-11-23T10:30:13-05:00"
+ },
  "2026-11-23|ENTRY|TSLA|Phase1B_ConfirmedGap_DebitSpread|44": {
   "late_s": 7.5,
   "muted": true,
