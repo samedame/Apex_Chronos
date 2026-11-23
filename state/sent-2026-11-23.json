@@ -1,0 +1,25 @@
+{
+ "2026-11-23|ENTRY|AMD|Phase1A_GapTrap_Single0DTE|5": {
+  "late_s": 12.8,
+  "muted": true,
+  "pos": [
+   "AMD",
+   "Phase1A_GapTrap_Single0DTE",
+   5
+  ],
+  "posted": false,
+  "t": "2026-11-23T09:36:12-05:00"
+ },
+ "feed-down": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-23T09:31:28-05:00"
+ },
+ "kill-switch": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-23T09:20:38-05:00"
+ }
+}
