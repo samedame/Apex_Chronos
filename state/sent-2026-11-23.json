@@ -54,6 +54,17 @@
   "posted": false,
   "t": "2026-11-23T11:48:06-05:00"
  },
+ "2026-11-23|ENTRY|NVDA|Phase1B_ConfirmedGap_DebitSpread|34": {
+  "late_s": 17139.9,
+  "muted": true,
+  "pos": [
+   "NVDA",
+   "Phase1B_ConfirmedGap_DebitSpread",
+   34
+  ],
+  "posted": false,
+  "t": "2026-11-23T14:50:39-05:00"
+ },
  "2026-11-23|ENTRY|TSLA|Phase1B_ConfirmedGap_DebitSpread|44": {
   "late_s": 7.5,
   "muted": true,
