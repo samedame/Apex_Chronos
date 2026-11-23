@@ -21,6 +21,17 @@
   "posted": false,
   "t": "2026-11-23T09:36:12-05:00"
  },
+ "2026-11-23|ENTRY|COIN|Phase2_MiddayPin_CreditSpread|75": {
+  "late_s": 6.3,
+  "muted": true,
+  "pos": [
+   "COIN",
+   "Phase2_MiddayPin_CreditSpread",
+   75
+  ],
+  "posted": false,
+  "t": "2026-11-23T10:46:06-05:00"
+ },
  "2026-11-23|ENTRY|META|Phase1C_BullTrap_PutDebitSpread|59": {
   "late_s": 13.4,
   "muted": true,
