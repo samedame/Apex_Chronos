@@ -1,13 +1,11 @@
 {
- "drawdown": 0.083374,
- "equity": 0.932702,
- "last_session": "2026-11-20",
- "last_session_return": -0.042534,
- "reasons": [
-  "2026-11-20 model session -4.3% <= -3%"
- ],
- "sessions": 5,
+ "drawdown": 0.082725,
+ "equity": 0.933362,
+ "last_session": "2026-11-23",
+ "last_session_return": 0.000708,
+ "reasons": [],
+ "sessions": 6,
  "slot_fraction": 0.1,
  "start": "2026-11-16",
- "tripped": true
+ "tripped": false
 }
