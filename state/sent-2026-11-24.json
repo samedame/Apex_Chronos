@@ -31,5 +31,16 @@
   ],
   "posted": false,
   "t": "2026-11-24T09:46:06-05:00"
+ },
+ "2026-11-24|ENTRY|SPY|Phase1C_BullTrap_PutDebitSpread|37": {
+  "late_s": 19.1,
+  "muted": true,
+  "pos": [
+   "SPY",
+   "Phase1C_BullTrap_PutDebitSpread",
+   37
+  ],
+  "posted": false,
+  "t": "2026-11-24T10:08:19-05:00"
  }
 }
