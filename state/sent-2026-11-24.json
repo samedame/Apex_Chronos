@@ -1,4 +1,15 @@
 {
+ "2026-11-24|ENTRY|AAPL|Phase1A_GapTrap_Single0DTE|6": {
+  "late_s": 18815.8,
+  "muted": true,
+  "pos": [
+   "AAPL",
+   "Phase1A_GapTrap_Single0DTE",
+   6
+  ],
+  "posted": false,
+  "t": "2026-11-24T14:50:35-05:00"
+ },
  "2026-11-24|ENTRY|AMZN|Phase1A_GapTrap_Single0DTE|13": {
   "late_s": 12.5,
   "muted": true,
