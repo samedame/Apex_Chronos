@@ -32,6 +32,17 @@
   "posted": false,
   "t": "2026-11-24T09:46:06-05:00"
  },
+ "2026-11-24|ENTRY|QQQ|Phase2_MiddayPin_CreditSpread|80": {
+  "conf": 49,
+  "late_s": 6.4,
+  "pos": [
+   "QQQ",
+   "Phase2_MiddayPin_CreditSpread",
+   80
+  ],
+  "posted": true,
+  "t": "2026-11-24T10:51:07-05:00"
+ },
  "2026-11-24|ENTRY|SPY|Phase1C_BullTrap_PutDebitSpread|37": {
   "late_s": 19.1,
   "muted": true,
