@@ -1,4 +1,15 @@
 {
+ "2026-11-24|ENTRY|AMZN|Phase1A_GapTrap_Single0DTE|13": {
+  "late_s": 12.5,
+  "muted": true,
+  "pos": [
+   "AMZN",
+   "Phase1A_GapTrap_Single0DTE",
+   13
+  ],
+  "posted": false,
+  "t": "2026-11-24T09:44:12-05:00"
+ },
  "2026-11-24|ENTRY|META|Phase1A_GapTrap_Single0DTE|10": {
   "late_s": 6.4,
   "muted": true,
