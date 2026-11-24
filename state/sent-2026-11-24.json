@@ -20,5 +20,16 @@
   ],
   "posted": false,
   "t": "2026-11-24T09:41:06-05:00"
+ },
+ "2026-11-24|ENTRY|QQQ|Phase1A_GapTrap_Single0DTE|15": {
+  "late_s": 6.4,
+  "muted": true,
+  "pos": [
+   "QQQ",
+   "Phase1A_GapTrap_Single0DTE",
+   15
+  ],
+  "posted": false,
+  "t": "2026-11-24T09:46:06-05:00"
  }
 }
