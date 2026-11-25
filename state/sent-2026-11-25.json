@@ -9,5 +9,16 @@
   ],
   "posted": false,
   "t": "2026-11-25T09:58:12-05:00"
+ },
+ "2026-11-25|ENTRY|NVDA|Phase1A_GapTrap_Single0DTE|28": {
+  "late_s": 12.4,
+  "muted": true,
+  "pos": [
+   "NVDA",
+   "Phase1A_GapTrap_Single0DTE",
+   28
+  ],
+  "posted": false,
+  "t": "2026-11-25T09:59:12-05:00"
  }
 }
