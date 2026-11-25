@@ -21,6 +21,17 @@
   "posted": true,
   "t": "2026-11-25T10:54:12-05:00"
  },
+ "2026-11-25|ENTRY|COIN|Phase1C_BullTrap_PutDebitSpread|35": {
+  "late_s": 17085.6,
+  "muted": true,
+  "pos": [
+   "COIN",
+   "Phase1C_BullTrap_PutDebitSpread",
+   35
+  ],
+  "posted": false,
+  "t": "2026-11-25T14:50:45-05:00"
+ },
  "2026-11-25|ENTRY|NVDA|Phase1A_GapTrap_Single0DTE|28": {
   "late_s": 12.4,
   "muted": true,
@@ -65,6 +76,12 @@
   "pos": null,
   "posted": true,
   "t": "2026-11-25T13:40:06-05:00"
+ },
+ "2026-11-25|TP1|AMZN|Phase2_MiddayPin_CreditSpread|156": {
+  "late_s": 0.0,
+  "pos": null,
+  "posted": true,
+  "t": "2026-11-25T14:50:46-05:00"
  },
  "2026-11-25|TP1|AMZN|Phase2_MiddayPin_CreditSpread|158": {
   "late_s": 0.0,
